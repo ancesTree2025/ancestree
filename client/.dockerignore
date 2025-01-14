@@ -1,0 +1,9 @@
+.svelte-kit
+build
+node_modules
+.dockerignore
+.gitignore
+.npmrc
+.prettierrc
+.prettierignore
+README.md
