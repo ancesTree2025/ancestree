@@ -1,0 +1,16 @@
+services:
+  ancestree-server:
+    container_name: ancestree-server
+    build:
+      context: .
+      target: runtime
+    ports:
+      - '8080:8080'
+
+  ancestree-client:
+    container_name: ancestree-client
+    build:
+      context: client
+      target: runtime
+    ports:
+      - '3000:3000'
