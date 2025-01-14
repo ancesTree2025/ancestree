@@ -1,5 +1,10 @@
 # AncesTree
 
+## Project Prerequisites
+
+Install [Bun](https://bun.sh) and execute `bun install` in the `client` directory to install all the frontend
+dependencies.
+
 ## Project management
 
 ### Commits
@@ -34,3 +39,11 @@ Branches are named as follows: `S[JIRA TICKET NUMBER]-description`.
 For example: `S8-skeleton`.
 
 If there is no applicable jira ticket then use 0 for the ticket number.
+
+## Important commands
+
+|       Command       | Directory |               Description                |
+|:-------------------:|:---------:|:----------------------------------------:|
+|   `./gradlew run`   |    `.`    |        Start backend in dev mode.        |
+|      `bun dev`      | `client`  |       Start frontend in dev mode.        |
+| `docker compose up` |    `.`    | Preview applications in production build |
