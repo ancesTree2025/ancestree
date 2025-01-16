@@ -1,8 +1,6 @@
 package org.graph
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.encodeToString
 
 @Serializable
 data class FamilyRelation(val FirstName: String, val LastName: String) {
@@ -24,7 +22,3 @@ data class FamilyRelation(val FirstName: String, val LastName: String) {
         siblings.add(sibling)
     }
 }
-
-//fun main() {
-//    val json = Json.encodeToString(FamilyRelation("Henry", "The 8th"))
-//}

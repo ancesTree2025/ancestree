@@ -12,7 +12,7 @@ import kotlinx.serialization.json.*
 * The first 3 are primarily used when querying wikipedia, and the last 3 are
 * primarily used when querying wikidata. */
 @Serializable
-data class SearchItem( val title: String, val pageid: Int )
+data class SearchItem( val pageid: Int )
 
 @Serializable
 data class Query( val search: List<SearchItem> = emptyList() )
@@ -100,35 +100,65 @@ suspend fun retrieveWikidataID(pageId: String): String? {
     return wikidataId
 }
 
-suspend fun getFamilyInfo(wikidataId: String): Map<String, String> {
+/* After retrieving the wikidata object ID we can then use this function to retrieve the
+* data stored about it. This returns a huge amount of information, from which we extract
+* the direct relatives of the person.
+*
+* The @var familyInfo is a map of strings to mutable lists - these strings will become
+* the descriptors for the properties which we find in the response, such as "father"
+* and "spouse". The lists of strings that they are mapping to will be lists of wikidata
+* q-item IDs.
+*
+* @param wikidataId     - The wikidata ID of the person.
+* @returns familyInfo   - A map of string to string, mapping the type of relation to the
+*                         wikidata object of that person. */
+suspend fun getFamilyInfo(wikidataId: String): Map<String, List<String>> {
     val customParams: HttpRequestBuilder.() -> Unit = {
         parameter("entity", wikidataId)
     }
 
+    // As in the previous queries, we set up our HTTP requests as before.
     val response = generateClient(customParams, "wbgetclaims")
 
     val jsonResponse = Json.parseToJsonElement(response.bodyAsText()).jsonObject
     val claims = jsonResponse["claims"]?.jsonObject
 
-    val familyProps = mapOf("P22" to "father", "P25" to "mother", "P26" to "spouse")
-    val familyInfo = mutableMapOf<String, String>()
+    val familyProps = mapOf("P22" to "Father", "P25" to "Mother", "P26" to "Spouse(s)", "P40" to "Child(ren)")
+    val familyInfo = mutableMapOf<String, MutableList<String>>()
 
+    // For each property that appears in the response's list of claims, if a relevant
+    // property appears, we look through the claim details and extract the objects/values
+    // from there.
     claims?.forEach { (prop, claimDetails) ->
         if (prop in familyProps.keys) {
-            val familyMemberId = claimDetails.jsonArray[0]
-                .jsonObject["mainsnak"]?.jsonObject?.get("datavalue")?.jsonObject
-                ?.get("value")?.jsonObject?.get("id")?.jsonPrimitive?.content
+            val familyMembers = claimDetails.jsonArray.mapNotNull { claim ->
+                claim.jsonObject["mainsnak"]?.jsonObject?.get("datavalue")?.jsonObject
+                    ?.get("value")?.jsonObject?.get("id")?.jsonPrimitive?.content
+            }
 
-            familyInfo[familyProps[prop]!!] = familyMemberId ?: "Unknown"
+            if (familyMembers.isNotEmpty()) {
+                familyInfo[familyProps[prop]!!] = familyMembers.toMutableList()
+            }
         }
+    }
+
+    // If a particular property did not appear, we initialise it but keep it empty.
+    familyProps.values.forEach { key ->
+        familyInfo.putIfAbsent(key, mutableListOf())
     }
 
     return familyInfo
 }
 
-suspend fun convertWikidataIdsToNames(ids: List<String>): Map<String, String> {
+/* The final function in the list of calls simply converts all the wikidata object IDs to
+* names. This is done for each list of relevant people.
+* @param familyInfo     - A map of string to string, mapping the type of relation to the
+*                         wikidata object of that person.
+* @*/
+suspend fun convertWikidataIdsToNames(familyInfo: Map<String, List<String>>): Map<String, List<String>> {
+    val allIds = familyInfo.values.flatten()
 
-    val idsParam = ids.joinToString("|")
+    val idsParam = allIds.joinToString("|")
 
     val customParams: HttpRequestBuilder.() -> Unit = {
         parameter("ids", idsParam)
@@ -141,32 +171,32 @@ suspend fun convertWikidataIdsToNames(ids: List<String>): Map<String, String> {
     val jsonResponse = Json.parseToJsonElement(response.bodyAsText()).jsonObject
     val entities = jsonResponse["entities"]?.jsonObject
 
-    val namesMap = mutableMapOf<String, String>()
+    val idToNameMap = mutableMapOf<String, String>()
 
+    // For each entity in the response, we extract the label of the entity and map it to the
+    // object ID.
     entities?.forEach { (id, entityDetails) ->
         val label = entityDetails.jsonObject["labels"]?.jsonObject?.get("en")?.jsonObject
             ?.get("value")?.jsonPrimitive?.content
-        if (label != null) {
-            namesMap[id] = label
-        } else {
-            namesMap[id] = "Unknown" // Fallback for missing labels
-        }
+        idToNameMap[id] = label ?: "Unknown"
     }
 
-    return namesMap
+    val result = mutableMapOf<String, List<String>>()
+
+    familyInfo.forEach { (relationshipType, ids) ->
+        val namesList = ids.mapNotNull { id -> idToNameMap[id] }
+        result[relationshipType] = namesList
+    }
+
+    return result
 }
 
 suspend fun main() {
 
-    val pageId = searchWikipediaArticles("Alexander the Great").first().pageid.toString()
-    println(pageId)
+    val pageId = searchWikipediaArticles("Edward of Windsor").first().pageid.toString()
     val wikidataId = retrieveWikidataID(pageId) ?: return
-    println(wikidataId)
     val familyInfo = getFamilyInfo(wikidataId)
-    println(familyInfo)
-    val familyMemberIds = familyInfo.values.toList()
-    println(familyMemberIds)
-    val familyMemberNames = convertWikidataIdsToNames(familyMemberIds)
+    val familyMemberNames = convertWikidataIdsToNames(familyInfo)
     println(familyMemberNames)
 
 }
