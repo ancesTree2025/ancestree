@@ -123,7 +123,8 @@ suspend fun getFamilyInfo(wikidataId: String): Map<String, List<String>> {
     val jsonResponse = Json.parseToJsonElement(response.bodyAsText()).jsonObject
     val claims = jsonResponse["claims"]?.jsonObject
 
-    val familyProps = mapOf("P22" to "Father", "P25" to "Mother", "P26" to "Spouse(s)", "P40" to "Child(ren)")
+    val familyProps = mapOf("P22" to "Father", "P25" to "Mother", "P26" to "Spouse(s)", "P40" to "Child(ren)", "P3373"
+    to "Sibling(s)")
     val familyInfo = mutableMapOf<String, MutableList<String>>()
 
     // For each property that appears in the response's list of claims, if a relevant
