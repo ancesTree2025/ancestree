@@ -11,9 +11,7 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    di {
-        import(appModule)
-    }
-    configureSerialization()
-    configureRouting()
+  di { import(appModule) }
+  configureSerialization()
+  configureRouting()
 }
