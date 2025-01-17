@@ -1,4 +1,4 @@
-package org
+package org.core
 
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
