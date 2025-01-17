@@ -15,6 +15,18 @@ export default [
 				project: './tsconfig.json',
 				extraFileExtensions: ['.svelte']
 			}
+		},
+		rules: {
+			// note you must disable the base rule
+			// as it can report incorrect errors
+			'no-unused-vars': 'off',
+			'@typescript-eslint/no-unused-vars': [
+				'error', // or "warn"
+				{
+					argsIgnorePattern: '^_',
+					caughtErrorsIgnorePattern: '^_'
+				}
+			]
 		}
 	},
 	pluginJs.configs.recommended,
