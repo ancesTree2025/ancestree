@@ -3,20 +3,28 @@ on: [push]
 jobs:
   build-frontend:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
     steps:
       - uses: actions/checkout@v4
-      - run: cd client
+
       - name: Install bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+
       - name: Install dependencies
         run: pwd && bun install
+
       - name: Build
         run: bun run build
+
       - name: Test
         run: bun run test
+
       - name: ESLint
         run: npx eslint src
+
       - name: Style
         run: bun run lint
