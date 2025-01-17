@@ -103,5 +103,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build and check format
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build and Check Format
         run: ./gradlew build
+
+      - name: Stop Gradle Daemon
+        run: ./gradlew --stop

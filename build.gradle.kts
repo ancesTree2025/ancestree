@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
     alias(libs.plugins.kotlin.plugin.serialization)
+    alias(libs.plugins.ktfmt)
 }
 
 group = "org"
@@ -28,4 +29,9 @@ dependencies {
     implementation(libs.ktor.server.config.yaml)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
+}
+
+ktfmt {
+    googleStyle()
+    maxWidth = 100
 }
