@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
     alias(libs.plugins.kotlin.plugin.serialization)
+    id("com.ncorti.ktfmt.gradle") version "0.21.0"
 }
 
 group = "org"

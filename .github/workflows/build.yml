@@ -1,4 +1,4 @@
-name: Build and test frontend
+name: Build and test
 on: [push]
 jobs:
   build-frontend:
@@ -28,3 +28,16 @@ jobs:
 
       - name: Style
         run: bun run lint
+
+  build-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: ./gradlew build
+
+      # TODO: test
+
+      - name: Check format
+        run: echo abc
