@@ -34,10 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build
+      - name: Build and check format
         run: ./gradlew build
 
       # TODO: test
-
-      - name: Check format
-        run: echo abc
