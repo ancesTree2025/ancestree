@@ -5,6 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: action/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - run: cd client
       - name: Install bun
         uses: oven-sh/setup-bun@v2
