@@ -66,6 +66,7 @@ jobs:
         run: bun run test
 
   lint-style-frontend:
+    needs: build-frontend
     runs-on: ubuntu-latest
     defaults:
       run:
