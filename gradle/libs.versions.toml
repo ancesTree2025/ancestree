@@ -2,6 +2,9 @@
 [versions]
 kotlin-version = "2.1.0"
 ktor-version = "3.0.3"
+logback-version = "1.4.14"
+ktfmt-version = "0.21.0"
+kodein-version = "7.22.0"
 
 [libraries]
 ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation-jvm", version.ref = "ktor-version" }
@@ -10,6 +13,12 @@ ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx
 ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor-version" }
 ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml-jvm", version.ref = "ktor-version" }
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host-jvm", version.ref = "ktor-version" }
+ktor-di-kodein = { module = "org.kodein.di:kodein-di-framework-ktor-server-jvm", version.ref = "kodein-version" }
+
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor-version" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor-version" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor-version" }
+
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin-version" }
 ktor-client-core = { module = "io.ktor:ktor-client-core-jvm", version.ref = "ktor-version" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio-jvm", version.ref = "ktor-version" }
@@ -19,3 +28,4 @@ ktor-client-logging = { module = "io.ktor:ktor-client-logging-jvm", version.ref 
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor-version" }
 kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin-version" }
+ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmt-version" }
