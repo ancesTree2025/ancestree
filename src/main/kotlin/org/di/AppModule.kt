@@ -10,9 +10,9 @@ import org.kodein.di.DI
 import org.kodein.di.bindMultiton
 
 val appModule =
-  DI.Module("AppModule") {
-    bindMultiton<String, HttpClient> { url -> HttpClient(CIO) { configure(url) } }
-  }
+    DI.Module("AppModule") {
+      bindMultiton<String, HttpClient> { url -> HttpClient(CIO) { configure(url) } }
+    }
 
 fun HttpClientConfig<CIOEngineConfig>.configure(url: String) {
   install(DefaultRequest) { url(url) }
