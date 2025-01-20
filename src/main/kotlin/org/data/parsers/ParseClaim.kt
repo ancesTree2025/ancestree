@@ -3,6 +3,8 @@ package org.data.parsers
 import io.ktor.client.statement.*
 import kotlinx.serialization.json.*
 
+import org.domain.models.FamilyProperties.familyProps
+
 /**
  * Parses Wikidata claim, extracting the relevant QIDs of all family members.
  *
@@ -10,14 +12,6 @@ import kotlinx.serialization.json.*
  * @returns A mapping of types of relation to lists of QIDs.
  */
 fun parseClaimForFamily(claims: JsonObject): Map<String, List<String>> {
-    val familyProps =
-        mapOf(
-            "P22" to "Father",
-            "P25" to "Mother",
-            "P26" to "Spouse(s)",
-            "P40" to "Child(ren)",
-            "P3373" to "Sibling(s)"
-        )
 
     val familyInfo = mutableMapOf<String, MutableList<String>>()
 

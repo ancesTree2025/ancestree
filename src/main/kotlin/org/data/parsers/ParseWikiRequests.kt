@@ -3,7 +3,6 @@ package org.data.parsers
 import io.ktor.client.statement.*
 import kotlinx.serialization.json.*
 
-import org.data.caches.WikiCacheManager
 import org.domain.models.PagesResponse
 
 /**

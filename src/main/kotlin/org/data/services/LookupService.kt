@@ -1,9 +1,8 @@
 package org.data.services
 
-import kotlinx.serialization.json.JsonObject
 import org.data.requests.*
 import org.data.parsers.*
-import org.data.caches.WikiCacheManager
+import org.data.caches.*
 
 /**
  * Service class for performing Wikipedia/Wikidata lookups.
@@ -41,6 +40,7 @@ class LookupService {
 
         val familyInfo: Map<String, List<String>>
 
+        /** We first check if we have the claim stored in our cache to avoid a query. */
         if (WikiCacheManager.getClaim(personQID) != null) {
             familyInfo = parseClaimForFamily(WikiCacheManager.getClaim(personQID)!!)
         } else {
@@ -48,6 +48,7 @@ class LookupService {
             familyInfo = parseFamilyInfo(familyResponse) ?: return emptyMap()
         }
 
+        /** We then select those names which don't appear in the cache, to query and store. */
         val allIds = familyInfo.values.flatten()
         val readableNames = mutableMapOf<String, String>()
         val toQuery = mutableListOf<String>()
@@ -61,6 +62,8 @@ class LookupService {
             }
         }
 
+        /** Finally, we retrieve the labels (as well as their claims for caching), and use them
+         * to map the full list of IDs to names. */
         val nameResponse = convertWikidataIdsToNames(toQuery)
         val labelClaimPair = parseNames(nameResponse)
 
