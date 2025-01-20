@@ -6,7 +6,7 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.data.FamilyProperties
-import org.domain.NodeProducer
+import org.domain.producers.NodeProducer
 import org.kodein.di.factory
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI

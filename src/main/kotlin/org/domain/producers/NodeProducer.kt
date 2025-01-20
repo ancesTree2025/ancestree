@@ -1,4 +1,4 @@
-package org.domain
+package org.domain.producers
 
 import org.domain.models.Node
 

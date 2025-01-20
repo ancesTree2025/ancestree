@@ -1,4 +1,4 @@
-package org.data
+package org.data.caches
 
 import kotlinx.serialization.json.JsonObject
 
