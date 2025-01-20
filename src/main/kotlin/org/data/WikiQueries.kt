@@ -7,28 +7,7 @@ import io.ktor.client.statement.*
 import kotlinx.serialization.json.*
 
 import org.data.requests.*
-
-
-/** The classes below are used to extract the information made in HTTP requests.
-* The first 3 are primarily used when querying wikipedia, and the last 3 are
-* primarily used when querying wikidata. */
-@Serializable
-data class SearchItem( val pageid: Int )
-
-@Serializable
-data class Query( val search: List<SearchItem> = emptyList() )
-
-@Serializable
-data class Response( val query: Query? = null )
-
-@Serializable
-data class WikiPageProps( val pageprops: Map<String, String>? = null )
-
-@Serializable
-data class WikiQuery( val pages: Map<String, WikiPageProps> )
-
-@Serializable
-data class WikiResponse( val query: WikiQuery? = null )
+import org.domain.models.wiki.*
 
 /** Searches for a name in Wikipedia, and returns their page id.
 * @param query          - Name of the person being searched for.
