@@ -7,50 +7,38 @@ import kotlinx.serialization.json.*
 import org.domain.models.wiki.*
 
 /**
- * Searches for a name in Wikipedia, and returns their page id.
+ * Searches for a name in Wikipedia and returns Wikidata QID (if found).
  *
- * @param query - Name of the person being searched for.
- * @param limit - Number of search instances to return from Wikipedia.
- * @return searchItems - We return a list of search items as long as our limit, of potential matches
- *   for the query. These each have a page ID.
+ * @param query The string to search for.
+ * @param limit The number of results to return.
+ * @return A Wikidata QID for the person being looked for.
  */
-suspend fun searchWikipediaArticles(query: String, limit: Int = 1): List<SearchItem> {
-    val response =
-        doWikipediaRequest("query") {
-            parameter("list", "search")
-            parameter("srsearch", query)
-            parameter("srlimit", limit)
-        }
-    val json = Json { ignoreUnknownKeys = true }
-    val jsonResponse = json.decodeFromString<Response>(response.body())
-    return jsonResponse.query?.search.orEmpty()
-}
-
-/**
- * Uses Wikipedia page id to find the wiki-base Q-item code.
- *
- * @param pageId - A wikipedia page id for a person of interest.
- * @returns wikidataId - A wikidata QID (Q-item ID) tied to a specific person.
- */
-suspend fun retrieveWikidataID(pageId: String): String? {
-    val response =
-        doWikipediaRequest("query") {
-            parameter("prop", "pageprops")
-            parameter("pageids", pageId)
-        }
+suspend fun searchWikipediaForQID(query: String, limit: Int = 1): String? {
+    val response = doWikipediaRequest("query") {
+        parameter("generator", "search")
+        parameter("gsrsearch", query)
+        parameter("gsrlimit", limit)
+        parameter("prop", "pageprops")
+        parameter("ppprop", "wikibase_item")
+    }
 
     val json = Json { ignoreUnknownKeys = true }
-    val jsonResponse: WikiResponse = json.decodeFromString(response.bodyAsText())
+    val result = json.decodeFromString<PagesResponse>(response.bodyAsText())
+    val qidSingleton = result.query?.pages?.values?.toList()
 
-    val page = jsonResponse.query?.pages?.values?.firstOrNull()
-    return page?.pageprops?.get("wikibase_item")
+    if (!qidSingleton.isNullOrEmpty()) {
+        return qidSingleton[0].pageprops?.wikibaseItem ?: ""
+    }
+
+    return null
 }
+
 
 /**
  * Retrieves a list of family members for a person from Wikidata.
  *
- * @param wikidataId - The wikidata ID of the person.
- * @returns familyInfo - A map of string to string, mapping the type of relation to the wikidata
+ * @param wikidataId The wikidata ID of the person.
+ * @returns A map of string to string, mapping the type of relation to the wikidata
  *   object of that person.
  */
 suspend fun getFamilyInfo(wikidataId: String): Map<String, List<String>> {
@@ -98,9 +86,9 @@ suspend fun getFamilyInfo(wikidataId: String): Map<String, List<String>> {
 /**
  * Converts Wikidata IDs to human-readable names.
  *
- * @param familyInfo - A map of string to string, mapping the type of relation to the wikidata
+ * @param familyInfo A map of string to string, mapping the type of relation to the wikidata
  *   object of that person.
- * @returns familyInfo - A map of string to string, mapping the same as the above.
+ * @returns A map of string to string, mapping the same as the above.
  */
 suspend fun convertWikidataIdsToNames(
     familyInfo: Map<String, List<String>>
@@ -113,7 +101,7 @@ suspend fun convertWikidataIdsToNames(
     val response =
         doWikidataRequest("wbgetentities") {
             parameter("ids", idsParam)
-            parameter("props", "labels")
+            parameter("props", "labels|claims")
             parameter("languages", "en")
         }
 
@@ -132,6 +120,7 @@ suspend fun convertWikidataIdsToNames(
                 ?.jsonPrimitive
                 ?.content
         idToNameMap[id] = label ?: "Unknown"
+        ClaimCache.put(id, details.jsonObject)
     }
 
     return familyInfo.mapValues { (_, ids) -> ids.map { id -> idToNameMap[id] ?: "Unknown" } }
@@ -140,15 +129,14 @@ suspend fun convertWikidataIdsToNames(
 /**
  * Combines the above functions to return a map of family relationships for a person.
  *
- * @param name - Name of the person being searched for.
- * @returns familyInfo - A map of string to string, mapping the type of relation to the wikidata
+ * @param name Name of the person being searched for.
+ * @returns A map of string to string, mapping the type of relation to the wikidata
  *   object of that person.
  */
 suspend fun fullQuery(name: String): Map<String, List<String>> {
-    val pageId = searchWikipediaArticles(name).firstOrNull()?.pageid.toString()
-    val wikidataId = retrieveWikidataID(pageId)
+    val wikidataId = searchWikipediaForQID(name)
     if (wikidataId == null) {
-        println("No Wikidata ID found for page $pageId")
+        println("No Wikidata ID found for $name")
         return emptyMap()
     }
 
