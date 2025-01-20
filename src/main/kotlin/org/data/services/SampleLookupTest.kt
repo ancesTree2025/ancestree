@@ -1,16 +1,17 @@
 package org.data.services
 
-import org.data.caches.WikiCacheManager
-
 /** Sample main function */
 suspend fun main() {
 
-    val name = "Elon Musk"
-    val personQID = LookupService.searchForPersonsQID(name)
-    val familyInfo = LookupService.getPersonsLabelAndFamilyMembers(personQID)
-    println("\n$name's family:")
+    val name = "Maye Musk"
+    val tuple3 = LookupService.query(name)
 
-    familyInfo.forEach{ (relation, instances) ->
-        println("$relation: $instances")
+    val qid = tuple3.first
+    val label = tuple3.second.first
+    val relation = tuple3.second.second
+
+    println("Official Name: $label\nQID: $qid")
+    relation.forEach{ (type, members) ->
+        println("-- $type: ${members.joinToString(" — ")}")
     }
 }

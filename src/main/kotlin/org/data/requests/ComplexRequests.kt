@@ -25,8 +25,7 @@ suspend fun searchWikipediaForQID(query: String, limit: Int = 1): HttpResponse {
 /**
  * Converts Wikidata IDs to human-readable names.
  *
- * @param familyInfo A map of string to string, mapping the type of relation to the wikidata
- *   object of that person.
+ * @param qids A string of bar-delimited (|) QIDs to retrieve labels and claims for.
  * @returns HTTP response.
  */
 suspend fun getLabelAndClaim(qids: String): HttpResponse {

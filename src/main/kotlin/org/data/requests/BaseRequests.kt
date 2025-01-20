@@ -3,8 +3,6 @@ package org.data.requests
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 
-import org.di.appModule
-
 /**
  * Simple enum with a list of the URLs we will query frequently.
  */

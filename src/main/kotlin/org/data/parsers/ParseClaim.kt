@@ -1,6 +1,5 @@
 package org.data.parsers
 
-import io.ktor.client.statement.*
 import kotlinx.serialization.json.*
 
 import org.data.models.FamilyProperties.familyProps
@@ -8,7 +7,7 @@ import org.data.models.FamilyProperties.familyProps
 /**
  * Parses Wikidata claim, extracting the relevant QIDs of all family members.
  *
- * @param response A claim JsonObject
+ * @param claims A claim JsonObject
  * @returns A mapping of types of relation to lists of QIDs.
  */
 fun parseClaimForFamily(claims: JsonObject): Map<String, List<String>> {
