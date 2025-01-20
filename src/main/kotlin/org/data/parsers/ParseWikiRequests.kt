@@ -1,12 +1,9 @@
 package org.data.parsers
 
 import io.ktor.client.statement.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 
-import org.data.caches.ClaimCache
+import org.data.caches.WikiCacheManager
 import org.domain.models.PagesResponse
 
 /**
@@ -32,44 +29,15 @@ suspend fun parseWikidataIDLookup(response: HttpResponse) : String? {
  * @param response The HTTP response from Wikidata.
  * @returns A mapping of types of relation to lists of QIDs.
  */
-suspend fun parseFamilyInfo(response: HttpResponse): Map<String, List<String>> {
+suspend fun parseFamilyInfo(response: HttpResponse): Map<String, List<String>>? {
     val json = Json.parseToJsonElement(response.bodyAsText()).jsonObject
     val claims = json["claims"]?.jsonObject
 
-    val familyProps =
-        mapOf(
-            "P22" to "Father",
-            "P25" to "Mother",
-            "P26" to "Spouse(s)",
-            "P40" to "Child(ren)",
-            "P3373" to "Sibling(s)"
-        )
-
-    val familyInfo = mutableMapOf<String, MutableList<String>>()
-
-    claims?.forEach { (prop, claimDetails) ->
-        if (prop in familyProps.keys) {
-            val familyMembers =
-                claimDetails.jsonArray.mapNotNull { claim ->
-                    claim.jsonObject["mainsnak"]
-                        ?.jsonObject
-                        ?.get("datavalue")
-                        ?.jsonObject
-                        ?.get("value")
-                        ?.jsonObject
-                        ?.get("id")
-                        ?.jsonPrimitive
-                        ?.content
-                }
-            if (familyMembers.isNotEmpty()) {
-                familyInfo[familyProps[prop]!!] = familyMembers.toMutableList()
-            }
-        }
+    if (claims != null) {
+        return parseClaimForFamily(claims)
     }
+    return null
 
-    familyProps.values.forEach { relation -> familyInfo.putIfAbsent(relation, mutableListOf()) }
-
-    return familyInfo.mapValues { it.value.toList() }
 }
 
 /**
@@ -79,11 +47,11 @@ suspend fun parseFamilyInfo(response: HttpResponse): Map<String, List<String>> {
  * @param response The HTTP response from Wikidata.
  * @returns A mapping of types of relation to lists of names.
  */
-suspend fun parseNames(response: HttpResponse): Map<String, String> {
+suspend fun parseNames(response: HttpResponse): Map<String, Pair<String, JsonObject>> {
     val jsonResponse = Json.parseToJsonElement(response.bodyAsText()).jsonObject
     val entities = jsonResponse["entities"]?.jsonObject
 
-    val idToNameMap = mutableMapOf<String, String>()
+    val idToNameMap = mutableMapOf<String, Pair<String, JsonObject>>()
 
     entities?.forEach { (id, details) ->
         val label =
@@ -94,8 +62,7 @@ suspend fun parseNames(response: HttpResponse): Map<String, String> {
                 ?.get("value")
                 ?.jsonPrimitive
                 ?.content
-        idToNameMap[id] = label ?: "Unknown"
-        ClaimCache.put(id, details.jsonObject)
+        idToNameMap[id] = Pair(label ?: "Unknown", details.jsonObject)
     }
 
     return idToNameMap

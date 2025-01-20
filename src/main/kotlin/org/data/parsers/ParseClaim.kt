@@ -1,0 +1,47 @@
+package org.data.parsers
+
+import io.ktor.client.statement.*
+import kotlinx.serialization.json.*
+
+/**
+ * Parses Wikidata claim, extracting the relevant QIDs of all family members.
+ *
+ * @param response A claim JsonObject
+ * @returns A mapping of types of relation to lists of QIDs.
+ */
+fun parseClaimForFamily(claims: JsonObject): Map<String, List<String>> {
+    val familyProps =
+        mapOf(
+            "P22" to "Father",
+            "P25" to "Mother",
+            "P26" to "Spouse(s)",
+            "P40" to "Child(ren)",
+            "P3373" to "Sibling(s)"
+        )
+
+    val familyInfo = mutableMapOf<String, MutableList<String>>()
+
+    claims.forEach { (prop, claimDetails) ->
+        if (prop in familyProps.keys) {
+            val familyMembers =
+                claimDetails.jsonArray.mapNotNull { claim ->
+                    claim.jsonObject["mainsnak"]
+                        ?.jsonObject
+                        ?.get("datavalue")
+                        ?.jsonObject
+                        ?.get("value")
+                        ?.jsonObject
+                        ?.get("id")
+                        ?.jsonPrimitive
+                        ?.content
+                }
+            if (familyMembers.isNotEmpty()) {
+                familyInfo[familyProps[prop]!!] = familyMembers.toMutableList()
+            }
+        }
+    }
+
+    familyProps.values.forEach { relation -> familyInfo.putIfAbsent(relation, mutableListOf()) }
+
+    return familyInfo.mapValues { it.value.toList() }
+}

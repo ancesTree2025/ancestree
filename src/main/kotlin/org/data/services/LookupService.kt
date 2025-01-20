@@ -1,7 +1,9 @@
 package org.data.services
 
+import kotlinx.serialization.json.JsonObject
 import org.data.requests.*
 import org.data.parsers.*
+import org.data.caches.WikiCacheManager
 
 /**
  * Service class for performing Wikipedia/Wikidata lookups.
@@ -9,14 +11,24 @@ import org.data.parsers.*
 class LookupService {
 
     /**
-     * Searches for a person and returns their QID.
+     * Searches for a person and returns their QID. We first query the cache and then Wikipedia.
      *
      * @param name The person's name.
      * @returns Their Wikidata QID as a string.
      */
     suspend fun searchForPersonsQID(name: String): String? {
+        if (WikiCacheManager.getQID(name) != null) {
+            return WikiCacheManager.getQID(name)
+        }
+
         val response = searchWikipediaForQID(name)
-        return parseWikidataIDLookup(response)
+        val qid = parseWikidataIDLookup(response)
+
+        if (qid != null) {
+            WikiCacheManager.putQID(name, qid)
+        }
+
+        return qid
     }
 
     /**
@@ -26,18 +38,45 @@ class LookupService {
      * @returns A mapping of types of relation to lists of relatives in that category.
      */
     suspend fun getPersonsFamilyMembers(personQID: String): Map<String, List<String>> {
-        val familyResponse = getFamilyInfo(personQID)
-        val familyInfo = parseFamilyInfo(familyResponse)
 
-        val nameResponse = convertWikidataIdsToNames(familyInfo)
-        val readableNames = parseNames(nameResponse)
+        val familyInfo: Map<String, List<String>>
+
+        if (WikiCacheManager.getClaim(personQID) != null) {
+            familyInfo = parseClaimForFamily(WikiCacheManager.getClaim(personQID)!!)
+        } else {
+            val familyResponse = getFamilyInfo(personQID)
+            familyInfo = parseFamilyInfo(familyResponse) ?: return emptyMap()
+        }
+
+        val allIds = familyInfo.values.flatten()
+        val readableNames = mutableMapOf<String, String>()
+        val toQuery = mutableListOf<String>()
+
+        allIds.forEach { id ->
+            val name = WikiCacheManager.getQID(id)
+            if (name == null) {
+                toQuery.add(id)
+            } else {
+                readableNames[id] = name
+            }
+        }
+
+        val nameResponse = convertWikidataIdsToNames(toQuery)
+        val labelClaimPair = parseNames(nameResponse)
+
+
+        labelClaimPair.forEach { (qid, pair) ->
+            readableNames[qid] = pair.first
+            WikiCacheManager.putQID(pair.first, qid)
+            WikiCacheManager.putClaim(qid,  pair.second)
+        }
 
         return familyInfo.mapValues { (_, ids) -> ids.map { id -> readableNames[id] ?: "Unknown" } }
     }
 }
 
 /** Sample main function */
-suspend fun main(args: Array<String>) {
+suspend fun main() {
 
     val ls = LookupService()
 

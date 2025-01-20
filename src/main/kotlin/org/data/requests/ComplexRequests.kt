@@ -41,9 +41,8 @@ suspend fun getFamilyInfo(wikidataId: String): HttpResponse {
  *   object of that person.
  * @returns HTTP response.
  */
-suspend fun convertWikidataIdsToNames(familyInfo: Map<String, List<String>>): HttpResponse {
-    val allIds = familyInfo.values.flatten()
-    val idsParam = allIds.joinToString("|")
+suspend fun convertWikidataIdsToNames(qids: List<String>): HttpResponse {
+    val idsParam = qids.joinToString("|")
 
     val response =
         doWikidataRequest("wbgetentities") {
