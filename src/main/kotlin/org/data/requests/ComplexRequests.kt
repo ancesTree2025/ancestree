@@ -23,30 +23,16 @@ suspend fun searchWikipediaForQID(query: String, limit: Int = 1): HttpResponse {
 }
 
 /**
- * Retrieves a list of family members for a person from Wikidata.
- *
- * @param wikidataId The wikidata ID of the person.
- * @returns HTTP response.
- */
-suspend fun getFamilyInfo(wikidataId: String): HttpResponse {
-    val response = doWikidataRequest("wbgetclaims") { parameter("entity", wikidataId) }
-
-    return response
-}
-
-/**
  * Converts Wikidata IDs to human-readable names.
  *
  * @param familyInfo A map of string to string, mapping the type of relation to the wikidata
  *   object of that person.
  * @returns HTTP response.
  */
-suspend fun convertWikidataIdsToNames(qids: List<String>): HttpResponse {
-    val idsParam = qids.joinToString("|")
-
+suspend fun getLabelAndClaim(qids: String): HttpResponse {
     val response =
         doWikidataRequest("wbgetentities") {
-            parameter("ids", idsParam)
+            parameter("ids", qids)
             parameter("props", "labels|claims")
             parameter("languages", "en")
         }

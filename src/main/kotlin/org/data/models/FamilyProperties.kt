@@ -1,4 +1,4 @@
-package org.domain.models
+package org.data.models
 
 object FamilyProperties {
     val familyProps =

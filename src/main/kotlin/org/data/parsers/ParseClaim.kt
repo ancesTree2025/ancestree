@@ -3,7 +3,7 @@ package org.data.parsers
 import io.ktor.client.statement.*
 import kotlinx.serialization.json.*
 
-import org.domain.models.FamilyProperties.familyProps
+import org.data.models.FamilyProperties.familyProps
 
 /**
  * Parses Wikidata claim, extracting the relevant QIDs of all family members.

@@ -5,7 +5,7 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.domain.models.FamilyProperties
+import org.data.models.FamilyProperties
 import org.domain.producers.NodeProducer
 import org.kodein.di.factory
 import org.kodein.di.instance

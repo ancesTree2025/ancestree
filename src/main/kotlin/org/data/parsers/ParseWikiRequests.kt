@@ -1,6 +1,7 @@
 package org.data.parsers
 
 import io.ktor.client.statement.*
+import io.ktor.server.plugins.*
 import kotlinx.serialization.json.*
 
 import org.domain.models.PagesResponse
@@ -11,32 +12,17 @@ import org.domain.models.PagesResponse
  * @param response The HTTP response from Wikipedia.
  * @returns A single parsed QID, as a string.
  */
-suspend fun parseWikidataIDLookup(response: HttpResponse) : String? {
+suspend fun parseWikidataIDLookup(response: HttpResponse) : String {
     val json = Json { ignoreUnknownKeys = true }
     val result = json.decodeFromString<PagesResponse>(response.bodyAsText())
-    val qidSingleton = result.query?.pages?.values?.toList()
 
-    if (!qidSingleton.isNullOrEmpty()) {
-        return qidSingleton[0].pageprops?.wikibaseItem ?: ""
-    }
-    return null
-}
+    val qidSingleton = result.query?.pages?.values
+        ?: throw NotFoundException("Could not find search values from Wikipedia API request.")
 
-/**
- * Parses Wikidata claim lookup responses, extracting the relevant QIDs of all family members.
- *
- * @param response The HTTP response from Wikidata.
- * @returns A mapping of types of relation to lists of QIDs.
- */
-suspend fun parseFamilyInfo(response: HttpResponse): Map<String, List<String>>? {
-    val json = Json.parseToJsonElement(response.bodyAsText()).jsonObject
-    val claims = json["claims"]?.jsonObject
+    val wikidataID = qidSingleton.toList()[0].pageprops?.wikibaseItem
+        ?: throw NotFoundException("Could not find Wikidata QID from pageprop in Wikipedia API search request.")
 
-    if (claims != null) {
-        return parseClaimForFamily(claims)
-    }
-    return null
-
+    return wikidataID
 }
 
 /**
@@ -46,7 +32,7 @@ suspend fun parseFamilyInfo(response: HttpResponse): Map<String, List<String>>? 
  * @param response The HTTP response from Wikidata.
  * @returns A mapping of types of relation to lists of names.
  */
-suspend fun parseNames(response: HttpResponse): Map<String, Pair<String, JsonObject>> {
+suspend fun parseWikidataQIDs(response: HttpResponse): Map<String, Pair<String, JsonObject>> {
     val jsonResponse = Json.parseToJsonElement(response.bodyAsText()).jsonObject
     val entities = jsonResponse["entities"]?.jsonObject
 
@@ -61,7 +47,14 @@ suspend fun parseNames(response: HttpResponse): Map<String, Pair<String, JsonObj
                 ?.get("value")
                 ?.jsonPrimitive
                 ?.content
-        idToNameMap[id] = Pair(label ?: "Unknown", details.jsonObject)
+                ?: throw NotFoundException("Failed to parse entity label given QID. This should NEVER happen.")
+
+        val claims =
+            details.jsonObject["claims"]
+                ?.jsonObject
+                ?: throw NotFoundException("Failed to parse entity claims given QID. This should NEVER happen.")
+
+        idToNameMap[id] = Pair(label, claims)
     }
 
     return idToNameMap

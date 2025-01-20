@@ -3,6 +3,8 @@ package org.data.requests
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 
+import org.di.appModule
+
 /**
  * Simple enum with a list of the URLs we will query frequently.
  */
@@ -18,7 +20,7 @@ enum class WikiEndpoint(val baseUrl: String) {
  * @param configParams A list of query parameters to be passed.
  * @returns The HTTP response from the URL.
  */
-suspend fun doRequest(
+private suspend fun doRequest(
     endpoint: WikiEndpoint,
     configParams: HttpRequestBuilder.() -> Unit
 ): HttpResponse {
