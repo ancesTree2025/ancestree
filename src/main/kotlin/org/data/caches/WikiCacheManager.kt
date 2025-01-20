@@ -2,6 +2,9 @@ package org.data.caches
 
 import kotlinx.serialization.json.JsonObject
 
+/**
+ * Simple cache manager for storing Wikidata claims and QIDs.
+ */
 object WikiCacheManager {
     private val claimCache = mutableMapOf<String, JsonObject>()
     private val qidCache = mutableMapOf<String, String>()

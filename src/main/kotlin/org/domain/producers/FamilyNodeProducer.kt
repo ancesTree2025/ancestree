@@ -1,10 +1,9 @@
 package org.domain.producers
 
-import org.data.FamilyProperties
-import org.domain.models.Node
+import org.domain.models.*
 
 class FamilyNodeProducer : NodeProducer<String, FamilyProperties> {
-  override fun produce(input: String): Node<Map<String, List<String>>> {
+  override fun produce(input: String): Node<FamilyProperties> {
     TODO("Not yet implemented")
   }
 }
