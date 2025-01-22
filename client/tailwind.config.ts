@@ -10,7 +10,13 @@ export default {
     colors: {
       bg: '#ffffff',
       fg: '#000000',
-      'node-bg': '#e0e0e0'
+      'node-bg': '#e0e0e0',
+      line: '#ccc'
+    },
+    extend: {
+      strokeWidth: {
+        line: '2'
+      }
     }
   },
 

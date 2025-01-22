@@ -41,11 +41,7 @@ export default class FamilyTreeCalculator {
   createSpouse({ x, y }: PersonNode, spouse: PersonData, spouseGap: number): PersonNode {
     const spouseNode = { name: spouse.name, x: x + this.RECT_WIDTH + spouseGap, y };
     this.people.push(spouseNode);
-    const marriageLine = this.horizontalLine(
-      x + this.RECT_WIDTH,
-      y + this.RECT_HEIGHT / 2,
-      spouseGap
-    );
+    const marriageLine = this.horizontalLine(x + this.RECT_WIDTH / 2, y, spouseGap);
     this.lines.push(marriageLine);
     return spouseNode;
   }
@@ -59,8 +55,8 @@ export default class FamilyTreeCalculator {
   ): PersonNode[] {
     const adjustedChildGap = childGap + this.RECT_WIDTH;
     const downLine = this.verticalLine(
-      (p1.x + this.RECT_WIDTH + p2.x) / 2,
-      p1.y + this.RECT_HEIGHT / 2,
+      (p1.x + p2.x) / 2,
+      p1.y,
       this.RECT_HEIGHT / 2 + generationGap / 2
     );
     this.lines.push(downLine);
@@ -71,14 +67,14 @@ export default class FamilyTreeCalculator {
       childLineLength
     );
     this.lines.push(childLine);
-    let x = childLine.x1 - this.RECT_WIDTH / 2;
+    let x = childLine.x1;
     const childrenNodes = [];
     for (const child of children) {
-      this.lines.push(this.verticalLine(x + this.RECT_WIDTH / 2, childLine.y1, generationGap / 2));
+      this.lines.push(this.verticalLine(x, childLine.y1, generationGap / 2));
       const childNode = {
         name: child.name,
         x,
-        y: downLine.y2 + generationGap / 2
+        y: downLine.y2 + generationGap / 2 + this.RECT_HEIGHT / 2
       };
       childrenNodes.push(childNode);
       this.people.push(childNode);
