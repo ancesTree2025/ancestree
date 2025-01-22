@@ -76,9 +76,3 @@ class FamilyGraphProducer : GraphProducer<String, Person> {
     return Node(familyInfo, qid, depth)
   }
 }
-
-fun main() {
-  runBlocking {
-    FamilyGraphProducer().produceGraph("Elon Musk").also { it.prettyPrint().also(::println) }
-  }
-}

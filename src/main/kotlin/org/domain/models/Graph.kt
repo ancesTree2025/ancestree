@@ -12,6 +12,8 @@ data class Graph<T>(
   val edges: Set<Edge<T>>
 ) {
 
+  constructor(): this(null, emptySet(), emptySet())
+
   fun isEmpty(): Boolean {
     return root == null
   }
