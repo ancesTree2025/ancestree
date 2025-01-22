@@ -15,22 +15,23 @@ class FamilyGraphProducer : GraphProducer<String, Person> {
     const val MAX_DEPTH = 2
   }
 
+  private val visited = mutableSetOf<String>()
+
   override suspend fun produceGraph(root: String): Graph<Person> {
-    val visited = setOf<String>()
-    return produceGraph(root, 0, visited).also {
-      println(it)
-    }
+    visited.clear()
+    return produceGraph(root, 0)
   }
 
-  private suspend fun produceGraph(query: String, depth: Int, visited: Set<String>): Graph<Person> {
+  private suspend fun produceGraph(query: String, depth: Int): Graph<Person> {
     if (abs(depth) > MAX_DEPTH || query.isBlank()) return emptyGraph()
 
     val rootNode = produceNode(query, depth)
     if (rootNode.data.name in visited) return emptyGraph()
+    visited.add(rootNode.data.name)
 
-    val parentsGraph = rootNode.data.parents.map { produceGraph(it, depth - 1, visited + it) }
-    val spousesGraph = rootNode.data.spouses.map { produceGraph(it, depth, visited + it) }
-    val childrenGraph = rootNode.data.children.map { produceGraph(it, depth + 1, visited + it) }
+    val parentsGraph = rootNode.data.parents.map { produceGraph(it, depth - 1) }
+    val spousesGraph = rootNode.data.spouses.map { produceGraph(it, depth) }
+    val childrenGraph = rootNode.data.children.map { produceGraph(it, depth + 1) }
 
     val directEdges = setOf<Edge<Person>>()
 
@@ -74,5 +75,11 @@ class FamilyGraphProducer : GraphProducer<String, Person> {
     )
 
     return Node(familyInfo, qid, depth)
+  }
+}
+
+fun main() {
+  runBlocking {
+    FamilyGraphProducer().produceGraph("Elon Musk").also { it.prettyPrint().also(::println) }
   }
 }
