@@ -1,4 +1,4 @@
-type PersonData = {
+export type PersonData = {
   name: string;
   spouses: PersonData[];
   parents: PersonData[];
@@ -14,7 +14,7 @@ export default class FamilyTreeCalculator {
   RECT_HEIGHT = 40;
   RECT_WIDTH = 80;
 
-  #horizontalLine(x: number, y: number, width: number) {
+  private horizontalLine(x: number, y: number, width: number) {
     return {
       x1: x,
       x2: x + width,
@@ -23,7 +23,7 @@ export default class FamilyTreeCalculator {
     };
   }
 
-  #verticalLine(x: number, y: number, height: number) {
+  private verticalLine(x: number, y: number, height: number) {
     return {
       x1: x,
       x2: x,
@@ -41,7 +41,7 @@ export default class FamilyTreeCalculator {
   createSpouse({ x, y }: PersonNode, spouse: PersonData, spouseGap: number): PersonNode {
     const spouseNode = { name: spouse.name, x: x + this.RECT_WIDTH + spouseGap, y };
     this.people.push(spouseNode);
-    const marriageLine = this.#horizontalLine(
+    const marriageLine = this.horizontalLine(
       x + this.RECT_WIDTH,
       y + this.RECT_HEIGHT / 2,
       spouseGap
@@ -58,14 +58,14 @@ export default class FamilyTreeCalculator {
     childGap: number
   ): PersonNode[] {
     const adjustedChildGap = childGap + this.RECT_WIDTH;
-    const downLine = this.#verticalLine(
+    const downLine = this.verticalLine(
       (p1.x + this.RECT_WIDTH + p2.x) / 2,
       p1.y + this.RECT_HEIGHT / 2,
       this.RECT_HEIGHT / 2 + generationGap / 2
     );
     this.lines.push(downLine);
     const childLineLength = (children.length - 1) * adjustedChildGap;
-    const childLine = this.#horizontalLine(
+    const childLine = this.horizontalLine(
       downLine.x1 - childLineLength / 2,
       downLine.y2,
       childLineLength
@@ -74,7 +74,7 @@ export default class FamilyTreeCalculator {
     let x = childLine.x1 - this.RECT_WIDTH / 2;
     const childrenNodes = [];
     for (const child of children) {
-      this.lines.push(this.#verticalLine(x + this.RECT_WIDTH / 2, childLine.y1, generationGap / 2));
+      this.lines.push(this.verticalLine(x + this.RECT_WIDTH / 2, childLine.y1, generationGap / 2));
       const childNode = {
         name: child.name,
         x,
