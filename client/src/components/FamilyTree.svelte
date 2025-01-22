@@ -1,14 +1,7 @@
 <script lang="ts">
   import * as d3 from 'd3';
-  import FamilyTreeCalculator from '../lib/FamilyTreeCalculator';
+  import FamilyTreeCalculator, { type PersonData } from '../lib/FamilyTreeCalculator';
   import { onMount } from 'svelte';
-
-  type PersonData = {
-    name: string;
-    spouses: PersonData[];
-    parents: PersonData[];
-    children: PersonData[];
-  };
 
   const RECT_HEIGHT = 40;
   const RECT_WIDTH = 80;
@@ -49,13 +42,7 @@
   const calc = new FamilyTreeCalculator();
   const personNode = calc.createPerson(focus, 100, 100);
   const spouseNode = calc.createSpouse(personNode, focus.spouses[0], 150);
-  calc.createChildren(
-    personNode,
-    spouseNode,
-    focus.children,
-    50,
-    50
-  );
+  calc.createChildren(personNode, spouseNode, focus.children, 50, 50);
 
   // Add the midpoint to the dat
   // Add links
