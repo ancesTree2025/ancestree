@@ -25,7 +25,26 @@
       }
     ],
     parents: [],
-    children: []
+    children: [
+      {
+        name: 'def',
+        spouses: [],
+        parents: [],
+        children: []
+      },
+      {
+        name: 'def',
+        spouses: [],
+        parents: [],
+        children: []
+      },
+      {
+        name: 'def',
+        spouses: [],
+        parents: [],
+        children: []
+      }
+    ]
   };
   const horizontalLine = (x: number, y: number, width: number) => ({
     x1: x,
@@ -39,15 +58,28 @@
     y1: y,
     y2: y + height,
   })
-  const data: { name: string; x: number; y: number }[] = [];
-  data.push({ name: focus.name, x, y });
+  const people: { name: string; x: number; y: number }[] = [];
+  people.push({ name: focus.name, x, y });
   const spouse = focus.spouses[0];
-  data.push({ name: spouse.name, x: x + RECT_WIDTH + SPOUSE_GAP, y });
+  people.push({ name: spouse.name, x: x + RECT_WIDTH + SPOUSE_GAP, y });
   const lines: { x1: number; x2: number; y1: number; y2: number }[] = [];
   const marriageLine = horizontalLine(x + RECT_WIDTH, y + RECT_HEIGHT / 2, SPOUSE_GAP);
   lines.push(marriageLine);
-  lines.push(verticalLine((marriageLine.x1 + marriageLine.x2) / 2, marriageLine.y1, 50))
-
+  const downLine = verticalLine((marriageLine.x1 + marriageLine.x2) / 2, marriageLine.y1, 50);
+  lines.push(downLine)
+  const CHILD_GAP = RECT_WIDTH + 50
+  const childLine = horizontalLine(downLine.x1 - (focus.children.length - 1) * CHILD_GAP / 2, downLine.y2, (focus.children.length - 1) * CHILD_GAP);
+  lines.push(childLine)
+  x = childLine.x1 - RECT_WIDTH / 2;
+  for (const child of focus.children) {
+    lines.push(verticalLine(x + RECT_WIDTH / 2, childLine.y1, 50));
+    people.push({
+      name: child.name,
+      x,
+      y: downLine.y2 + 50
+    })
+    x += CHILD_GAP
+  }
   // Add the midpoint to the dat
   // Add links
   onMount(() => {
@@ -69,7 +101,7 @@
     // Add nodes
     const nodes = svg
       .selectAll('.node')
-      .data(data)
+      .data(people)
       .enter()
       .append('g')
       .attr('class', 'node')
