@@ -3,12 +3,10 @@ package org.data.requests
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 
-/**
- * Simple enum with a list of the URLs we will query frequently.
- */
+/** Simple enum with a list of the URLs we will query frequently. */
 enum class WikiEndpoint(val baseUrl: String) {
-    WIKIPEDIA("https://en.wikipedia.org/w/api.php"),
-    WIKIDATA("https://www.wikidata.org/w/api.php")
+  WIKIPEDIA("https://en.wikipedia.org/w/api.php"),
+  WIKIDATA("https://www.wikidata.org/w/api.php"),
 }
 
 /**
@@ -19,14 +17,14 @@ enum class WikiEndpoint(val baseUrl: String) {
  * @returns The HTTP response from the URL.
  */
 private suspend fun doRequest(
-    endpoint: WikiEndpoint,
-    configParams: HttpRequestBuilder.() -> Unit
+  endpoint: WikiEndpoint,
+  configParams: HttpRequestBuilder.() -> Unit,
 ): HttpResponse {
-    val client = HttpClientProvider.httpClient
-    return client.get(endpoint.baseUrl) {
-        configParams()
-        parameter("format", "json")
-    }
+  val client = HttpClientProvider.httpClient
+  return client.get(endpoint.baseUrl) {
+    configParams()
+    parameter("format", "json")
+  }
 }
 
 /**
@@ -37,13 +35,13 @@ private suspend fun doRequest(
  * @returns The HTTP response from the URL.
  */
 suspend fun doWikipediaRequest(
-    action: String,
-    configParams: HttpRequestBuilder.() -> Unit
+  action: String,
+  configParams: HttpRequestBuilder.() -> Unit,
 ): HttpResponse {
-    return doRequest(WikiEndpoint.WIKIPEDIA) {
-        parameter("action", action)
-        configParams()
-    }
+  return doRequest(WikiEndpoint.WIKIPEDIA) {
+    parameter("action", action)
+    configParams()
+  }
 }
 
 /**
@@ -54,11 +52,11 @@ suspend fun doWikipediaRequest(
  * @returns The HTTP response from the URL.
  */
 suspend fun doWikidataRequest(
-    action: String,
-    configParams: HttpRequestBuilder.() -> Unit
+  action: String,
+  configParams: HttpRequestBuilder.() -> Unit,
 ): HttpResponse {
-    return doRequest(WikiEndpoint.WIKIDATA) {
-        parameter("action", action)
-        configParams()
-    }
+  return doRequest(WikiEndpoint.WIKIDATA) {
+    parameter("action", action)
+    configParams()
+  }
 }

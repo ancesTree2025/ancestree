@@ -11,15 +11,16 @@ import io.ktor.client.statement.*
  * @return HTTP Response.
  */
 suspend fun searchWikipediaForQID(query: String, limit: Int = 1): HttpResponse {
-    val response = doWikipediaRequest("query") {
-        parameter("generator", "search")
-        parameter("gsrsearch", query)
-        parameter("gsrlimit", limit)
-        parameter("prop", "pageprops")
-        parameter("ppprop", "wikibase_item")
+  val response =
+    doWikipediaRequest("query") {
+      parameter("generator", "search")
+      parameter("gsrsearch", query)
+      parameter("gsrlimit", limit)
+      parameter("prop", "pageprops")
+      parameter("ppprop", "wikibase_item")
     }
 
-    return response
+  return response
 }
 
 /**
@@ -29,12 +30,12 @@ suspend fun searchWikipediaForQID(query: String, limit: Int = 1): HttpResponse {
  * @returns HTTP response.
  */
 suspend fun getLabelAndClaim(qids: String): HttpResponse {
-    val response =
-        doWikidataRequest("wbgetentities") {
-            parameter("ids", qids)
-            parameter("props", "labels|claims")
-            parameter("languages", "en")
-        }
+  val response =
+    doWikidataRequest("wbgetentities") {
+      parameter("ids", qids)
+      parameter("props", "labels|claims")
+      parameter("languages", "en")
+    }
 
-    return response
+  return response
 }
