@@ -1,5 +1,7 @@
 package org.data.producers
 
+import kotlinx.coroutines.runBlocking
+import org.core.prettyPrint
 import org.data.models.Person
 import org.data.services.LookupService
 import org.domain.models.*
@@ -14,22 +16,45 @@ class FamilyGraphProducer : GraphProducer<String, Person> {
   }
 
   override suspend fun produceGraph(root: String): Graph<Person> {
-    val visited = setOf<Person>()
-    return produceGraph(root, 0, visited)
+    val visited = setOf<String>()
+    return produceGraph(root, 0, visited).also {
+      println(it)
+    }
   }
 
-  private suspend fun produceGraph(query: String, depth: Int, visited: Set<Person>): Graph<Person> {
-    if (abs(depth) > MAX_DEPTH) return emptyGraph()
+  private suspend fun produceGraph(query: String, depth: Int, visited: Set<String>): Graph<Person> {
+    if (abs(depth) > MAX_DEPTH || query.isBlank()) return emptyGraph()
 
     val rootNode = produceNode(query, depth)
-    if (rootNode.data in visited) return emptyGraph()
+    if (rootNode.data.name in visited) return emptyGraph()
+
+    val parentsGraph = rootNode.data.parents.map { produceGraph(it, depth - 1, visited + it) }
+    val spousesGraph = rootNode.data.spouses.map { produceGraph(it, depth, visited + it) }
+    val childrenGraph = rootNode.data.children.map { produceGraph(it, depth + 1, visited + it) }
+
+    val directEdges = setOf<Edge<Person>>()
+
+    val nodes = (parentsGraph.flatMap(Graph<Person>::nodes)
+        + spousesGraph.flatMap(Graph<Person>::nodes)
+        + childrenGraph.flatMap(Graph<Person>::nodes)
+        + rootNode).toSet()
+    val edges = (parentsGraph.flatMap(Graph<Person>::edges)
+        + spousesGraph.flatMap(Graph<Person>::edges)
+        + childrenGraph.flatMap(Graph<Person>::edges)
+        + directEdges).toSet()
+
+    return Graph(
+      root = rootNode,
+      nodes = nodes,
+      edges = edges
+    )
   }
 
 
   /**
    * Produces a node for a particular person using cached results and Wiki queries.
    *
-   * @param input An input string of a person's name.
+   * @param query An input string of a person's name.
    * @returns A node housing FamilyData, containing individual-specific information.
    */
   override suspend fun produceNode(query: String, depth: Int): Node<Person> {
@@ -39,8 +64,21 @@ class FamilyGraphProducer : GraphProducer<String, Person> {
     val label = tuple3.second.first
     val relation = tuple3.second.second
 
-    val familyInfo = Person(qid, label, relation["Gender"]!![0])
+    val familyInfo = Person(
+      id = qid,
+      name = label,
+      gender = relation["Gender"]?.getOrElse(0) {"prefer not to say"} ?: "", // FIXME please honestly kill me
+      parents = listOf(relation["Father"]!!.getOrElse(0) { "" }, relation["Mother"]!!.getOrElse(0) { "" }), // fixme kill me again
+      spouses = relation["Spouse(s)"]!!,
+      children = relation["Child(ren)"]!!
+    )
 
     return Node(familyInfo, qid, depth)
+  }
+}
+
+fun main() {
+  runBlocking {
+    FamilyGraphProducer().produceGraph("Elon Musk").also { it.prettyPrint().also(::println) }
   }
 }

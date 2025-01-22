@@ -13,8 +13,8 @@ fun parseClaimForFamily(claims: JsonObject): Map<String, List<String>> {
 
   val familyInfo = mutableMapOf<String, MutableList<String>>()
 
-  claims.forEach { (prop, claimDetails) ->
-    if (prop in familyProps.keys) {
+  familyProps.keys.forEach { key ->
+    claims[key]?.let { claimDetails ->
       val familyMembers =
         claimDetails.jsonArray.mapNotNull { claim ->
           claim.jsonObject["mainsnak"]
@@ -27,8 +27,9 @@ fun parseClaimForFamily(claims: JsonObject): Map<String, List<String>> {
             ?.jsonPrimitive
             ?.content
         }
+
       if (familyMembers.isNotEmpty()) {
-        familyInfo[familyProps[prop]!!] = familyMembers.toMutableList()
+        familyInfo[familyProps[key]!!] = familyMembers.toMutableList()
       }
     }
   }

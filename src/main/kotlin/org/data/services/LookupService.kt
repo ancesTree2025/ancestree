@@ -21,7 +21,7 @@ object LookupService {
   suspend fun query(input: String): Pair<String, Pair<String, Map<String, List<String>>>> {
     val qid = searchForPersonsQID(input)
     val labelAndFamily = getPersonsLabelAndFamilyMembers(qid)
-    return Pair(qid, Pair(labelAndFamily.first, labelAndFamily.second))
+    return Pair(qid, labelAndFamily)
   }
 
   /**
