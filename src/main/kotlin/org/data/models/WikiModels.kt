@@ -1,4 +1,4 @@
-package org.domain.models
+package org.data.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

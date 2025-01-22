@@ -3,7 +3,7 @@ package org.data.parsers
 import io.ktor.client.statement.*
 import io.ktor.server.plugins.*
 import kotlinx.serialization.json.*
-import org.domain.models.PagesResponse
+import org.data.models.PagesResponse
 
 /**
  * Parses Wikipedia ID Lookup responses, extracting the relevant QID.
