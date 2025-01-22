@@ -33,7 +33,9 @@ class FamilyGraphProducer : GraphProducer<String, Person> {
     val spousesGraph = rootNode.data.spouses.map { produceGraph(it, depth) }
     val childrenGraph = rootNode.data.children.map { produceGraph(it, depth + 1) }
 
-    val directEdges = setOf<Edge<Person>>()
+    val directEdges =
+      spousesGraph.mapNotNull { spouse -> spouse.root?.let { Edge(rootNode.id, it.id) } } +
+          childrenGraph.mapNotNull { child -> child.root?.let { Edge(rootNode.id, it.id) } }
 
     val nodes = (parentsGraph.flatMap(Graph<Person>::nodes)
         + spousesGraph.flatMap(Graph<Person>::nodes)
