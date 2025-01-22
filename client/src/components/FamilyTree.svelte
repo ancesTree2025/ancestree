@@ -1,6 +1,8 @@
 <script lang="ts">
   import * as d3 from 'd3';
+  import FamilyTreeCalculator from '../lib/FamilyTreeCalculator';
   import { onMount } from 'svelte';
+
   type PersonData = {
     name: string;
     spouses: PersonData[];
@@ -12,8 +14,6 @@
   const RECT_WIDTH = 80;
   const SPOUSE_GAP = 150;
 
-  let x = 100;
-  let y = 100;
   let focus: PersonData = {
     name: 'abc',
     spouses: [
@@ -46,40 +46,17 @@
       }
     ]
   };
-  const horizontalLine = (x: number, y: number, width: number) => ({
-    x1: x,
-    x2: x + width,
-    y1: y,
-    y2: y,
-  })
-  const verticalLine = (x: number, y: number, height: number) => ({
-    x1: x,
-    x2: x,
-    y1: y,
-    y2: y + height,
-  })
-  const people: { name: string; x: number; y: number }[] = [];
-  people.push({ name: focus.name, x, y });
-  const spouse = focus.spouses[0];
-  people.push({ name: spouse.name, x: x + RECT_WIDTH + SPOUSE_GAP, y });
-  const lines: { x1: number; x2: number; y1: number; y2: number }[] = [];
-  const marriageLine = horizontalLine(x + RECT_WIDTH, y + RECT_HEIGHT / 2, SPOUSE_GAP);
-  lines.push(marriageLine);
-  const downLine = verticalLine((marriageLine.x1 + marriageLine.x2) / 2, marriageLine.y1, 50);
-  lines.push(downLine)
-  const CHILD_GAP = RECT_WIDTH + 50
-  const childLine = horizontalLine(downLine.x1 - (focus.children.length - 1) * CHILD_GAP / 2, downLine.y2, (focus.children.length - 1) * CHILD_GAP);
-  lines.push(childLine)
-  x = childLine.x1 - RECT_WIDTH / 2;
-  for (const child of focus.children) {
-    lines.push(verticalLine(x + RECT_WIDTH / 2, childLine.y1, 50));
-    people.push({
-      name: child.name,
-      x,
-      y: downLine.y2 + 50
-    })
-    x += CHILD_GAP
-  }
+  const calc = new FamilyTreeCalculator();
+  const personNode = calc.createPerson(focus, 100, 100);
+  const spouseNode = calc.createSpouse(personNode, focus.spouses[0], 150);
+  calc.createChildren(
+    personNode,
+    spouseNode,
+    focus.children,
+    50,
+    50
+  );
+
   // Add the midpoint to the dat
   // Add links
   onMount(() => {
@@ -89,7 +66,7 @@
 
     svg
       .selectAll('.link')
-      .data(lines)
+      .data(calc.lines)
       .enter()
       .append('line')
       .attr('class', 'link')
@@ -101,7 +78,7 @@
     // Add nodes
     const nodes = svg
       .selectAll('.node')
-      .data(people)
+      .data(calc.people)
       .enter()
       .append('g')
       .attr('class', 'node')
