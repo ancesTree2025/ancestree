@@ -1,20 +1,26 @@
-<script>
-  import Panzoom from '../components/Panzoom.svelte';
-  import Node from '../components/Node.svelte';
-  import FamilyTree from '../components/FamilyTree.svelte';
+<script lang="ts">
+  // import FamilyTree from '../components/FamilyTree.svelte';
+  import NameInput from '../components/NameInput.svelte';
+
+  let showNameBox = $state(true)
+
+  function submitAction(name: string) {
+    console.log("yay")
+    showNameBox = false
+  }
 </script>
 
-<!-- <div class="flex h-full flex-col">
+<div class="flex h-full flex-col">
   <nav>
     <h1>Ancestree</h1>
   </nav>
-  <div class="flex-1"> -->
-    <!-- <Panzoom>
-      <Node name="King henry" x={100} y={100} />
-    </Panzoom> -->
-    <FamilyTree></FamilyTree>
-  <!-- </div>
-</div> -->
+
+  {#if showNameBox}
+  <div class="flex-1">
+     <NameInput submitAction={submitAction}></NameInput>
+  </div>
+  {/if}
+</div>
 
 <style scoped>
 </style>
