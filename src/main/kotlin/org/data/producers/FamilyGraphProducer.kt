@@ -1,7 +1,6 @@
 package org.data.producers
 
 import kotlinx.coroutines.runBlocking
-import org.core.prettyPrint
 import org.data.models.Person
 import org.data.services.LookupService
 import org.domain.models.*
@@ -77,11 +76,5 @@ class FamilyGraphProducer : GraphProducer<String, Person> {
     )
 
     return Node(familyInfo, qid, depth)
-  }
-}
-
-fun main() {
-  runBlocking {
-    FamilyGraphProducer().produceGraph("Elon Musk").also { it.prettyPrint().also(::println) }
   }
 }
