@@ -1,7 +1,7 @@
 package org.data.producers
 
 import org.data.models.Person
-import org.data.services.LookupService
+import org.data.services.WikiLookupService
 import org.domain.models.*
 import org.domain.producers.GraphProducer
 import kotlin.math.abs
@@ -68,7 +68,7 @@ class FamilyGraphProducer : GraphProducer<String, Person> {
    * @returns A node housing FamilyData, containing individual-specific information.
    */
    private suspend fun produceNode(query: String, depth: Int): PersonAndRelatives<Person> {
-    val personFamilyInfo = LookupService.query(query)
+    val personFamilyInfo = WikiLookupService().query(query)
 
     val qid = personFamilyInfo.id
     val label = personFamilyInfo.name
