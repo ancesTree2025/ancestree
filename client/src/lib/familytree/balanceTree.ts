@@ -1,5 +1,131 @@
 import type { PersonID, Tree } from './models';
 
-export function balanceTree(_focus: PersonID, _tree: Tree) {
-  // TODO
+const BASE_WIDTH = 100;
+const GENERATION_HEIGHT = 100;
+
+export function balanceTree(focus: PersonID, tree: Tree, center: [number, number]) {
+  const visited = new Set<PersonID>();
+
+  // The x position of the current "right edge" of the graph
+  // Accumulates as nodes are added to the right.
+  let right = 0;
+
+  let y = center[1];
+  const subtree = new Set<PersonID>();
+  const subtreeX = placeSubtree(focus, subtree);
+
+  y = center[1];
+  const supertree = new Set<PersonID>();
+  const supertreeX = placeSupertree(focus, supertree);
+
+  // To make sure the focused node is at center, we need to shift
+  // the nodes in the subtree and supertree
+  adjustNodes(subtree, center[0] - subtreeX);
+  adjustNodes(supertree, center[0] - supertreeX);
+
+  // Shifts all nodes by a certain X
+  function adjustNodes(set: Set<PersonID>, x: number) {
+    for (const node of set) {
+      tree.people.get(node)!.x += x;
+    }
+  }
+
+  // Set the position of a node if they have not already been given a position
+  function addPerson(personId: PersonID, x: number, y: number) {
+    if (visited.has(personId)) return;
+    visited.add(personId);
+    const person = tree.people.get(personId)!;
+    person.x = x;
+    person.y = y;
+  }
+
+  /**
+   * Assigns a position to the spouse node and descendant nodes
+   * @param focused The ID of the focused node
+   * @param subtree A mutable set of nodes currently included in the subtree (including focused node)
+   * @returns The x position of the focused node
+   */
+  function placeSubtree(focused: PersonID, subtree: Set<PersonID>): number {
+    subtree.add(focused);
+
+    // finds any marriages for which this node is a parent
+    const marriages = tree.marriages.filter((m) => m.parents.includes(focused));
+    if (marriages.length === 0) {
+      // Places a single node and pushes the right edge right by 1 base width
+      const meX = right + BASE_WIDTH / 2;
+      addPerson(focused, meX, y);
+      right += BASE_WIDTH;
+      return meX;
+    }
+
+    // assuming someone has at most one marriage, and assuming no cycles
+    if (marriages.length == 1) {
+      const marriage = marriages[0];
+      // assuming a marraige has only one spouse
+      const spouse = marriage.parents.find((p) => p !== focused)!;
+      subtree.add(spouse);
+      const children = marriage.children;
+      // if we only have one child, the width of the two parents (2 * BASE_WIDTH)
+      // is larger than the width of the child (BASE_WIDTH), so pad both sides
+      // by half of BASE_WIDTH
+      if (children.length < 2) {
+        right += BASE_WIDTH / 2;
+      }
+
+      // recursively place children
+      const left = right;
+      y += GENERATION_HEIGHT;
+      for (const child of children) {
+        placeSubtree(child, subtree);
+      }
+      y -= GENERATION_HEIGHT;
+
+      // render parents at the midpoint of the children's width
+      const mid = (left + right) / 2;
+      const meX = mid - BASE_WIDTH / 2;
+      addPerson(spouse, mid + BASE_WIDTH / 2, y);
+      addPerson(focused, meX, y);
+
+      if (children.length < 2) {
+        right += BASE_WIDTH / 2;
+      }
+
+      return meX;
+    }
+    return right;
+  }
+
+  /**
+   * Assigns a position to ancestor nodes
+   * @param focused The ID of the focused node
+   * @param subtree A mutable set of nodes currently included in the supertree (excluding focused node)
+   * @returns The x position of the focused node
+   */
+  function placeSupertree(person: PersonID, supertree: Set<PersonID>): number {
+    // assuming someone has exactly two parents from one marriage, or no parent marriage
+    const parentMarriage = tree.marriages.find((m) => m.children.includes(person));
+
+    if (parentMarriage == undefined) {
+      const meX = right + BASE_WIDTH / 2;
+      addPerson(person, meX, y);
+      right += BASE_WIDTH;
+      return meX;
+    }
+
+    const mother = parentMarriage.parents[0];
+    const father = parentMarriage.parents[1];
+
+    supertree.add(mother);
+    supertree.add(father);
+
+    y -= GENERATION_HEIGHT;
+    const motherX = placeSupertree(mother, supertree);
+    const fatherX = placeSupertree(father, supertree);
+    y += GENERATION_HEIGHT;
+
+    const mid = (motherX + fatherX) / 2;
+    addPerson(person, mid, y);
+
+    return mid;
+  }
 }

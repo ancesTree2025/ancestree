@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { balanceTree } from '$lib/familytree/balanceTree';
   import { fetchTree } from '$lib/familytree/fetchTree';
   import type { Marriages, People, Tree } from '$lib/familytree/models';
   import * as d3 from 'd3';
@@ -14,6 +15,7 @@
 
   $effect(() => {
     const fetched = fetchTree('test');
+    balanceTree('a', fetched, [200, 200]);
     tree = fetched;
   });
 </script>
