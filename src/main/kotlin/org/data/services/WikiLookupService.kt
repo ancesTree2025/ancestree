@@ -5,7 +5,6 @@ import org.data.models.Label
 import org.data.models.PersonAndFamilyInfo
 import org.data.models.QID
 import org.data.models.Relation
-import org.data.parsers.parseClaimForFamily
 import org.data.parsers.parseWikidataIDLookup
 import org.data.parsers.parseWikidataQIDs
 import org.data.requests.getLabelAndClaim
@@ -81,7 +80,7 @@ class WikiLookupService : LookupService<String, PersonAndFamilyInfo> {
         ?: throw NotFoundException("Label Family pair not found in singleton map.")
 
     val label = labelFamilyPair.first
-    val familyInfo = replaceQIDsWithNames(parseClaimForFamily(labelFamilyPair.second))
+    val familyInfo = replaceQIDsWithNames(labelFamilyPair.second)
 
     return Pair(label, familyInfo)
   }

@@ -4,6 +4,7 @@ import io.ktor.client.statement.*
 import io.ktor.server.plugins.*
 import kotlinx.serialization.json.*
 import org.data.models.*
+import org.data.models.FamilyProperties.familyProps
 
 /**
  * Parses Wikipedia ID Lookup responses, extracting the relevant QID.
@@ -33,26 +34,31 @@ suspend fun parseWikidataIDLookup(response: HttpResponse): QID {
  * family members.
  *
  * @param response The HTTP response from Wikidata.
- * @returns A mapping of types of relation to lists of names.
+ * @returns A mapping of QIDs to a pair of the name and the relation.
  */
-suspend fun parseWikidataQIDs(response: HttpResponse): Map<QID, Pair<Label, Claim>> {
+suspend fun parseWikidataQIDs(response: HttpResponse): Map<QID, Pair<Label, Relation>> {
   val json = Json { ignoreUnknownKeys = true }
   val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
-  val idToNameMap = mutableMapOf<String, Pair<String, JsonObject>>()
-
-  result.entities.forEach { (id, entityInfo) ->
+  return result.entities.mapValues { (_, entityInfo) ->
     val label = entityInfo.labels.en.value
 
-    val claimsJsonObject =
-      JsonObject(
-        entityInfo.claims.mapValues { (_, claims) ->
-          JsonArray(claims.map { Json.encodeToJsonElement(it) })
-        }
-      )
+    val familyInfo = familyProps.keys.associateWith { key ->
+      entityInfo.claims[key]?.flatMap { claim ->
+        claim.mainsnak.datavalue?.value
+          ?.jsonObject
+          ?.get("id")
+          ?.jsonPrimitive
+          ?.content
+          ?.let { listOf(it) }
+          ?: emptyList()
+      } ?: emptyList()
+    }.toMutableMap()
 
-    idToNameMap[id] = Pair(label, claimsJsonObject)
+    familyProps.values.forEach { relation ->
+      familyInfo.putIfAbsent(relation, emptyList())
+    }
+
+    label to familyInfo
   }
-
-  return idToNameMap
 }
