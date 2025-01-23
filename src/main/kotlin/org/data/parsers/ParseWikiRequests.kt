@@ -3,9 +3,7 @@ package org.data.parsers
 import io.ktor.client.statement.*
 import io.ktor.server.plugins.*
 import kotlinx.serialization.json.*
-import org.data.models.DataLabel
-import org.data.models.PagesResponse
-import org.data.models.WikidataResponse
+import org.data.models.*
 
 /**
  * Parses Wikipedia ID Lookup responses, extracting the relevant QID.
@@ -13,7 +11,7 @@ import org.data.models.WikidataResponse
  * @param response The HTTP response from Wikipedia.
  * @returns A single parsed QID, as a string.
  */
-suspend fun parseWikidataIDLookup(response: HttpResponse): String {
+suspend fun parseWikidataIDLookup(response: HttpResponse): QID {
   val json = Json { ignoreUnknownKeys = true }
   val result = json.decodeFromString<PagesResponse>(response.bodyAsText())
 
@@ -37,7 +35,7 @@ suspend fun parseWikidataIDLookup(response: HttpResponse): String {
  * @param response The HTTP response from Wikidata.
  * @returns A mapping of types of relation to lists of names.
  */
-suspend fun parseWikidataQIDs(response: HttpResponse): Map<String, Pair<String, JsonObject>> {
+suspend fun parseWikidataQIDs(response: HttpResponse): Map<QID, Pair<Label, Claim>> {
   val json = Json { ignoreUnknownKeys = true }
   val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 

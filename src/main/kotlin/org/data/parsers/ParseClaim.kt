@@ -2,19 +2,20 @@ package org.data.parsers
 
 import kotlinx.serialization.json.*
 import org.data.models.FamilyProperties.familyProps
+import org.data.models.*
 
 /**
  * Parses Wikidata claim, extracting the relevant QIDs of all family members.
  *
- * @param claims A claim JsonObject
+ * @param claim A claim JsonObject
  * @returns A mapping of types of relation to lists of QIDs.
  */
-fun parseClaimForFamily(claims: JsonObject): Map<String, List<String>> {
+fun parseClaimForFamily(claim: Claim): Relation {
 
   val familyInfo = mutableMapOf<String, MutableList<String>>()
 
   familyProps.keys.forEach { key ->
-    claims[key]?.let { claimDetails ->
+    claim[key]?.let { claimDetails ->
       val familyMembers =
         claimDetails.jsonArray.mapNotNull { claim ->
           claim.jsonObject["mainsnak"]

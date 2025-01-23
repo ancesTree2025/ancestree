@@ -1,5 +1,6 @@
 package org.data.producers
 
+import org.data.models.Label
 import org.data.models.Person
 import org.data.services.WikiLookupService
 import org.domain.models.*
@@ -7,7 +8,7 @@ import org.domain.producers.GraphProducer
 import kotlin.math.abs
 
 /** A class to produce family nodes, which will be connected by marriage edges. */
-class FamilyGraphProducer : GraphProducer<String, Person> {
+class FamilyGraphProducer : GraphProducer<Label, Person> {
 
   private data class PersonAndRelatives<T> (
     val node: Node<T>,
