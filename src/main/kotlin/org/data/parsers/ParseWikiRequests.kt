@@ -3,7 +3,9 @@ package org.data.parsers
 import io.ktor.client.statement.*
 import io.ktor.server.plugins.*
 import kotlinx.serialization.json.*
+import org.data.models.DataLabel
 import org.data.models.PagesResponse
+import org.data.models.WikidataResponse
 
 /**
  * Parses Wikipedia ID Lookup responses, extracting the relevant QID.
@@ -36,29 +38,15 @@ suspend fun parseWikidataIDLookup(response: HttpResponse): String {
  * @returns A mapping of types of relation to lists of names.
  */
 suspend fun parseWikidataQIDs(response: HttpResponse): Map<String, Pair<String, JsonObject>> {
-  val jsonResponse = Json.parseToJsonElement(response.bodyAsText()).jsonObject
-  val entities = jsonResponse["entities"]?.jsonObject
+  val json = Json { ignoreUnknownKeys = true }
+  val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
   val idToNameMap = mutableMapOf<String, Pair<String, JsonObject>>()
 
-  entities?.forEach { (id, details) ->
-    val label =
-      details.jsonObject["labels"]
-        ?.jsonObject
-        ?.get("en")
-        ?.jsonObject
-        ?.get("value")
-        ?.jsonPrimitive
-        ?.content
-        ?: throw NotFoundException(
-          "Failed to parse entity label given QID. This should NEVER happen."
-        )
+  result.entities.forEach { (id, entityInfo) ->
+    val label = entityInfo.labels.en.value
 
-    val claims =
-      details.jsonObject["claims"]?.jsonObject
-        ?: throw NotFoundException(
-          "Failed to parse entity claims given QID. This should NEVER happen."
-        )
+    val claims = Json.parseToJsonElement(entityInfo.claims).jsonObject
 
     idToNameMap[id] = Pair(label, claims)
   }

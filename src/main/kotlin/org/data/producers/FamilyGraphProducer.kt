@@ -1,6 +1,5 @@
 package org.data.producers
 
-import kotlinx.coroutines.runBlocking
 import org.data.models.Person
 import org.data.services.LookupService
 import org.domain.models.*
@@ -10,11 +9,19 @@ import kotlin.math.abs
 /** A class to produce family nodes, which will be connected by marriage edges. */
 class FamilyGraphProducer : GraphProducer<String, Person> {
 
+  private data class PersonAndRelatives<T> (
+    val node: Node<T>,
+    val parents: List<String>,
+    val spouses: List<String>,
+    val children: List<String>
+  )
+
   companion object {
     const val MAX_DEPTH = 2
   }
 
   private val visited = mutableSetOf<String>()
+  private val parentMap = mutableMapOf<String, List<String>>();
 
   override suspend fun produceGraph(root: String): Graph<Person> {
     visited.clear()
@@ -24,13 +31,14 @@ class FamilyGraphProducer : GraphProducer<String, Person> {
   private suspend fun produceGraph(query: String, depth: Int): Graph<Person> {
     if (abs(depth) > MAX_DEPTH || query.isBlank()) return emptyGraph()
 
-    val rootNode = produceNode(query, depth)
-    if (rootNode.data.name in visited) return emptyGraph()
-    visited.add(rootNode.data.name)
+    val nodeAndRelatives = produceNode(query, depth)
+    val rootNode = nodeAndRelatives.node
+    if (rootNode.data.id in visited) return emptyGraph()
+    visited.add(rootNode.id)
 
-    val parentsGraph = rootNode.data.parents.map { produceGraph(it, depth - 1) }
-    val spousesGraph = rootNode.data.spouses.map { produceGraph(it, depth) }
-    val childrenGraph = rootNode.data.children.map { produceGraph(it, depth + 1) }
+    val parentsGraph = nodeAndRelatives.parents.map { produceGraph(it, depth - 1) }
+    val spousesGraph = nodeAndRelatives.spouses.map { produceGraph(it, depth) }
+    val childrenGraph = nodeAndRelatives.children.map { produceGraph(it, depth + 1) }
 
     val directEdges =
       spousesGraph.mapNotNull { spouse -> spouse.root?.let { Edge(rootNode.id, it.id) } } +
@@ -59,22 +67,26 @@ class FamilyGraphProducer : GraphProducer<String, Person> {
    * @param query An input string of a person's name.
    * @returns A node housing FamilyData, containing individual-specific information.
    */
-  override suspend fun produceNode(query: String, depth: Int): Node<Person> {
-    val tuple3 = LookupService.query(query)
+   private suspend fun produceNode(query: String, depth: Int): PersonAndRelatives<Person> {
+    val personFamilyInfo = LookupService.query(query)
 
-    val qid = tuple3.first
-    val label = tuple3.second.first
-    val relation = tuple3.second.second
+    val qid = personFamilyInfo.id
+    val label = personFamilyInfo.name
+    val relation = personFamilyInfo.family
 
     val familyInfo = Person(
       id = qid,
       name = label,
       gender = relation["Gender"]?.getOrElse(0) {"prefer not to say"} ?: "", // FIXME please honestly kill me
+    )
+
+    val node = Node(familyInfo, qid, depth)
+
+    return PersonAndRelatives<Person> (
+      node,
       parents = listOf(relation["Father"]!!.getOrElse(0) { "" }, relation["Mother"]!!.getOrElse(0) { "" }), // fixme kill me again
       spouses = relation["Spouse(s)"]!!,
       children = relation["Child(ren)"]!!
     )
-
-    return Node(familyInfo, qid, depth)
   }
 }

@@ -2,6 +2,7 @@ package org.data.services
 
 import io.ktor.server.plugins.*
 import org.data.caches.WikiCacheManager
+import org.data.models.PersonAndFamilyInfo
 import org.data.parsers.parseClaimForFamily
 import org.data.parsers.parseWikidataIDLookup
 import org.data.parsers.parseWikidataQIDs
@@ -18,10 +19,14 @@ object LookupService {
    * @param input The person's name.
    * @returns A 3-tuple of QID, Label and Family Relations.
    */
-  suspend fun query(input: String): Pair<String, Pair<String, Map<String, List<String>>>> {
+  suspend fun query(input: String): PersonAndFamilyInfo {
     val qid = searchForPersonsQID(input)
     val labelAndFamily = getPersonsLabelAndFamilyMembers(qid)
-    return Pair(qid, labelAndFamily)
+    return PersonAndFamilyInfo(
+      qid,
+      labelAndFamily.first,
+      labelAndFamily.second,
+    )
   }
 
   /**
