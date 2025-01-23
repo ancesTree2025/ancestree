@@ -1,54 +1,78 @@
 <script lang="ts">
   import * as d3 from 'd3';
-  import FamilyTreeCalculator, { type PersonData } from '../lib/FamilyTreeCalculator';
 
   const RECT_HEIGHT = 40;
   const RECT_WIDTH = 80;
   const RECT_RADIUS = 10;
 
-  let focus: PersonData = {
-    name: 'abc',
-    spouses: [
-      {
-        name: 'def',
-        spouses: [],
-        parents: [],
-        children: []
-      }
-    ],
-    parents: [],
-    children: [
-      {
-        name: 'def',
-        spouses: [],
-        parents: [],
-        children: []
-      },
-      {
-        name: 'def',
-        spouses: [],
-        parents: [],
-        children: []
-      },
-      {
-        name: 'def',
-        spouses: [],
-        parents: [],
-        children: []
-      }
-    ]
+  type PersonID = string;
+
+  type Person = {
+    name: PersonID;
+    x: number;
+    y: number;
   };
-  const calc = new FamilyTreeCalculator();
-  const personNode = calc.createPerson(focus, 100, 100);
-  const spouseNode = calc.createSpouse(personNode, focus.spouses[0], 150);
-  calc.createChildren(personNode, spouseNode, focus.children, 50, 50);
+
+  let people = $state<Map<PersonID, Person>>(
+    new Map([
+      ['a', { name: 'Alice', x: 125, y: 100 }],
+      ['b', { name: 'Bob', x: 275, y: 100 }],
+      ['c', { name: 'Charlie', x: 50, y: 200 }],
+      ['d', { name: 'David', x: 200, y: 200 }],
+      ['e', { name: 'Eve', x: 350, y: 200 }]
+    ])
+  );
+
+  type Marriage = {
+    parents: PersonID[];
+    children: PersonID[];
+  };
+
+  let marriages = $state<Marriage[]>([
+    {
+      parents: ['a', 'b'],
+      children: ['c', 'd', 'e']
+    }
+  ]);
 </script>
 
 <svg width="800" height="600">
-  {#each calc.lines as line}
-    <line x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} class="stroke-line"></line>
+  {#each marriages as marriage}
+    <!-- fetch Person for each parent, child -->
+    {@const mother = people.get(marriage.parents[0])!}
+    {@const father = people.get(marriage.parents[1])!}
+    {@const children = marriage.children.map((id) => people.get(id)!)}
+
+    <!-- Draw marriage lines -->
+    {@const parentsX = (mother.x + father.x) / 2}
+    {#if mother.y == father.y}
+      <line x1={mother.x} y1={mother.y} x2={father.x} y2={father.y} class="stroke-line" />
+    {:else}
+      <line x1={mother.x} y1={mother.y} x2={parentsX} y2={mother.y} class="stroke-line" />
+      <line x1={parentsX} y1={mother.y} x2={parentsX} y2={father.y} class="stroke-line" />
+      <line x1={father.x} y1={father.y} x2={parentsX} y2={father.y} class="stroke-line" />
+    {/if}
+
+    {#if children.length > 0}
+      <!-- Draw line between parents and children -->
+      {@const parentsY = Math.max(mother.y, father.y)}
+      {@const childrenY = Math.min(...children.map((child) => child.y))}
+      {@const midY = (parentsY + childrenY) / 2}
+      <line x1={parentsX} y1={parentsY} x2={parentsX} y2={midY} class="stroke-line" />
+
+      <!-- Draw children line -->
+      {@const leftChildX = Math.min(parentsX, ...children.map((child) => child.x))}
+      {@const rightChildX = Math.max(parentsX, ...children.map((child) => child.x))}
+      <line x1={leftChildX} y1={midY} x2={rightChildX} y2={midY} class="stroke-line" />
+
+      <!-- Draw line from each child to children line -->
+      {#each marriage.children as child}
+        {@const childNode = people.get(child)!}
+        <line x1={childNode.x} y1={midY} x2={childNode.x} y2={childNode.y} class="stroke-line" />
+      {/each}
+    {/if}
   {/each}
-  {#each calc.people as person}
+  {#each people as [id, person] (id)}
     <g transform="translate({person.x},{person.y})">
       <rect
         x={-RECT_WIDTH / 2}
