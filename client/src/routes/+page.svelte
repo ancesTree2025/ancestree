@@ -17,7 +17,7 @@
 
   {#if showNameBox}
   <div class="flex-1">
-     <NameInput submitAction={submitAction}></NameInput>
+     <NameInput></NameInput>
   </div>
   {/if}
 </div>
