@@ -18,7 +18,8 @@
 <!-- <Panzoom>
       <Node name="King henry" x={100} y={100} />
     </Panzoom> -->
-<FamilyTree></FamilyTree>
+    <NameInput bind:treeData={treeData} />
+    <FamilyTree {treeData} />
   </div>
 </div>
 

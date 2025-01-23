@@ -4,6 +4,8 @@
   import type { Marriages, People, Tree } from '$lib/familytree/models';
   import * as d3 from 'd3';
 
+  let { treeData }: { treeData?: Tree } = $props<{treeData?: Tree}>();
+
   const RECT_HEIGHT = 40;
   const RECT_WIDTH = 80;
   const RECT_RADIUS = 10;
