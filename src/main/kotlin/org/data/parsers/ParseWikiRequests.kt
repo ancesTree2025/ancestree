@@ -46,9 +46,11 @@ suspend fun parseWikidataQIDs(response: HttpResponse): Map<String, Pair<String, 
   result.entities.forEach { (id, entityInfo) ->
     val label = entityInfo.labels.en.value
 
-    val claims = Json.parseToJsonElement(entityInfo.claims).jsonObject
+    val claimsJsonObject = JsonObject(entityInfo.claims.mapValues { (_, claims) ->
+      JsonArray(claims.map { Json.encodeToJsonElement(it) })
+    })
 
-    idToNameMap[id] = Pair(label, claims)
+    idToNameMap[id] = Pair(label, claimsJsonObject)
   }
 
   return idToNameMap
