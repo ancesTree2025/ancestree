@@ -1,7 +1,9 @@
 package org.data.services
 
 import io.ktor.server.plugins.*
-import org.data.caches.WikiCacheManager
+import org.data.caches.ClaimCacheManager
+import org.data.caches.LabelCacheManager
+import org.data.caches.QIDCacheManager
 import org.data.models.Label
 import org.data.models.PersonAndFamilyInfo
 import org.data.models.QID
@@ -39,8 +41,8 @@ class CachedWikiLookupService : LookupService<String, PersonAndFamilyInfo> {
    * @returns Their Wikidata QID as a string.
    */
   private suspend fun searchForPersonsQID(name: String): QID {
-    if (WikiCacheManager.getQID(name) != null) {
-      return WikiCacheManager.getQID(name)!!
+    if (QIDCacheManager.get(name) != null) {
+      return QIDCacheManager.get(name)!!
     }
 
     val response = searchWikipediaForQID(name)
@@ -62,7 +64,7 @@ class CachedWikiLookupService : LookupService<String, PersonAndFamilyInfo> {
     val toQuery = mutableListOf<String>()
 
     allIds.forEach { id ->
-      val name = WikiCacheManager.getLabel(id)
+      val name = LabelCacheManager.get(id)
       if (name == null) {
         toQuery.add(id)
       } else {
@@ -80,9 +82,9 @@ class CachedWikiLookupService : LookupService<String, PersonAndFamilyInfo> {
 
     labelClaimPair.forEach { (qid, pair) ->
       readableNames[qid] = pair.first
-      WikiCacheManager.putQID(pair.first, qid)
-      WikiCacheManager.putClaim(qid, pair.second)
-      WikiCacheManager.putLabel(qid, pair.first)
+      QIDCacheManager.put(pair.first, qid)
+      ClaimCacheManager.put(qid, pair.second)
+      LabelCacheManager.put(qid, pair.first)
     }
 
     return familyInfo.mapValues { (_, ids) -> ids.map { id -> readableNames[id] ?: "Unknown" } }
@@ -97,7 +99,7 @@ class CachedWikiLookupService : LookupService<String, PersonAndFamilyInfo> {
   private suspend fun getPersonsLabelAndFamilyMembers(personQID: QID): Pair<Label, Relation> {
 
     /** We first check if we have the claim stored in our cache to avoid a query. */
-    if (WikiCacheManager.getClaim(personQID) == null) {
+    if (ClaimCacheManager.get(personQID) == null) {
 
       /** If not, we query Wikidata to get them, and cache as relevant. */
       val familyResponse = getLabelAndClaim(personQID)
@@ -107,14 +109,14 @@ class CachedWikiLookupService : LookupService<String, PersonAndFamilyInfo> {
         labelFamilyMap[personQID]
           ?: throw NotFoundException("Label Family pair not found in singleton map.")
 
-      WikiCacheManager.putQID(labelFamilyPair.first, personQID)
-      WikiCacheManager.putClaim(personQID, labelFamilyPair.second)
-      WikiCacheManager.putLabel(personQID, labelFamilyPair.first)
+      QIDCacheManager.put(labelFamilyPair.first, personQID)
+      ClaimCacheManager.put(personQID, labelFamilyPair.second)
+      LabelCacheManager.put(personQID, labelFamilyPair.first)
     }
 
     val familyInfo =
-      replaceQIDsWithNames(parseClaimForFamily(WikiCacheManager.getClaim(personQID)!!))
-    val label = WikiCacheManager.getLabel(personQID)!!
+      replaceQIDsWithNames(parseClaimForFamily(ClaimCacheManager.get(personQID)!!))
+    val label = LabelCacheManager.get(personQID)!!
 
     return Pair(label, familyInfo)
   }

@@ -22,7 +22,6 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
   }
 
   private val visited = mutableSetOf<String>()
-  private val parentMap = mutableMapOf<String, List<String>>();
 
   override suspend fun produceGraph(root: String): Graph<Person> {
     visited.clear()
