@@ -1,5 +1,10 @@
 # AncesTree
 
+## Project Prerequisites
+
+Install [Bun](https://bun.sh) and execute `bun install` in the `client` directory to install all the frontend
+dependencies.
+
 ## Project management
 
 ### Commits
@@ -29,8 +34,18 @@ scope is what you're changing i.e. frontend or backend. It is optional - if refa
 
 ### Branch naming
 
-Branches are named as follows: `S[JIRA TICKET NUMBER]-description`.
+Branches are named as follows: `AT-[JIRA TICKET NUMBER]-description`.
 
-For example: `S8-skeleton`.
+For example: `AT-8-skeleton`.
 
 If there is no applicable jira ticket then use 0 for the ticket number.
+
+## Important commands
+
+|       Command       | Directory |               Description                |
+|:-------------------:|:---------:|:----------------------------------------:|
+|   `./gradlew run`   |    `.`    |        Start backend in dev mode.        |
+|      `bun dev`      | `client`  |       Start frontend in dev mode.        |
+| `docker compose up` |    `.`    | Preview applications in production build |
+
+On Fedora Linux, the command is `docker-compose up`.
