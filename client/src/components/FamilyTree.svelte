@@ -1,39 +1,21 @@
 <script lang="ts">
+  import { fetchTree } from '$lib/familytree/fetchTree';
+  import type { Marriages, People } from '$lib/familytree/models';
   import * as d3 from 'd3';
 
   const RECT_HEIGHT = 40;
   const RECT_WIDTH = 80;
   const RECT_RADIUS = 10;
 
-  type PersonID = string;
+  let people = $state<People>(new Map());
 
-  type Person = {
-    name: PersonID;
-    x: number;
-    y: number;
-  };
+  let marriages = $state<Marriages>([]);
 
-  let people = $state<Map<PersonID, Person>>(
-    new Map([
-      ['a', { name: 'Alice', x: 125, y: 100 }],
-      ['b', { name: 'Bob', x: 275, y: 100 }],
-      ['c', { name: 'Charlie', x: 50, y: 200 }],
-      ['d', { name: 'David', x: 200, y: 200 }],
-      ['e', { name: 'Eve', x: 350, y: 200 }]
-    ])
-  );
-
-  type Marriage = {
-    parents: PersonID[];
-    children: PersonID[];
-  };
-
-  let marriages = $state<Marriage[]>([
-    {
-      parents: ['a', 'b'],
-      children: ['c', 'd', 'e']
-    }
-  ]);
+  $effect(() => {
+    const tree = fetchTree('test');
+    people = tree.people;
+    marriages = tree.marriages;
+  });
 </script>
 
 <svg width="800" height="600">
