@@ -1,29 +1,29 @@
 <script lang="ts">
   import { fetchTree } from '$lib/familytree/fetchTree';
-  import type { Marriages, People } from '$lib/familytree/models';
+  import type { Marriages, People, Tree } from '$lib/familytree/models';
   import * as d3 from 'd3';
 
   const RECT_HEIGHT = 40;
   const RECT_WIDTH = 80;
   const RECT_RADIUS = 10;
 
-  let people = $state<People>(new Map());
-
-  let marriages = $state<Marriages>([]);
+  let tree = $state<Tree>({
+    people: new Map(),
+    marriages: []
+  });
 
   $effect(() => {
-    const tree = fetchTree('test');
-    people = tree.people;
-    marriages = tree.marriages;
+    const fetched = fetchTree('test');
+    tree = fetched;
   });
 </script>
 
 <svg width="800" height="600">
-  {#each marriages as marriage}
+  {#each tree.marriages as marriage}
     <!-- fetch Person for each parent, child -->
-    {@const mother = people.get(marriage.parents[0])!}
-    {@const father = people.get(marriage.parents[1])!}
-    {@const children = marriage.children.map((id) => people.get(id)!)}
+    {@const mother = tree.people.get(marriage.parents[0])!}
+    {@const father = tree.people.get(marriage.parents[1])!}
+    {@const children = marriage.children.map((id) => tree.people.get(id)!)}
 
     <!-- Draw marriage lines -->
     {@const parentsX = (mother.x + father.x) / 2}
@@ -48,13 +48,12 @@
       <line x1={leftChildX} y1={midY} x2={rightChildX} y2={midY} class="stroke-line" />
 
       <!-- Draw line from each child to children line -->
-      {#each marriage.children as child}
-        {@const childNode = people.get(child)!}
-        <line x1={childNode.x} y1={midY} x2={childNode.x} y2={childNode.y} class="stroke-line" />
+      {#each children as child}
+        <line x1={child.x} y1={midY} x2={child.x} y2={child.y} class="stroke-line" />
       {/each}
     {/if}
   {/each}
-  {#each people as [id, person] (id)}
+  {#each tree.people as [id, person] (id)}
     <g transform="translate({person.x},{person.y})">
       <rect
         x={-RECT_WIDTH / 2}
