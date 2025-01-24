@@ -2,20 +2,27 @@
   import { balanceTree } from '$lib/familytree/balanceTree';
   import { fetchTree } from '$lib/familytree/fetchTree';
   import type { Tree } from '$lib/familytree/models';
+  import NameInput from './NameInput.svelte';
 
-  let { tree }: { tree?: Tree } = $props<{ tree?: Tree }>();
+  let tree = $state<Tree | undefined>();
+  let name = $state<string | undefined>()
 
   const RECT_HEIGHT = 40;
   const RECT_WIDTH = 80;
   const RECT_RADIUS = 10;
 
   $effect(() => {
-    const fetched = fetchTree('test');
-    balanceTree('a', fetched, [200, 200]);
-    tree = fetched;
+    if (name) {
+      fetchTree(name).then(fetched => {
+        balanceTree(fetched.focusId, fetched.tree, [200, 200]);
+        tree = fetched.tree;
+      })
+    }
   });
 </script>
 
+<h1>{JSON.stringify(tree)}</h1>
+<NameInput bind:nameInput={name} />
 <svg width="800" height="600">
   {#if tree}
     {#each tree.marriages as marriage}

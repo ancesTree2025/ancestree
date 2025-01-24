@@ -5,16 +5,17 @@
   import type { Tree } from '$lib/familytree/models';
   import Card from './Card.svelte';
 
-  let { treeData = $bindable() }: { treeData?: Tree } = $props<{ treeData?: Tree }>();
+  let { nameInput = $bindable() }: { nameInput?: string } = $props<{ nameInput?: string }>();
 
   let name = $state('');
   const submitAction = () => {
-    fetch(`http://localhost:8080/${name}`).then((response) => {
-      response.json().then((s) => {
-        treeData = apiResponseToTree(s);
-      });
-    });
+    nameInput = name
   };
+    // fetch(`http://localhost:8080/${name}`).then((response) => {
+    //   response.json().then((s) => {
+    //     treeData = apiResponseToTree(s);
+    //   });
+    // });
   // let { submitAction } = $props<{submitAction: (name: string) => void}>()
 </script>
 
