@@ -49,6 +49,11 @@ class WikiLookupService : LookupService<String, PersonAndFamilyInfo> {
   private suspend fun replaceQIDsWithNames(familyInfo: Relation): Relation {
     /** We then select those names which don't appear in the cache, to query and store. */
     val allIds = familyInfo.values.flatten()
+
+    if (allIds.isEmpty()) {
+      return familyInfo
+    }
+
     val readableNames = mutableMapOf<String, String>()
 
     val idsParam = allIds.joinToString("|")
