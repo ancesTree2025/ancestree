@@ -11,7 +11,7 @@ import kotlin.math.abs
 class FamilyGraphProducer : GraphProducer<String, Person> {
 
   companion object {
-    const val MAX_DEPTH = 2
+    const val MAX_DEPTH = 1
   }
 
   private val visited = mutableSetOf<String>()
