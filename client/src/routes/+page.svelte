@@ -1,8 +1,10 @@
 <script lang="ts">
+  import type { Tree } from '$lib/familytree/models';
   import FamilyTree from '../components/FamilyTree.svelte';
   import NameInput from '../components/NameInput.svelte';
 
   let showNameBox = $state(true)
+  let treeData = $state<Tree | undefined>()
 
   function submitAction(name: string) {
     console.log("yay")
