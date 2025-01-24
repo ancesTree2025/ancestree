@@ -29,16 +29,14 @@
   let name = $state('');
   const submitAction = () => {
     fetch(`http://localhost:8080/${name}`).then((response) => {
-      const people: Map<PersonID, Person & { depth: number }> = new Map();
-      const marriages: Marriages = [];
-      // Create map of Person to list of parents
-      // Iterate through this map, creating a new map of parents to family
-
-      // Create map of Person to list of children
-      // Create list of marriages
-      // For each marriage m
       response.json().then((s: ApiResponse) => {
-        for (const person of s.nodes.concat(s.root) ) {
+        // Create map of Person to list of children
+        // Create list of marriages
+        // For each marriage make its children the intersection of the children
+        // of both members
+        const people: Map<PersonID, Person & { depth: number }> = new Map();
+        const marriages: Marriages = [];
+        for (const person of s.nodes.concat(s.root)) {
           people.set(person.id, { name: person.data.name, x: 0, y: 0, depth: person.depth });
         }
         const children = new Map<PersonID, PersonID[]>();
