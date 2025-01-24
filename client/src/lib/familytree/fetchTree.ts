@@ -4,7 +4,7 @@ type PersonData = {
   data: {
     id: PersonID;
     name: string;
-    gender: 'male' | 'female';
+    gender: 'male' | 'female' | 'prefer not to say';
   };
   id: PersonID;
   depth: number;

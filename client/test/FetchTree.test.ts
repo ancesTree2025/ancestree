@@ -5,7 +5,7 @@ const basicPersonData = (id: string, depth: number) => ({
   data: {
     id,
     name: id,
-    gender: 'male' as const
+    gender: 'prefer not to say' as const
   },
   id,
   depth
