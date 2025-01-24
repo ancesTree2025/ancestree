@@ -23,9 +23,6 @@
       node2: PersonID;
     }[];
   };
-
-  const people: People = new Map();
-
   let name = $state('');
   const submitAction = () => {
     fetch(`http://localhost:8080/${name}`).then((response) => {
