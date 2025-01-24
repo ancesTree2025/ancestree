@@ -15,7 +15,7 @@
 
   $effect(() => {
     const fetched = fetchTree('test');
-    balanceTree('a', fetched, [200, 200]);
+    balanceTree('a', fetched, [300, 250]);
     tree = fetched;
   });
 </script>
