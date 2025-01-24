@@ -9,7 +9,7 @@ data class Graph<T>(
   /* only nullable when graph is empty */
   val root: Node<T>?,
   val nodes: Set<Node<T>>,
-  val edges: Set<Edge>,
+  val edges: Set<Edge>
 ) {
 
   fun isEmpty(): Boolean {
