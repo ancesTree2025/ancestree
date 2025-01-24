@@ -37,6 +37,11 @@ function apiResponseToTree(res: ApiResponse): { focusId: PersonID; tree: Tree } 
         children.set(edge.node1, []);
       }
       children.get(edge.node1)?.push(edge.node2);
+    } else if (people.get(edge.node1)!.depth > people.get(edge.node2)!.depth) {
+      if (!children.has(edge.node2)) {
+        children.set(edge.node2, []);
+      }
+      children.get(edge.node2)?.push(edge.node1);
     } else {
       marriages.push({ parents: [edge.node1, edge.node2], children: [] });
     }
