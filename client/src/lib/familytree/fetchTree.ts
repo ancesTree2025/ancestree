@@ -9,6 +9,7 @@ type PersonData = {
   id: PersonID;
   depth: number;
 };
+
 type ApiResponse = {
   root: PersonData;
   nodes: PersonData[];
@@ -17,7 +18,8 @@ type ApiResponse = {
     node2: PersonID;
   }[];
 };
-export const apiResponseToTree = (res: ApiResponse): { focusId: PersonID; tree: Tree } => {
+
+function apiResponseToTree(res: ApiResponse): { focusId: PersonID; tree: Tree } {
   // Create map of Person to list of children
   // Create list of marriages
   // For each marriage make its children the intersection of the children
@@ -51,7 +53,7 @@ export const apiResponseToTree = (res: ApiResponse): { focusId: PersonID; tree: 
       marriages
     }
   };
-};
+}
 
 export async function fetchTree(name: string): Promise<{ focusId: PersonID; tree: Tree }> {
   const response = await fetch(`http://localhost:8080/${name}`);

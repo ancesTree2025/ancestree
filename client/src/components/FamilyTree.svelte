@@ -5,25 +5,28 @@
   import NameInput from './NameInput.svelte';
 
   let tree = $state<Tree | undefined>();
-  let name = $state<string | undefined>()
+  let name = $state<string | undefined>();
 
   const RECT_HEIGHT = 40;
   const RECT_WIDTH = 80;
   const RECT_RADIUS = 10;
 
+  let width = 800;
+  let height = 600;
+
   $effect(() => {
     if (name) {
-      fetchTree(name).then(fetched => {
-        balanceTree(fetched.focusId, fetched.tree, [200, 200]);
+      fetchTree(name).then((fetched) => {
+        balanceTree(fetched.focusId, fetched.tree, [width / 2, height / 2]);
         tree = fetched.tree;
-      })
+      });
     }
   });
 </script>
 
 <h1>{JSON.stringify(tree)}</h1>
 <NameInput bind:nameInput={name} />
-<svg width="800" height="600">
+<svg {width} {height}>
   {#if tree}
     {#each tree.marriages as marriage}
       <!-- fetch Person for each parent, child -->
