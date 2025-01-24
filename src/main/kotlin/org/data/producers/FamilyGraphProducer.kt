@@ -1,5 +1,6 @@
 package org.data.producers
 
+import io.ktor.util.reflect.*
 import kotlin.math.abs
 import org.data.models.Label
 import org.data.models.Person
@@ -18,7 +19,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
   )
 
   companion object {
-    const val MAX_DEPTH = 2
+    const val MAX_DEPTH = 1
   }
 
   private val visited = mutableSetOf<String>()
@@ -67,32 +68,28 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
    * @returns A node housing FamilyData, containing individual-specific information.
    */
   private suspend fun produceNode(query: String, depth: Int): PersonAndRelatives<Person> {
-    val personFamilyInfo = WikiLookupService().query(query)
+    val personFamilyInfo =
+      WikiLookupService().query(query)
+        ?: return PersonAndRelatives(
+          Node(Person(query, query, "???"), query, depth),
+          emptyList(),
+          emptyList(),
+          emptyList(),
+        )
 
     val qid = personFamilyInfo.id
     val label = personFamilyInfo.name
     val relation = personFamilyInfo.family
 
-    val familyInfo =
-      Person(
-        id = qid,
-        name = label,
-        gender =
-          relation["Gender"]?.getOrElse(0) { "prefer not to say" }
-            ?: "", // FIXME please honestly kill me
-      )
+    val familyInfo = Person(id = qid, name = label, gender = relation.Gender)
 
     val node = Node(familyInfo, qid, depth)
 
-    return PersonAndRelatives<Person>(
+    return PersonAndRelatives(
       node,
-      parents =
-        listOf(
-          relation["Father"]!!.getOrElse(0) { "" },
-          relation["Mother"]!!.getOrElse(0) { "" },
-        ), // fixme kill me again
-      spouses = relation["Spouse(s)"]!!,
-      children = relation["Child(ren)"]!!,
+      parents = listOf(relation.Father),
+      spouses = relation.Spouses,
+      children = relation.Children,
     )
   }
 }

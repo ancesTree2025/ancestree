@@ -1,10 +1,7 @@
 package org.data.services
 
 import io.ktor.server.plugins.*
-import org.data.models.Label
-import org.data.models.PersonAndFamilyInfo
-import org.data.models.QID
-import org.data.models.Relation
+import org.data.models.*
 import org.data.parsers.parseWikidataIDLookup
 import org.data.parsers.parseWikidataQIDs
 import org.data.requests.getLabelAndClaim
@@ -20,10 +17,26 @@ class WikiLookupService : LookupService<String, PersonAndFamilyInfo> {
    * @param input The person's name.
    * @returns A 3-tuple of QID, Label and Family Relations.
    */
-  override suspend fun query(input: String): PersonAndFamilyInfo {
+  override suspend fun query(input: String): PersonAndFamilyInfo? {
     val qid = searchForPersonsQID(input)
+
+    if (qid.isNullOrEmpty()) {
+      return null
+    }
+
     val labelAndFamily = getPersonsLabelAndFamilyMembers(qid)
-    return PersonAndFamilyInfo(qid, labelAndFamily.first, labelAndFamily.second)
+
+    val family =
+      NamedRelation(
+        labelAndFamily.second["Gender"]?.getOrElse(0) { "Unknown" } ?: "Unknown",
+        labelAndFamily.second["Father"]?.getOrElse(0) { "Unknown" } ?: "Unknown",
+        labelAndFamily.second["Mother"]?.getOrElse(0) { "Unknown" } ?: "Unknown",
+        labelAndFamily.second["Spouse(s)"]!!,
+        labelAndFamily.second["Child(ren)"]!!,
+        labelAndFamily.second["Sibling(s)"]!!,
+      )
+
+    return PersonAndFamilyInfo(qid, labelAndFamily.first, family)
   }
 
   /**
@@ -32,10 +45,9 @@ class WikiLookupService : LookupService<String, PersonAndFamilyInfo> {
    * @param name The person's name.
    * @returns Their Wikidata QID as a string.
    */
-  private suspend fun searchForPersonsQID(name: String): QID {
+  private suspend fun searchForPersonsQID(name: String): QID? {
     val response = searchWikipediaForQID(name)
     val qid = parseWikidataIDLookup(response)
-
     return qid
   }
 
@@ -80,6 +92,7 @@ class WikiLookupService : LookupService<String, PersonAndFamilyInfo> {
         ?: throw NotFoundException("Label Family pair not found in singleton map.")
 
     val label = labelFamilyPair.first
+
     val familyInfo = replaceQIDsWithNames(labelFamilyPair.second)
 
     return Pair(label, familyInfo)
