@@ -23,6 +23,7 @@ import kotlinx.serialization.json.JsonElement
 
 @Serializable data class WikiClaim(val mainsnak: MainSnak)
 
-@Serializable data class MainSnak(val snaktype: String, val datatype: String, val datavalue: DataValue? = null)
+@Serializable
+data class MainSnak(val snaktype: String, val datatype: String, val datavalue: DataValue? = null)
 
 @Serializable data class DataValue(val value: JsonElement)

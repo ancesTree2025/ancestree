@@ -27,11 +27,7 @@ class CachedWikiLookupService : LookupService<String, PersonAndFamilyInfo> {
   override suspend fun query(input: String): PersonAndFamilyInfo {
     val qid = searchForPersonsQID(input)
     val labelAndFamily = getPersonsLabelAndFamilyMembers(qid)
-    return PersonAndFamilyInfo(
-      qid,
-      labelAndFamily.first,
-      labelAndFamily.second,
-    )
+    return PersonAndFamilyInfo(qid, labelAndFamily.first, labelAndFamily.second)
   }
 
   /**
@@ -114,8 +110,7 @@ class CachedWikiLookupService : LookupService<String, PersonAndFamilyInfo> {
       LabelCacheManager.put(personQID, labelFamilyPair.first)
     }
 
-    val familyInfo =
-      replaceQIDsWithNames(parseClaimForFamily(ClaimCacheManager.get(personQID)!!))
+    val familyInfo = replaceQIDsWithNames(parseClaimForFamily(ClaimCacheManager.get(personQID)!!))
     val label = LabelCacheManager.get(personQID)!!
 
     return Pair(label, familyInfo)

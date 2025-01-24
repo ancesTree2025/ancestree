@@ -24,11 +24,7 @@ class WikiLookupService : LookupService<String, PersonAndFamilyInfo> {
   override suspend fun query(input: String): PersonAndFamilyInfo {
     val qid = searchForPersonsQID(input)
     val labelAndFamily = getPersonsLabelAndFamilyMembers(qid)
-    return PersonAndFamilyInfo(
-      qid,
-      labelAndFamily.first,
-      labelAndFamily.second,
-    )
+    return PersonAndFamilyInfo(qid, labelAndFamily.first, labelAndFamily.second)
   }
 
   /**
@@ -59,9 +55,7 @@ class WikiLookupService : LookupService<String, PersonAndFamilyInfo> {
     val nameResponse = getLabelAndClaim(idsParam)
     val labelClaimPair = parseWikidataQIDs(nameResponse)
 
-    labelClaimPair.forEach { (qid, pair) ->
-      readableNames[qid] = pair.first
-    }
+    labelClaimPair.forEach { (qid, pair) -> readableNames[qid] = pair.first }
 
     return familyInfo.mapValues { (_, ids) -> ids.map { id -> readableNames[id] ?: "Unknown" } }
   }

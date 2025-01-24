@@ -1,8 +1,8 @@
 package org.data.parsers
 
 import kotlinx.serialization.json.*
-import org.data.models.FamilyProperties.familyProps
 import org.data.models.*
+import org.data.models.FamilyProperties.familyProps
 
 /**
  * Parses Wikidata claim, extracting the relevant QIDs of all family members.
