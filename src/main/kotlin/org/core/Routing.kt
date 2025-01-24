@@ -5,15 +5,15 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.data.FamilyProperties
-import org.domain.NodeProducer
+import org.data.models.Person
+import org.domain.producers.GraphProducer
 import org.kodein.di.factory
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 
 fun Application.configureRouting() {
   val clientFactory by closestDI().factory<String, HttpClient>()
-  val nodeProducer by closestDI().instance<NodeProducer<String, FamilyProperties>>()
+  val graphProducer by closestDI().instance<GraphProducer<String, Person>>()
 
   routing {
     get("/{name}") {
@@ -24,7 +24,10 @@ fun Application.configureRouting() {
             "name is required. Nothing was passed",
           )
 
-      call.respond(HttpStatusCode.OK, nodeProducer.produce(name))
+      val graph = graphProducer.produceGraph(name)
+      if (graph.isEmpty()) return@get call.respond(HttpStatusCode.NoContent)
+
+      call.respond(graph)
     }
   }
 }

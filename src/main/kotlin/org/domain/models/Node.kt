@@ -1,3 +1,5 @@
 package org.domain.models
 
-data class Node<T>(val data: T)
+import kotlinx.serialization.Serializable
+
+@Serializable data class Node<T>(val data: T, val id: String, val depth: Int)
