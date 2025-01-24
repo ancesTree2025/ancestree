@@ -3,7 +3,10 @@
 <script lang="ts">
   import Card from './Card.svelte';
 
-  let { nameInput = $bindable() }: { nameInput?: string } = $props<{ nameInput?: string }>();
+  let { nameInput = $bindable(), loading }: { nameInput?: string; loading: boolean } = $props<{
+    nameInput?: string;
+    loading?: boolean;
+  }>();
 
   let name = $state('');
   function submitAction() {
@@ -16,6 +19,9 @@
   <input bind:value={name} class="NameTextBox" />
   <div>
     <button class="SubmitBox" onclick={submitAction}>Submit</button>
+    {#if loading}
+      <p>Loading...</p>
+    {/if}
   </div>
 </Card>
 

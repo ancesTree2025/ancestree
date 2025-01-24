@@ -14,18 +14,21 @@
   let width = 800;
   let height = 600;
 
+  let loading = $state(false);
+
   $effect(() => {
     if (name) {
+      loading = true;
       fetchTree(name).then((fetched) => {
         balanceTree(fetched.focusId, fetched.tree, [width / 2, height / 2]);
         tree = fetched.tree;
+        loading = false;
       });
     }
   });
 </script>
 
-<h1>{JSON.stringify(tree)}</h1>
-<NameInput bind:nameInput={name} />
+<NameInput bind:nameInput={name} {loading} />
 <svg {width} {height}>
   {#if tree}
     {#each tree.marriages as marriage}
