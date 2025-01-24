@@ -16,7 +16,7 @@
       <Node name="King henry" x={100} y={100} />
     </Panzoom> -->
     <NameInput bind:treeData />
-    <FamilyTree {treeData} />
+    <FamilyTree tree={treeData} />
   </div>
 </div>
 

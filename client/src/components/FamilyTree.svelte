@@ -3,7 +3,7 @@
   import { fetchTree } from '$lib/familytree/fetchTree';
   import type { Tree } from '$lib/familytree/models';
 
-  let { tree }: { tree?: Tree } = $props<{ treeData?: Tree }>();
+  let { tree }: { tree?: Tree } = $props<{ tree?: Tree }>();
 
   const RECT_HEIGHT = 40;
   const RECT_WIDTH = 80;
