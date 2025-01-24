@@ -18,7 +18,7 @@ test('Handles two marriages with different children', () => {
     { id: 'Child 1', depth: 2 },
     { id: 'Wife 2', depth: 1 },
     { id: 'Child 2', depth: 2 },
-    { id: 'Focus', depth: 1 },
+    { id: 'Focus', depth: 1 }
   ]) {
     resultingPeopleMap.set(id, { name: id, depth, x: 0, y: 0 });
   }

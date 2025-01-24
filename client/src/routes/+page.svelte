@@ -3,8 +3,8 @@
   import FamilyTree from '../components/FamilyTree.svelte';
   import NameInput from '../components/NameInput.svelte';
 
-  let showNameBox = $state(true)
-  let treeData = $state<Tree | undefined>()
+  let showNameBox = $state(true);
+  let treeData = $state<Tree | undefined>();
 </script>
 
 <div class="flex h-full flex-col">
@@ -12,19 +12,19 @@
     <h1>Ancestree</h1>
   </nav>
   <div class="flex-1">
-<!-- <Panzoom>
+    <!-- <Panzoom>
       <Node name="King henry" x={100} y={100} />
     </Panzoom> -->
-    <NameInput bind:treeData={treeData} />
+    <NameInput bind:treeData />
     <FamilyTree {treeData} />
   </div>
 </div>
 
-  {#if showNameBox}
+{#if showNameBox}
   <div class="flex-1">
-     <NameInput></NameInput>
+    <NameInput></NameInput>
   </div>
-  {/if}
+{/if}
 
 <style scoped>
 </style>

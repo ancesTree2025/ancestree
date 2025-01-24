@@ -8,6 +8,6 @@
   }
 
   text {
-    @apply text-fg font-sans;
+    @apply font-sans text-fg;
   }
 }

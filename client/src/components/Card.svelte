@@ -1,5 +1,5 @@
 <!-- Card component to overlay other components -->
-<div class="h-full w-full fixed flex items-center justify-center">
+<div class="fixed flex h-full w-full items-center justify-center">
   <div class="card">
     <slot></slot>
   </div>
