@@ -5,11 +5,6 @@
 
   let showNameBox = $state(true)
   let treeData = $state<Tree | undefined>()
-
-  function submitAction(name: string) {
-    console.log("yay")
-    showNameBox = false
-  }
 </script>
 
 <div class="flex h-full flex-col">
