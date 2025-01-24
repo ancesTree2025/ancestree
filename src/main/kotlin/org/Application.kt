@@ -1,7 +1,6 @@
 package org
 
 import io.ktor.server.application.*
-import io.ktor.server.plugins.cors.routing.CORS
 import org.core.configureRouting
 import org.core.configureSerialization
 import org.di.appModule
@@ -13,9 +12,6 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
   di { import(appModule) }
-  install(CORS) {
-    anyHost() // TODO: unsafe
-  }
   configureSerialization()
   configureRouting()
 }

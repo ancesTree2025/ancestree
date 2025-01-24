@@ -3,7 +3,7 @@ package org.data.parsers
 import io.ktor.client.statement.*
 import io.ktor.server.plugins.*
 import kotlinx.serialization.json.*
-import org.data.models.*
+import org.data.models.PagesResponse
 
 /**
  * Parses Wikipedia ID Lookup responses, extracting the relevant QID.
@@ -11,7 +11,7 @@ import org.data.models.*
  * @param response The HTTP response from Wikipedia.
  * @returns A single parsed QID, as a string.
  */
-suspend fun parseWikidataIDLookup(response: HttpResponse): QID {
+suspend fun parseWikidataIDLookup(response: HttpResponse): String {
   val json = Json { ignoreUnknownKeys = true }
   val result = json.decodeFromString<PagesResponse>(response.bodyAsText())
 
@@ -35,23 +35,32 @@ suspend fun parseWikidataIDLookup(response: HttpResponse): QID {
  * @param response The HTTP response from Wikidata.
  * @returns A mapping of types of relation to lists of names.
  */
-suspend fun parseWikidataQIDs(response: HttpResponse): Map<QID, Pair<Label, Claim>> {
-  val json = Json { ignoreUnknownKeys = true }
-  val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
+suspend fun parseWikidataQIDs(response: HttpResponse): Map<String, Pair<String, JsonObject>> {
+  val jsonResponse = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+  val entities = jsonResponse["entities"]?.jsonObject
 
   val idToNameMap = mutableMapOf<String, Pair<String, JsonObject>>()
 
-  result.entities.forEach { (id, entityInfo) ->
-    val label = entityInfo.labels.en.value
+  entities?.forEach { (id, details) ->
+    val label =
+      details.jsonObject["labels"]
+        ?.jsonObject
+        ?.get("en")
+        ?.jsonObject
+        ?.get("value")
+        ?.jsonPrimitive
+        ?.content
+        ?: throw NotFoundException(
+          "Failed to parse entity label given QID. This should NEVER happen."
+        )
 
-    val claimsJsonObject =
-      JsonObject(
-        entityInfo.claims.mapValues { (_, claims) ->
-          JsonArray(claims.map { Json.encodeToJsonElement(it) })
-        }
-      )
+    val claims =
+      details.jsonObject["claims"]?.jsonObject
+        ?: throw NotFoundException(
+          "Failed to parse entity claims given QID. This should NEVER happen."
+        )
 
-    idToNameMap[id] = Pair(label, claimsJsonObject)
+    idToNameMap[id] = Pair(label, claims)
   }
 
   return idToNameMap

@@ -14,7 +14,7 @@ import org.kodein.di.DI
 import org.kodein.di.bindMultiton
 import org.kodein.di.bindSingleton
 
-// val appDI = DI { import(appModule) }
+//val appDI = DI { import(appModule) }
 
 val appModule by lazy {
   DI.Module("AppModule") {
