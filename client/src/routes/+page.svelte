@@ -21,9 +21,12 @@
 </script>
 
 <div class="flex h-full flex-col">
-  <nav class="flex items-center px-8 py-4 shadow-lg">
-    <h1 class="mr-8">Ancestree</h1>
-    <NameInput bind:nameInput={name} {loading} />
+  <nav class="flex items-center gap-12 px-8 py-4 shadow-lg">
+    <h1 class="w-48 text-lg">Ancestree</h1>
+    <div class="flex flex-1 justify-center">
+      <NameInput bind:nameInput={name} {loading} />
+    </div>
+    <div class="w-48"></div>
   </nav>
   <div class="flex-1">
     <FamilyTree {tree} />

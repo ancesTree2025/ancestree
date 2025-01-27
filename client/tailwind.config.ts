@@ -9,15 +9,15 @@ export default {
     },
     colors: {
       bg: '#ffffff',
-      fg: '#000000',
-      'input-bg': '#f0f0f0',
-      'node-bg': '#e0e0e0',
-      line: '#ccc',
+      fg: '#222',
+      'input-bg': '#eee',
+      'node-bg': '#ddd',
+      line: '#ddd',
       transparent: 'transparent'
     },
     extend: {
       strokeWidth: {
-        line: '2'
+        line: '3'
       }
     }
   },

@@ -1,7 +1,7 @@
 import type { Positions, PersonID, Tree } from './models';
 
-const BASE_WIDTH = 100;
-const GENERATION_HEIGHT = 100;
+const BASE_WIDTH = 160;
+const GENERATION_HEIGHT = 120;
 
 export function balanceTree(tree: Tree, center: [number, number]): Positions {
   const positions: Positions = {};
