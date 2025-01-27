@@ -38,6 +38,7 @@
   "dependencies": {
     "@types/d3": "^7.4.3",
     "d3": "^7.9.0",
-    "unplugin-icons": "^22.0.0"
+    "unplugin-icons": "^22.0.0",
+    "zod": "^3.24.1"
   }
 }

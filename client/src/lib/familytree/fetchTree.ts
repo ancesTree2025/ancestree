@@ -1,23 +1,28 @@
 import type { Marriages, People, PersonID, Tree } from './models';
+import { z } from 'zod';
 
-type PersonData = {
-  data: {
-    id: PersonID;
-    name: string;
-    gender: string;
-  };
-  id: PersonID;
-  depth: number;
-};
+const personIdSchema = z.string();
 
-type ApiResponse = {
-  root: PersonData;
-  nodes: PersonData[];
-  edges: {
-    node1: PersonID;
-    node2: PersonID;
-  }[];
-};
+const personSchema = z.object({
+  data: z.object({
+    id: personIdSchema,
+    name: z.string(),
+    gender: z.string(),
+  }),
+  id: personIdSchema,
+  depth: z.number(),
+})
+
+const apiResponseSchema = z.object({
+  root: personSchema,
+  nodes: z.array(personSchema),
+  edges: z.array(z.object({
+    node1: personIdSchema,
+    node2: personIdSchema
+  }))
+})
+
+type ApiResponse = z.infer<typeof apiResponseSchema>;
 
 export function apiResponseToTree(res: ApiResponse): Tree {
   // Create mappings from people ids to their info and depths
@@ -91,5 +96,5 @@ export function apiResponseToTree(res: ApiResponse): Tree {
 export async function fetchTree(name: string): Promise<Tree> {
   const response = await fetch(`http://localhost:8080/${name}`);
   const json = await response.json();
-  return apiResponseToTree(json);
+  return apiResponseToTree(apiResponseSchema.parse(json));
 }
