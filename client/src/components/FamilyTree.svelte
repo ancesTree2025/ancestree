@@ -1,82 +1,85 @@
 <script lang="ts">
   import { balanceTree } from '$lib/familytree/balanceTree';
-  import { fetchTree } from '$lib/familytree/fetchTree';
-  import type { Tree } from '$lib/familytree/models';
-  import NameInput from './NameInput.svelte';
+  import { type Positions, type Tree } from '$lib/familytree/models';
 
-  let tree = $state<Tree | undefined>();
-  let name = $state<string | undefined>();
+  let { tree }: { tree?: Tree } = $props<{ tree?: Tree }>();
+  let positions = $state<Positions | undefined>(undefined);
+
+  $effect(() => {
+    if (tree) {
+      const newPositions = balanceTree(tree, [width / 2, height / 2]);
+      positions = newPositions;
+    } else {
+      positions = undefined;
+    }
+  });
 
   const RECT_HEIGHT = 40;
   const RECT_WIDTH = 80;
   const RECT_RADIUS = 10;
 
-  let width = 800;
-  let height = 600;
-
-  let loading = $state(false);
-
-  $effect(() => {
-    if (name) {
-      loading = true;
-      fetchTree(name).then((fetched) => {
-        balanceTree(fetched.focusId, fetched.tree, [width / 2, height / 2]);
-        tree = fetched.tree;
-        loading = false;
-      });
-    }
-  });
+  const width = 800;
+  const height = 600;
 </script>
 
-<NameInput bind:nameInput={name} {loading} />
 <svg {width} {height}>
   {#if tree}
     {#each tree.marriages as marriage}
       <!-- fetch Person for each parent, child -->
-      {@const mother = tree.people.get(marriage.parents[0])!}
-      {@const father = tree.people.get(marriage.parents[1])!}
-      {@const children = marriage.children.map((id) => tree!.people.get(id)!)}
+      {@const mother = positions?.[marriage.parents[0]]}
+      {@const father = positions?.[marriage.parents[1]]}
+      {@const children = marriage.children.map((id) => positions?.[id])}
 
-      <!-- Draw marriage lines -->
-      {@const parentsX = (mother.x + father.x) / 2}
-      {#if mother.y == father.y}
-        <line x1={mother.x} y1={mother.y} x2={father.x} y2={father.y} class="stroke-line" />
-      {:else}
-        <line x1={mother.x} y1={mother.y} x2={parentsX} y2={mother.y} class="stroke-line" />
-        <line x1={parentsX} y1={mother.y} x2={parentsX} y2={father.y} class="stroke-line" />
-        <line x1={father.x} y1={father.y} x2={parentsX} y2={father.y} class="stroke-line" />
-      {/if}
+      {#if mother && father}
+        <!-- Draw marriage lines -->
+        {@const parentsX = (mother.x + father.x) / 2}
+        {#if mother.y == father.y}
+          <line x1={mother.x} y1={mother.y} x2={father.x} y2={father.y} class="stroke-line" />
+        {:else}
+          <line x1={mother.x} y1={mother.y} x2={parentsX} y2={mother.y} class="stroke-line" />
+          <line x1={parentsX} y1={mother.y} x2={parentsX} y2={father.y} class="stroke-line" />
+          <line x1={father.x} y1={father.y} x2={parentsX} y2={father.y} class="stroke-line" />
+        {/if}
 
-      {#if children.length > 0}
-        <!-- Draw line between parents and children -->
-        {@const parentsY = Math.max(mother.y, father.y)}
-        {@const childrenY = Math.min(...children.map((child) => child.y))}
-        {@const midY = (parentsY + childrenY) / 2}
-        <line x1={parentsX} y1={parentsY} x2={parentsX} y2={midY} class="stroke-line" />
+        {#if children.length > 0}
+          <!-- Draw line between parents and children -->
+          {@const parentsY = Math.max(mother.y, father.y)}
+          {@const childrenY = Math.min(...children.map((child) => child?.y ?? Infinity))}
+          {@const midY = (parentsY + childrenY) / 2}
+          <line x1={parentsX} y1={parentsY} x2={parentsX} y2={midY} class="stroke-line" />
 
-        <!-- Draw children line -->
-        {@const leftChildX = Math.min(parentsX, ...children.map((child) => child.x))}
-        {@const rightChildX = Math.max(parentsX, ...children.map((child) => child.x))}
-        <line x1={leftChildX} y1={midY} x2={rightChildX} y2={midY} class="stroke-line" />
+          <!-- Draw children line -->
+          {@const leftChildX = Math.min(parentsX, ...children.map((child) => child?.x ?? Infinity))}
+          {@const rightChildX = Math.max(
+            parentsX,
+            ...children.map((child) => child?.x ?? -Infinity)
+          )}
+          <line x1={leftChildX} y1={midY} x2={rightChildX} y2={midY} class="stroke-line" />
 
-        <!-- Draw line from each child to children line -->
-        {#each children as child}
-          <line x1={child.x} y1={midY} x2={child.x} y2={child.y} class="stroke-line" />
-        {/each}
+          <!-- Draw line from each child to children line -->
+          {#each children as child}
+            {#if child}
+              <line x1={child.x} y1={midY} x2={child.x} y2={child.y} class="stroke-line" />
+            {/if}
+          {/each}
+        {/if}
       {/if}
     {/each}
-    {#each tree.people as [id, person] (id)}
-      <g transform="translate({person.x},{person.y})">
-        <rect
-          x={-RECT_WIDTH / 2}
-          y={-RECT_HEIGHT / 2}
-          width={RECT_WIDTH}
-          height={RECT_HEIGHT}
-          rx={RECT_RADIUS}
-          class="fill-node-bg"
-        ></rect>
-        <text class="" text-anchor="middle" dominant-baseline="middle">{person.name}</text>
-      </g>
+    {#each tree.people as [id, person]}
+      {@const position = positions?.[id]}
+      {#if position}
+        <g transform="translate({position.x},{position.y})">
+          <rect
+            x={-RECT_WIDTH / 2}
+            y={-RECT_HEIGHT / 2}
+            width={RECT_WIDTH}
+            height={RECT_HEIGHT}
+            rx={RECT_RADIUS}
+            class="fill-node-bg"
+          ></rect>
+          <text class="" text-anchor="middle" dominant-baseline="middle">{person.name}</text>
+        </g>
+      {/if}
     {/each}
   {/if}
 </svg>

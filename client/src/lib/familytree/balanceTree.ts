@@ -1,10 +1,10 @@
-import type { PersonID, Tree } from './models';
+import type { Positions, PersonID, Tree } from './models';
 
 const BASE_WIDTH = 100;
 const GENERATION_HEIGHT = 100;
 
-export function balanceTree(focus: PersonID, tree: Tree, center: [number, number]) {
-  const visited = new Set<PersonID>();
+export function balanceTree(tree: Tree, center: [number, number]): Positions {
+  const positions: Positions = {};
 
   // The x position of the current "right edge" of the graph
   // Accumulates as nodes are added to the right.
@@ -12,31 +12,30 @@ export function balanceTree(focus: PersonID, tree: Tree, center: [number, number
 
   let y = center[1];
   const subtree = new Set<PersonID>();
-  const subtreeX = placeSubtree(focus, subtree);
+  const subtreeX = placeSubtree(tree.focus, subtree);
 
   y = center[1];
   const supertree = new Set<PersonID>();
-  const supertreeX = placeSupertree(focus, supertree);
+  const supertreeX = placeSupertree(tree.focus, supertree);
 
   // To make sure the focused node is at center, we need to shift
   // the nodes in the subtree and supertree
   adjustNodes(subtree, center[0] - subtreeX);
   adjustNodes(supertree, center[0] - supertreeX);
 
+  return positions;
+
   // Shifts all nodes by a certain X
   function adjustNodes(set: Set<PersonID>, x: number) {
     for (const node of set) {
-      tree.people.get(node)!.x += x;
+      positions[node].x += x;
     }
   }
 
   // Set the position of a node if they have not already been given a position
   function addPerson(personId: PersonID, x: number, y: number) {
-    if (visited.has(personId)) return;
-    visited.add(personId);
-    const person = tree.people.get(personId)!;
-    person.x = x;
-    person.y = y;
+    if (positions[personId] !== undefined) return;
+    positions[personId] = { x, y };
   }
 
   /**

@@ -1,12 +1,11 @@
 export type PersonID = string;
 
 export type Person = {
-  name: PersonID;
-  x: number;
-  y: number;
+  name: string;
 };
 
-export type People = Map<string, Person>;
+// Needs to be an array for deep reactivity to work
+export type People = [PersonID, Person][];
 
 export type Marriage = {
   parents: PersonID[];
@@ -16,6 +15,14 @@ export type Marriage = {
 export type Marriages = Marriage[];
 
 export type Tree = {
+  focus: PersonID;
   people: People;
   marriages: Marriages;
 };
+
+export type Position = {
+  x: number;
+  y: number;
+};
+
+export type Positions = { [id: PersonID]: Position };
