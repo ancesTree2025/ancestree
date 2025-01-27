@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { balanceTree } from '$lib/familytree/balanceTree';
   import { fetchTree } from '$lib/familytree/fetchTree';
   import type { Tree } from '$lib/familytree/models';
   import FamilyTree from '../components/FamilyTree.svelte';
@@ -22,10 +21,10 @@
 </script>
 
 <div class="flex h-full flex-col">
-  <nav>
-    <h1>Ancestree</h1>
+  <nav class="flex items-center px-8 py-4 shadow-lg">
+    <h1 class="mr-8">Ancestree</h1>
+    <NameInput bind:nameInput={name} {loading} />
   </nav>
-  <NameInput bind:nameInput={name} {loading} />
   <div class="flex-1">
     <FamilyTree {tree} />
   </div>

@@ -10,8 +10,10 @@ export default {
     colors: {
       bg: '#ffffff',
       fg: '#000000',
+      'input-bg': '#f0f0f0',
       'node-bg': '#e0e0e0',
-      line: '#ccc'
+      line: '#ccc',
+      transparent: 'transparent'
     },
     extend: {
       strokeWidth: {
