@@ -30,6 +30,6 @@
     onkeydown={submitIfEnter}
   />
   {#if loading}
-    <div class="loader bg-fg mr-3 h-5 w-5 p-1 opacity-50" />
+    <div class="loader bg-fg mr-3 h-5 w-5 p-1 opacity-50"></div>
   {/if}
 </div>
