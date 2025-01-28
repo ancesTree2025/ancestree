@@ -1,11 +1,10 @@
 package org.data.producers
 
-import kotlinx.coroutines.runBlocking
+import kotlin.math.abs
 import org.data.models.Person
 import org.data.services.LookupService
 import org.domain.models.*
 import org.domain.producers.GraphProducer
-import kotlin.math.abs
 
 /** A class to produce family nodes, which will be connected by marriage edges. */
 class FamilyGraphProducer : GraphProducer<String, Person> {
@@ -34,24 +33,23 @@ class FamilyGraphProducer : GraphProducer<String, Person> {
 
     val directEdges =
       spousesGraph.mapNotNull { spouse -> spouse.root?.let { Edge(rootNode.id, it.id) } } +
-          childrenGraph.mapNotNull { child -> child.root?.let { Edge(rootNode.id, it.id) } }
+        childrenGraph.mapNotNull { child -> child.root?.let { Edge(rootNode.id, it.id) } }
 
-    val nodes = (parentsGraph.flatMap(Graph<Person>::nodes)
-        + spousesGraph.flatMap(Graph<Person>::nodes)
-        + childrenGraph.flatMap(Graph<Person>::nodes)
-        + rootNode).toSet()
-    val edges = (parentsGraph.flatMap(Graph<Person>::edges)
-        + spousesGraph.flatMap(Graph<Person>::edges)
-        + childrenGraph.flatMap(Graph<Person>::edges)
-        + directEdges).toSet()
+    val nodes =
+      (parentsGraph.flatMap(Graph<Person>::nodes) +
+          spousesGraph.flatMap(Graph<Person>::nodes) +
+          childrenGraph.flatMap(Graph<Person>::nodes) +
+          rootNode)
+        .toSet()
+    val edges =
+      (parentsGraph.flatMap(Graph<Person>::edges) +
+          spousesGraph.flatMap(Graph<Person>::edges) +
+          childrenGraph.flatMap(Graph<Person>::edges) +
+          directEdges)
+        .toSet()
 
-    return Graph(
-      root = rootNode,
-      nodes = nodes,
-      edges = edges
-    )
+    return Graph(root = rootNode, nodes = nodes, edges = edges)
   }
-
 
   /**
    * Produces a node for a particular person using cached results and Wiki queries.
@@ -66,14 +64,21 @@ class FamilyGraphProducer : GraphProducer<String, Person> {
     val label = tuple3.second.first
     val relation = tuple3.second.second
 
-    val familyInfo = Person(
-      id = qid,
-      name = label,
-      gender = relation["Gender"]?.getOrElse(0) {"prefer not to say"} ?: "", // FIXME please honestly kill me
-      parents = listOf(relation["Father"]!!.getOrElse(0) { "" }, relation["Mother"]!!.getOrElse(0) { "" }), // fixme kill me again
-      spouses = relation["Spouse(s)"]!!,
-      children = relation["Child(ren)"]!!
-    )
+    val familyInfo =
+      Person(
+        id = qid,
+        name = label,
+        gender =
+          relation["Gender"]?.getOrElse(0) { "prefer not to say" }
+            ?: "", // FIXME please honestly kill me
+        parents =
+          listOf(
+            relation["Father"]!!.getOrElse(0) { "" },
+            relation["Mother"]!!.getOrElse(0) { "" },
+          ), // fixme kill me again
+        spouses = relation["Spouse(s)"]!!,
+        children = relation["Child(ren)"]!!,
+      )
 
     return Node(familyInfo, qid, depth)
   }
