@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-bg;
+    @apply bg-white;
   }
 
   h1,
@@ -16,7 +16,7 @@
   p,
   input,
   text {
-    @apply font-sans font-medium text-fg;
+    @apply text-black font-sans font-medium;
   }
 }
 

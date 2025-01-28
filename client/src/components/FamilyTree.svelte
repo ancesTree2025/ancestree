@@ -2,7 +2,7 @@
   import { balanceTree } from '$lib/familytree/balanceTree';
   import { type Positions, type Tree } from '$lib/familytree/models';
 
-  let { tree }: { tree?: Tree } = $props<{ tree?: Tree }>();
+  let { tree }: { tree?: Tree } = $props();
   let positions = $state<Positions>({});
 
   $effect(() => {
@@ -32,11 +32,35 @@
           <!-- Draw marriage lines -->
           {@const parentsX = (mother.x + father.x) / 2}
           {#if mother.y == father.y}
-            <line x1={mother.x} y1={mother.y} x2={father.x} y2={father.y} class="stroke-line" />
+            <line
+              x1={mother.x}
+              y1={mother.y}
+              x2={father.x}
+              y2={father.y}
+              class="stroke-line stroke-node"
+            />
           {:else}
-            <line x1={mother.x} y1={mother.y} x2={parentsX} y2={mother.y} class="stroke-line" />
-            <line x1={parentsX} y1={mother.y} x2={parentsX} y2={father.y} class="stroke-line" />
-            <line x1={father.x} y1={father.y} x2={parentsX} y2={father.y} class="stroke-line" />
+            <line
+              x1={mother.x}
+              y1={mother.y}
+              x2={parentsX}
+              y2={mother.y}
+              class="stroke-line stroke-node"
+            />
+            <line
+              x1={parentsX}
+              y1={mother.y}
+              x2={parentsX}
+              y2={father.y}
+              class="stroke-line stroke-node"
+            />
+            <line
+              x1={father.x}
+              y1={father.y}
+              x2={parentsX}
+              y2={father.y}
+              class="stroke-line stroke-node"
+            />
           {/if}
 
           {#if children.length > 0}
@@ -44,7 +68,13 @@
             {@const parentsY = Math.max(mother.y, father.y)}
             {@const childrenY = Math.min(...children.map((child) => child?.y ?? Infinity))}
             {@const midY = (parentsY + childrenY) / 2}
-            <line x1={parentsX} y1={parentsY} x2={parentsX} y2={midY} class="stroke-line" />
+            <line
+              x1={parentsX}
+              y1={parentsY}
+              x2={parentsX}
+              y2={midY}
+              class="stroke-line stroke-node"
+            />
 
             <!-- Draw children line -->
             {@const leftChildX = Math.min(
@@ -55,12 +85,24 @@
               parentsX,
               ...children.map((child) => child?.x ?? -Infinity)
             )}
-            <line x1={leftChildX} y1={midY} x2={rightChildX} y2={midY} class="stroke-line" />
+            <line
+              x1={leftChildX}
+              y1={midY}
+              x2={rightChildX}
+              y2={midY}
+              class="stroke-line stroke-node"
+            />
 
             <!-- Draw line from each child to children line -->
             {#each children as child}
               {#if child}
-                <line x1={child.x} y1={midY} x2={child.x} y2={child.y} class="stroke-line" />
+                <line
+                  x1={child.x}
+                  y1={midY}
+                  x2={child.x}
+                  y2={child.y}
+                  class="stroke-line stroke-node"
+                />
               {/if}
             {/each}
           {/if}

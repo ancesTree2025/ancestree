@@ -6,14 +6,20 @@
 
   let name = $state<string | undefined>();
   let loading = $state(false);
+  let error = $state<string | undefined>();
 
   let tree = $state<Tree | undefined>();
 
   $effect(() => {
     if (name) {
       loading = true;
-      fetchTree(name).then((fetched) => {
-        tree = fetched;
+      fetchTree(name).then((result) => {
+        const [fetched, err] = result.toTuple();
+        if (fetched) {
+          tree = fetched;
+        } else if (err) {
+          error = err;
+        }
         loading = false;
       });
     }
@@ -24,7 +30,7 @@
   <nav class="flex items-center gap-12 px-8 py-4 shadow-lg">
     <h1 class="w-48 text-lg">Ancestree</h1>
     <div class="flex flex-1 justify-center">
-      <NameInput bind:nameInput={name} {loading} />
+      <NameInput bind:nameInput={name} {loading} {error} />
     </div>
     <div class="w-48"></div>
   </nav>
