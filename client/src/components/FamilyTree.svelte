@@ -78,8 +78,13 @@
               rx={RECT_RADIUS}
               class="fill-node-bg"
             ></rect>
-            <foreignObject x={-RECT_WIDTH/2} y={-RECT_HEIGHT/2} width={RECT_WIDTH} height={RECT_HEIGHT}>
-              <div class="flex w-full h-full items-center justify-center text-center">
+            <foreignObject
+              x={-RECT_WIDTH / 2}
+              y={-RECT_HEIGHT / 2}
+              width={RECT_WIDTH}
+              height={RECT_HEIGHT}
+            >
+              <div class="flex h-full w-full items-center justify-center text-center">
                 {person.name}
               </div>
             </foreignObject>
