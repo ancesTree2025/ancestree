@@ -3,14 +3,14 @@
   import { type Positions, type Tree } from '$lib/familytree/models';
 
   let { tree }: { tree?: Tree } = $props<{ tree?: Tree }>();
-  let positions = $state<Positions | undefined>(undefined);
+  let positions = $state<Positions>({});
 
   $effect(() => {
     if (tree) {
       const newPositions = balanceTree(tree, [0, 0]);
       positions = newPositions;
     } else {
-      positions = undefined;
+      positions = {};
     }
   });
 
@@ -24,9 +24,9 @@
     {#if tree}
       {#each tree.marriages as marriage}
         <!-- fetch Person for each parent, child -->
-        {@const mother = positions?.[marriage.parents[0]]}
-        {@const father = positions?.[marriage.parents[1]]}
-        {@const children = marriage.children.map((id) => positions?.[id])}
+        {@const mother = positions[marriage.parents[0]]}
+        {@const father = positions[marriage.parents[1]]}
+        {@const children = marriage.children.map((id) => positions[id])}
 
         {#if mother && father}
           <!-- Draw marriage lines -->
@@ -67,7 +67,7 @@
         {/if}
       {/each}
       {#each tree.people as [id, person]}
-        {@const position = positions?.[id]}
+        {@const position = positions[id]}
         {#if position}
           <g transform="translate({position.x},{position.y})">
             <rect
