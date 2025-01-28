@@ -9,10 +9,12 @@ import kotlinx.serialization.json.Json
 
 fun Application.configureSerialization() {
   install(ContentNegotiation) {
-    json(Json {
-      prettyPrint = true
-      explicitNulls = false
-      encodeDefaults = true
-    })
+    json(
+      Json {
+        prettyPrint = true
+        explicitNulls = false
+        encodeDefaults = true
+      }
+    )
   }
 }
