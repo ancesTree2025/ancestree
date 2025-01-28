@@ -26,6 +26,93 @@ const apiResponseSchema = z.object({
 
 type ApiResponse = z.infer<typeof apiResponseSchema>;
 
+const RETURN_SAMPLE_DATA = true;
+
+const sampleData: ApiResponse = {
+  root: {
+    data: {
+      id: '1',
+      name: 'Henry VIII',
+      gender: 'male'
+    },
+    id: '1',
+    depth: 0
+  },
+  nodes: [
+    {
+      data: {
+        id: '1',
+        name: 'Henry VIII',
+        gender: 'male'
+      },
+      id: '1',
+      depth: 0
+    },
+    {
+      data: {
+        id: '2',
+        name: 'Catherine of Aragon',
+        gender: 'female'
+      },
+      id: '2',
+      depth: 0
+    },
+    {
+      data: {
+        id: '3',
+        name: 'Mary 1',
+        gender: 'female'
+      },
+      id: '3',
+      depth: 1
+    },
+    {
+      data: {
+        id: '4',
+        name: 'Henry VII',
+        gender: 'male'
+      },
+      id: '4',
+      depth: -1
+    },
+    {
+      data: {
+        id: '5',
+        name: 'Elizabeth of York',
+        gender: 'female'
+      },
+      id: '5',
+      depth: -1
+    }
+  ],
+  edges: [
+    {
+      node1: '1',
+      node2: '2'
+    },
+    {
+      node1: '1',
+      node2: '3'
+    },
+    {
+      node1: '2',
+      node2: '3'
+    },
+    {
+      node1: '4',
+      node2: '1'
+    },
+    {
+      node1: '5',
+      node2: '1'
+    },
+    {
+      node1: '4',
+      node2: '5'
+    }
+  ]
+};
+
 export function apiResponseToTree(res: ApiResponse): Tree {
   // Create mappings from people ids to their info and depths
   const people: People = [];
@@ -96,7 +183,12 @@ export function apiResponseToTree(res: ApiResponse): Tree {
 }
 
 export async function fetchTree(name: string): Promise<Tree> {
-  const response = await fetch(`http://localhost:8080/${name}`);
-  const json = await response.json();
+  let json: object;
+  if (RETURN_SAMPLE_DATA) {
+    json = sampleData;
+  } else {
+    const response = await fetch(`http://localhost:8080/${name}`);
+    json = await response.json();
+  }
   return apiResponseToTree(apiResponseSchema.parse(json));
 }
