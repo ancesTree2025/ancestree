@@ -13,6 +13,7 @@
   $effect(() => {
     if (name) {
       loading = true;
+      error = undefined;
       fetchTree(name).then((result) => {
         const [fetched, err] = result.toTuple();
         if (fetched) {

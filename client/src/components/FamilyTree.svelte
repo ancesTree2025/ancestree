@@ -37,7 +37,7 @@
               y1={mother.y}
               x2={father.x}
               y2={father.y}
-              class="stroke-line stroke-node"
+              class="stroke-node stroke-line"
             />
           {:else}
             <line
@@ -45,21 +45,21 @@
               y1={mother.y}
               x2={parentsX}
               y2={mother.y}
-              class="stroke-line stroke-node"
+              class="stroke-node stroke-line"
             />
             <line
               x1={parentsX}
               y1={mother.y}
               x2={parentsX}
               y2={father.y}
-              class="stroke-line stroke-node"
+              class="stroke-node stroke-line"
             />
             <line
               x1={father.x}
               y1={father.y}
               x2={parentsX}
               y2={father.y}
-              class="stroke-line stroke-node"
+              class="stroke-node stroke-line"
             />
           {/if}
 
@@ -73,7 +73,7 @@
               y1={parentsY}
               x2={parentsX}
               y2={midY}
-              class="stroke-line stroke-node"
+              class="stroke-node stroke-line"
             />
 
             <!-- Draw children line -->
@@ -90,7 +90,7 @@
               y1={midY}
               x2={rightChildX}
               y2={midY}
-              class="stroke-line stroke-node"
+              class="stroke-node stroke-line"
             />
 
             <!-- Draw line from each child to children line -->
@@ -101,7 +101,7 @@
                   y1={midY}
                   x2={child.x}
                   y2={child.y}
-                  class="stroke-line stroke-node"
+                  class="stroke-node stroke-line"
                 />
               {/if}
             {/each}
@@ -118,7 +118,7 @@
               width={RECT_WIDTH}
               height={RECT_HEIGHT}
               rx={RECT_RADIUS}
-              class="fill-node-bg"
+              class="fill-node"
             ></rect>
             <text class="" text-anchor="middle" dominant-baseline="middle">{person.name}</text>
           </g>

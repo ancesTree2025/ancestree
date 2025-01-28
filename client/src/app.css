@@ -16,7 +16,7 @@
   p,
   input,
   text {
-    @apply text-black font-sans font-medium;
+    @apply font-sans font-medium text-black;
   }
 }
 
