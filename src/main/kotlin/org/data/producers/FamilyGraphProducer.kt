@@ -77,13 +77,12 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
           emptyList(),
         )
 
-    val qid = personFamilyInfo.id
-    val label = personFamilyInfo.name
-    val relation = personFamilyInfo.family
+    val person = personFamilyInfo.first
+    val relation = personFamilyInfo.second
 
-    val familyInfo = Person(id = qid, name = label, gender = relation.Gender)
+    val familyInfo = Person(id = person.id, name = person.name, gender = person.gender)
 
-    val node = Node(familyInfo, qid, depth)
+    val node = Node(familyInfo, person.id, depth)
 
     return PersonAndRelatives(
       node,

@@ -24,20 +24,21 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
       return null
     }
 
-    val labelAndFamily = getPersonsLabelAndFamilyMembers(qid)
+    val labelAndFamily = try {
+      getPersonsLabelAndFamilyMembers(qid)
+    } catch (e: NotFoundException) {
+      return null;
+    }
+
 
     val personalInfo =
-      NamedRelation(
-        labelAndFamily.second["Father"]?.getOrElse(0) { "Unknown" } ?: "Unknown",
-        labelAndFamily.second["Mother"]?.getOrElse(0) { "Unknown" } ?: "Unknown",
-        labelAndFamily.second["Spouse(s)"]!!,
-        labelAndFamily.second["Child(ren)"]!!,
-        labelAndFamily.second["Sibling(s)"]!!,
+      NamedRelation.from(
+        labelAndFamily.second
       )
 
-    val person = Person(qid, labelAndFamily.first, personalInfo["Gender"])
+    val person = Person(qid, labelAndFamily.first, "Couldnt find one")
 
-    return PersonAndFamilyInfo(qid, labelAndFamily.first, family)
+    return Pair(person, personalInfo)
   }
 
   /**
