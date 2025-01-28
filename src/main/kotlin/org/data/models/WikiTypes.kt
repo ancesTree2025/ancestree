@@ -6,6 +6,6 @@ typealias QID = String
 
 typealias Label = String
 
-typealias Relation = Map<String, List<String>>
+typealias PropertyMapping = Map<String, List<String>>
 
 typealias Claim = JsonObject

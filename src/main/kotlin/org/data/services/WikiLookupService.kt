@@ -8,7 +8,7 @@ import org.data.requests.getLabelAndClaim
 import org.data.requests.searchWikipediaForQID
 
 /** Service class for performing Wikipedia/Wikidata lookups. */
-class WikiLookupService : LookupService<String, PersonAndFamilyInfo> {
+class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
 
   /**
    * The only exposed function, to be used for interaction with Wikipedia/Wikidata and for any sort
@@ -17,7 +17,7 @@ class WikiLookupService : LookupService<String, PersonAndFamilyInfo> {
    * @param input The person's name.
    * @returns A 3-tuple of QID, Label and Family Relations.
    */
-  override suspend fun query(input: String): PersonAndFamilyInfo? {
+  override suspend fun query(input: String): Pair<Person, NamedRelation>? {
     val qid = searchForPersonsQID(input)
 
     if (qid.isNullOrEmpty()) {
@@ -26,15 +26,16 @@ class WikiLookupService : LookupService<String, PersonAndFamilyInfo> {
 
     val labelAndFamily = getPersonsLabelAndFamilyMembers(qid)
 
-    val family =
+    val personalInfo =
       NamedRelation(
-        labelAndFamily.second["Gender"]?.getOrElse(0) { "Unknown" } ?: "Unknown",
         labelAndFamily.second["Father"]?.getOrElse(0) { "Unknown" } ?: "Unknown",
         labelAndFamily.second["Mother"]?.getOrElse(0) { "Unknown" } ?: "Unknown",
         labelAndFamily.second["Spouse(s)"]!!,
         labelAndFamily.second["Child(ren)"]!!,
         labelAndFamily.second["Sibling(s)"]!!,
       )
+
+    val person = Person(qid, labelAndFamily.first, personalInfo["Gender"])
 
     return PersonAndFamilyInfo(qid, labelAndFamily.first, family)
   }
@@ -57,7 +58,7 @@ class WikiLookupService : LookupService<String, PersonAndFamilyInfo> {
    * @param familyInfo A mapping of type of relation to a list of QIDs for individuals of that type.
    * @returns A human-readable mapping without QIDs.
    */
-  private suspend fun replaceQIDsWithNames(familyInfo: Relation): Relation {
+  private suspend fun replaceQIDsWithNames(familyInfo: PropertyMapping): PropertyMapping {
     /** We then select those names which don't appear in the cache, to query and store. */
     val allIds = familyInfo.values.flatten()
 
@@ -82,7 +83,7 @@ class WikiLookupService : LookupService<String, PersonAndFamilyInfo> {
    * @param personQID The person's QID.
    * @returns Their label and a mapping of types of relation to lists of relatives in that category.
    */
-  private suspend fun getPersonsLabelAndFamilyMembers(personQID: QID): Pair<Label, Relation> {
+  private suspend fun getPersonsLabelAndFamilyMembers(personQID: QID): Pair<Label, PropertyMapping> {
 
     val familyResponse = getLabelAndClaim(personQID)
     val labelFamilyMap = parseWikidataQIDs(familyResponse)

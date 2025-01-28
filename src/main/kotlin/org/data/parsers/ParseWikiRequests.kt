@@ -4,7 +4,7 @@ import io.ktor.client.statement.*
 import io.ktor.server.plugins.*
 import kotlinx.serialization.json.*
 import org.data.models.*
-import org.data.models.FamilyProperties.familyProps
+import org.data.models.WikidataProperties.relevantProperties
 
 /**
  * Parses Wikipedia ID Lookup responses, extracting the relevant QID.
@@ -34,7 +34,7 @@ suspend fun parseWikidataIDLookup(response: HttpResponse): QID? {
  * @param response The HTTP response from Wikidata.
  * @returns A mapping of QIDs to a pair of the name and the relation.
  */
-suspend fun parseWikidataQIDs(response: HttpResponse): Map<QID, Pair<Label, Relation>> {
+suspend fun parseWikidataQIDs(response: HttpResponse): Map<QID, Pair<Label, PropertyMapping>> {
   val json = Json { ignoreUnknownKeys = true }
   val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
@@ -42,7 +42,7 @@ suspend fun parseWikidataQIDs(response: HttpResponse): Map<QID, Pair<Label, Rela
     val label = entityInfo.labels.en.value
 
     val familyInfo =
-      familyProps.entries
+      relevantProperties.entries
         .associate { (key, value) ->
           value to
             (entityInfo.claims[key]?.flatMap { claim ->
@@ -53,7 +53,7 @@ suspend fun parseWikidataQIDs(response: HttpResponse): Map<QID, Pair<Label, Rela
         }
         .toMutableMap()
 
-    familyProps.values.forEach { relation -> familyInfo.putIfAbsent(relation, emptyList()) }
+    relevantProperties.values.forEach { relation -> familyInfo.putIfAbsent(relation, emptyList()) }
 
     label to familyInfo
   }
