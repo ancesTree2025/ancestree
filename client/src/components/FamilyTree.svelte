@@ -78,7 +78,11 @@
               rx={RECT_RADIUS}
               class="fill-node-bg"
             ></rect>
-            <text class="" text-anchor="middle" dominant-baseline="middle">{person.name}</text>
+            <foreignObject x={-RECT_WIDTH/2} y={-RECT_HEIGHT/2} width={RECT_WIDTH} height={RECT_HEIGHT}>
+              <div class="flex w-full h-full items-center justify-center text-center">
+                {person.name}
+              </div>
+            </foreignObject>
           </g>
         {/if}
       {/each}
