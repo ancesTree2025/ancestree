@@ -1,3 +1,4 @@
+import { Result } from 'typescript-result';
 import type { Marriages, People, PersonID, Tree } from './models';
 import { z } from 'zod';
 
@@ -95,8 +96,19 @@ export function apiResponseToTree(res: ApiResponse): Tree {
   };
 }
 
-export async function fetchTree(name: string): Promise<Tree> {
-  const response = await fetch(`http://localhost:8080/${name}`);
-  const json = await response.json();
-  return apiResponseToTree(apiResponseSchema.parse(json));
+export async function fetchTree(name: string): Promise<Result<Tree, string>> {
+  const response = await Result.fromAsyncCatching(fetch(`http://localhost:8080/${name}`)).mapError(
+    () => 'Could not connect to server'
+  );
+  if (response.getOrNull()?.status === 404) {
+    return Result.error('Person not found');
+  }
+  const parsed = response.mapCatching(
+    async (response) => (await response.json()) as ApiResponse,
+    () => 'Could not parse server response'
+  );
+  return parsed.mapCatching(
+    (json) => apiResponseToTree(apiResponseSchema.parse(json)),
+    () => 'Server data in wrong format'
+  );
 }
