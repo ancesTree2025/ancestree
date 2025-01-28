@@ -25,7 +25,7 @@
   const HOVER_CLASS = 'scale-100 hover:scale-125 transition-transform duration-150';
 </script>
 
-<div class="bg-input relative flex w-80 items-center gap-3 rounded-full pl-4">
+<div class="relative flex w-80 items-center gap-3 rounded-full bg-input pl-4">
   <IconSearch class="text-black opacity-50" />
   <input
     class="flex-1 bg-transparent py-2 outline-none"
@@ -46,7 +46,7 @@
       <div
         class="absolute bottom-0 left-1/2 flex h-0 w-0 -translate-y-4 flex-col items-center opacity-0 transition-all peer-hover:translate-y-0 peer-hover:opacity-100"
       >
-        <p class="bg-red mt-2 text-nowrap rounded-xl px-8 py-1 text-center text-sm text-white">
+        <p class="mt-2 text-nowrap rounded-xl bg-red px-8 py-1 text-center text-sm text-white">
           {status.error}
         </p>
       </div>
