@@ -7,20 +7,22 @@ const personSchema = z.object({
   data: z.object({
     id: personIdSchema,
     name: z.string(),
-    gender: z.string(),
+    gender: z.string()
   }),
   id: personIdSchema,
-  depth: z.number(),
-})
+  depth: z.number()
+});
 
 const apiResponseSchema = z.object({
   root: personSchema,
   nodes: z.array(personSchema),
-  edges: z.array(z.object({
-    node1: personIdSchema,
-    node2: personIdSchema
-  }))
-})
+  edges: z.array(
+    z.object({
+      node1: personIdSchema,
+      node2: personIdSchema
+    })
+  )
+});
 
 type ApiResponse = z.infer<typeof apiResponseSchema>;
 

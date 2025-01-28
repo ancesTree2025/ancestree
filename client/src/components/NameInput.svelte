@@ -21,7 +21,7 @@
   }
 </script>
 
-<div class="bg-input-bg flex w-80 items-center gap-3 rounded-full pl-4">
+<div class="flex w-80 items-center gap-3 rounded-full bg-input-bg pl-4">
   <IconSearch class="text-fg opacity-50" />
   <input
     class="flex-1 bg-transparent py-2"
@@ -30,6 +30,6 @@
     onkeydown={submitIfEnter}
   />
   {#if loading}
-    <div class="loader bg-fg mr-3 h-5 w-5 p-1 opacity-50"></div>
+    <div class="loader mr-3 h-5 w-5 bg-fg p-1 opacity-50"></div>
   {/if}
 </div>
