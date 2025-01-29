@@ -13,6 +13,9 @@ export default [
         parser: typescriptParser,
         project: './tsconfig.json',
         extraFileExtensions: ['.svelte']
+      },
+      globals: {
+        fetch: 'readonly'
       }
     },
     rules: {
