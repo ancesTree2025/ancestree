@@ -11,84 +11,62 @@ import org.domain.producers.GraphProducer
 /** A class to produce family nodes, which will be connected by marriage edges. */
 class FamilyGraphProducer : GraphProducer<Label, Person> {
 
-  private data class PersonAndRelatives<T>(
-    val node: Node<T>,
-    val parents: List<String>,
-    val spouses: List<String>,
-    val children: List<String>,
-  )
-
   companion object {
     const val MAX_DEPTH = 1
   }
 
-  private val visited = mutableSetOf<String>()
+  private val visited = mutableSetOf<Label>()
+  private val nodes = mutableMapOf<Label, Node<Person>>()
+  private val edges = mutableSetOf<Edge>()
 
-  override suspend fun produceGraph(root: String): Graph<Person> {
+  override suspend fun produceGraph(root: Label): Graph<Person> {
     visited.clear()
-    return produceGraph(root, 0)
+    nodes.clear()
+    edges.clear()
+    val rootNode = produceGraph(root, 0)
+      ?: return emptyGraph()
+    return Graph(rootNode, nodes.values.toSet(), edges)
   }
 
-  private suspend fun produceGraph(query: String, depth: Int): Graph<Person> {
-    if (abs(depth) > MAX_DEPTH || query.isBlank()) return emptyGraph()
+  // new: returns null if no new node to be made
+  // new: use name in visited instead of qid for now
+  private suspend fun produceGraph(query: Label, depth: Int): Node<Person>? {
+    if (abs(depth) > MAX_DEPTH || query.isBlank()) return null
+    if (query in visited) return nodes[query]
 
-    val nodeAndRelatives = produceNode(query, depth)
-    val rootNode = nodeAndRelatives.node
-    if (rootNode.data.id in visited) return emptyGraph()
-    visited.add(rootNode.id)
+    // return empty node if not found from lookup
+    val wikiResponse = WikiLookupService().query(query)
+      ?: return Node(Person("Missing", query, "???"), query, depth)
 
-    val parentsGraph = nodeAndRelatives.parents.map { produceGraph(it, depth - 1) }
-    val spousesGraph = nodeAndRelatives.spouses.map { produceGraph(it, depth) }
-    val childrenGraph = nodeAndRelatives.children.map { produceGraph(it, depth + 1) }
+    val person = wikiResponse.first
+    val relation = wikiResponse.second
 
-    val directEdges =
-      spousesGraph.mapNotNull { spouse -> spouse.root?.let { Edge(rootNode.id, it.id) } } +
-        childrenGraph.mapNotNull { child -> child.root?.let { Edge(rootNode.id, it.id) } }
-
-    val nodes =
-      (parentsGraph.flatMap(Graph<Person>::nodes) +
-          spousesGraph.flatMap(Graph<Person>::nodes) +
-          childrenGraph.flatMap(Graph<Person>::nodes) +
-          rootNode)
-        .toSet()
-    val edges =
-      (parentsGraph.flatMap(Graph<Person>::edges) +
-          spousesGraph.flatMap(Graph<Person>::edges) +
-          childrenGraph.flatMap(Graph<Person>::edges) +
-          directEdges)
-        .toSet()
-
-    return Graph(root = rootNode, nodes = nodes, edges = edges)
-  }
-
-  /**
-   * Produces a node for a particular person using cached results and Wiki queries.
-   *
-   * @param query An input string of a person's name.
-   * @returns A node housing FamilyData, containing individual-specific information.
-   */
-  private suspend fun produceNode(query: String, depth: Int): PersonAndRelatives<Person> {
-    val personFamilyInfo =
-      WikiLookupService().query(query)
-        ?: return PersonAndRelatives(
-          Node(Person(query, query, "???"), query, depth),
-          emptyList(),
-          emptyList(),
-          emptyList(),
-        )
-
-    val person = personFamilyInfo.first
-    val relation = personFamilyInfo.second
-
-    val familyInfo = Person(id = person.id, name = person.name, gender = person.gender)
-
-    val node = Node(familyInfo, person.id, depth)
-
-    return PersonAndRelatives(
-      node,
-      parents = listOf(relation.Father),
-      spouses = relation.Spouses,
-      children = relation.Children,
+    val rootNode = Node(
+      Person(
+        id = person.id,
+        name = person.name,
+        gender = person.gender,
+      ),
+      person.name,
+      depth,
     )
+
+    visited.add(query)
+    nodes.put(query, rootNode)
+
+    val parents = listOf(relation.Father, relation.Mother)
+    val spouses = relation.Spouses
+    val children = relation.Children
+
+    // recurse over relations
+    val parentNodes = parents.map { produceGraph(it, depth - 1) }
+    val spouseNodes = spouses.map { produceGraph(it, depth) }
+    val childNodes = children.map { produceGraph(it, depth + 1) }
+
+    // adds edges to set
+    spouseNodes.forEach { if (it != null) edges.add(Edge(rootNode.id, it.id, "spouse")) }
+    childNodes.forEach { if (it != null) edges.add(Edge(rootNode.id, it.id, "child")) }
+
+    return rootNode
   }
 }
