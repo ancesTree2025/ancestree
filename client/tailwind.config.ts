@@ -8,11 +8,11 @@ export default {
       sans: ['Figtree', 'sans-serif']
     },
     colors: {
-      bg: '#ffffff',
-      fg: '#222',
-      'input-bg': '#eee',
-      'node-bg': '#ddd',
-      line: '#ddd',
+      white: '#fff',
+      black: '#222',
+      input: '#eee',
+      node: '#ddd',
+      red: '#f44',
       transparent: 'transparent'
     },
     extend: {
