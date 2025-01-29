@@ -4,7 +4,7 @@
   import type { Status } from '$lib/status';
   import FamilyTree from '../components/FamilyTree.svelte';
   import NameInput from '../components/NameInput.svelte';
-  // @ts-ignore
+  // @ts-expect-error
   import { page } from '$app/stores';
 
   let name = $state<string | undefined>();
