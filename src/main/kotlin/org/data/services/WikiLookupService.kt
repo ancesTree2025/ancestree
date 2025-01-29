@@ -5,7 +5,7 @@ import org.data.models.*
 import org.data.parsers.parseWikidataIDLookup
 import org.data.parsers.parseWikidataQIDs
 import org.data.requests.getLabelAndClaim
-import org.data.requests.searchWikipediaForQID
+import org.data.requests.searchWikidataForQID
 
 /** Service class for performing Wikipedia/Wikidata lookups. */
 class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
@@ -36,7 +36,7 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
         labelAndFamily.second
       )
 
-    val person = Person(qid, labelAndFamily.first, "Couldnt find one")
+    val person = Person(qid, labelAndFamily.first, labelAndFamily.second["Gender"]?.getOrNull(0) ?: "Unknown")
 
     return Pair(person, personalInfo)
   }
@@ -48,7 +48,7 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
    * @returns Their Wikidata QID as a string.
    */
   private suspend fun searchForPersonsQID(name: String): QID? {
-    val response = searchWikipediaForQID(name)
+    val response = searchWikidataForQID(name)
     val qid = parseWikidataIDLookup(response)
     return qid
   }

@@ -19,10 +19,7 @@ suspend fun parseWikidataIDLookup(response: HttpResponse): QID? {
   val qidSingleton = result.query?.pages?.values ?: return null
 
   val wikidataID =
-    qidSingleton.toList()[0].pageprops?.wikibaseItem
-      ?: throw NotFoundException(
-        "Could not find Wikidata QID from pageprop in Wikipedia API search request."
-      )
+    qidSingleton.toList()[0].title
 
   return wikidataID
 }
@@ -38,8 +35,8 @@ suspend fun parseWikidataQIDs(response: HttpResponse): Map<QID, Pair<Label, Prop
   val json = Json { ignoreUnknownKeys = true }
   val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
-  return result.entities.mapValues { (_, entityInfo) ->
-    val label = entityInfo.labels.en.value
+  return result.entities.mapValues{ (_, entityInfo) ->
+    val label = entityInfo.labels.en?.value ?: "DEBUG: Label not found in english"
 
     val familyInfo =
       relevantProperties.entries

@@ -9,7 +9,7 @@ import kotlinx.serialization.json.JsonElement
 
 @Serializable data class PagesQuery(val pages: Map<String, PageInfo>? = null)
 
-@Serializable data class PageInfo(val pageprops: PageProps? = null)
+@Serializable data class PageInfo(val title: String)
 
 @Serializable data class PageProps(@SerialName("wikibase_item") val wikibaseItem: String? = null)
 
@@ -17,7 +17,7 @@ import kotlinx.serialization.json.JsonElement
 
 @Serializable data class EntityInfo(val labels: LangInfo, val claims: Map<String, List<WikiClaim>>)
 
-@Serializable data class LangInfo(val en: DataLabel)
+@Serializable data class LangInfo(val en: DataLabel? = null)
 
 @Serializable data class DataLabel(val value: String)
 
