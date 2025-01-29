@@ -3,7 +3,8 @@ package org.data.parsers
 import io.ktor.client.statement.*
 import io.ktor.server.plugins.*
 import kotlinx.serialization.json.*
-import org.data.models.PagesResponse
+import org.data.models.*
+import org.data.models.WikidataProperties.relevantProperties
 
 /**
  * Parses Wikipedia ID Lookup responses, extracting the relevant QID.
@@ -11,19 +12,14 @@ import org.data.models.PagesResponse
  * @param response The HTTP response from Wikipedia.
  * @returns A single parsed QID, as a string.
  */
-suspend fun parseWikidataIDLookup(response: HttpResponse): String {
+suspend fun parseWikidataIDLookup(response: HttpResponse): QID? {
   val json = Json { ignoreUnknownKeys = true }
   val result = json.decodeFromString<PagesResponse>(response.bodyAsText())
 
-  val qidSingleton =
-    result.query?.pages?.values
-      ?: throw NotFoundException("Could not find search values from Wikipedia API request.")
+  val qidSingleton = result.query?.pages?.values ?: return null
 
   val wikidataID =
-    qidSingleton.toList()[0].pageprops?.wikibaseItem
-      ?: throw NotFoundException(
-        "Could not find Wikidata QID from pageprop in Wikipedia API search request."
-      )
+    qidSingleton.toList()[0].title
 
   return wikidataID
 }
@@ -33,35 +29,29 @@ suspend fun parseWikidataIDLookup(response: HttpResponse): String {
  * family members.
  *
  * @param response The HTTP response from Wikidata.
- * @returns A mapping of types of relation to lists of names.
+ * @returns A mapping of QIDs to a pair of the name and the relation.
  */
-suspend fun parseWikidataQIDs(response: HttpResponse): Map<String, Pair<String, JsonObject>> {
-  val jsonResponse = Json.parseToJsonElement(response.bodyAsText()).jsonObject
-  val entities = jsonResponse["entities"]?.jsonObject
+suspend fun parseWikidataQIDs(response: HttpResponse): Map<QID, Pair<Label, PropertyMapping>> {
+  val json = Json { ignoreUnknownKeys = true }
+  val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
-  val idToNameMap = mutableMapOf<String, Pair<String, JsonObject>>()
+  return result.entities.mapValues{ (_, entityInfo) ->
+    val label = entityInfo.labels.en?.value ?: "DEBUG: Label not found in english"
 
-  entities?.forEach { (id, details) ->
-    val label =
-      details.jsonObject["labels"]
-        ?.jsonObject
-        ?.get("en")
-        ?.jsonObject
-        ?.get("value")
-        ?.jsonPrimitive
-        ?.content
-        ?: throw NotFoundException(
-          "Failed to parse entity label given QID. This should NEVER happen."
-        )
+    val familyInfo =
+      relevantProperties.entries
+        .associate { (key, value) ->
+          value to
+            (entityInfo.claims[key]?.flatMap { claim ->
+              claim.mainsnak.datavalue?.value?.jsonObject?.get("id")?.jsonPrimitive?.content?.let {
+                listOf(it)
+              } ?: emptyList()
+            } ?: emptyList())
+        }
+        .toMutableMap()
 
-    val claims =
-      details.jsonObject["claims"]?.jsonObject
-        ?: throw NotFoundException(
-          "Failed to parse entity claims given QID. This should NEVER happen."
-        )
+    relevantProperties.values.forEach { relation -> familyInfo.putIfAbsent(relation, emptyList()) }
 
-    idToNameMap[id] = Pair(label, claims)
+    label to familyInfo
   }
-
-  return idToNameMap
 }

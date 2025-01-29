@@ -1,7 +1,7 @@
 package org.data.models
 
-object FamilyProperties {
-  val familyProps =
+object WikidataProperties {
+  val relevantProperties =
     mapOf(
       "P21" to "Gender",
       "P22" to "Father",
