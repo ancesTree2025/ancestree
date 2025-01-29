@@ -22,8 +22,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     visited.clear()
     nodes.clear()
     edges.clear()
-    val rootNode = produceGraph(root, 0)
-      ?: return emptyGraph()
+    val rootNode = produceGraph(root, 0) ?: return emptyGraph()
     return Graph(rootNode, nodes.values.toSet(), edges)
   }
 
@@ -34,21 +33,14 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     if (query in visited) return nodes[query]
 
     // return empty node if not found from lookup
-    val wikiResponse = WikiLookupService().query(query)
-      ?: return Node(Person("Missing", query, "???"), query, depth)
+    val wikiResponse =
+      WikiLookupService().query(query) ?: return Node(Person("Missing", query, "???"), query, depth)
 
     val person = wikiResponse.first
     val relation = wikiResponse.second
 
-    val rootNode = Node(
-      Person(
-        id = person.id,
-        name = person.name,
-        gender = person.gender,
-      ),
-      person.id,
-      depth,
-    )
+    val rootNode =
+      Node(Person(id = person.id, name = person.name, gender = person.gender), person.id, depth)
 
     visited.add(query)
     nodes.put(query, rootNode)
