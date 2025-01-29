@@ -1,6 +1,5 @@
 package org.data.producers
 
-import io.ktor.util.reflect.*
 import kotlin.math.abs
 import org.data.models.Label
 import org.data.models.Person
@@ -23,8 +22,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     visited.clear()
     nodes.clear()
     edges.clear()
-    val rootNode = produceGraph(root, 0)
-      ?: return emptyGraph()
+    val rootNode = produceGraph(root, 0) ?: return emptyGraph()
     return Graph(rootNode, nodes.values.toSet(), edges)
   }
 
@@ -35,21 +33,14 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     if (query in visited) return nodes[query]
 
     // return empty node if not found from lookup
-    val wikiResponse = WikiLookupService().query(query)
-      ?: return Node(Person("Missing", query, "???"), query, depth)
+    val wikiResponse =
+      WikiLookupService().query(query) ?: return Node(Person("Missing", query, "???"), query, depth)
 
     val person = wikiResponse.first
     val relation = wikiResponse.second
 
-    val rootNode = Node(
-      Person(
-        id = person.id,
-        name = person.name,
-        gender = person.gender,
-      ),
-      person.name,
-      depth,
-    )
+    val rootNode =
+      Node(Person(id = person.id, name = person.name, gender = person.gender), person.id, depth)
 
     visited.add(query)
     nodes.put(query, rootNode)
@@ -59,13 +50,13 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     val children = relation.Children
 
     // recurse over relations
-    val parentNodes = parents.map { produceGraph(it, depth - 1) }
+    parents.map { produceGraph(it, depth - 1) }
     val spouseNodes = spouses.map { produceGraph(it, depth) }
     val childNodes = children.map { produceGraph(it, depth + 1) }
 
     // adds edges to set
-    spouseNodes.forEach { if (it != null) edges.add(Edge(rootNode.id, it.id, "spouse")) }
-    childNodes.forEach { if (it != null) edges.add(Edge(rootNode.id, it.id, "child")) }
+    spouseNodes.forEach { if (it != null) edges.add(Edge(rootNode.id, it.id)) }
+    childNodes.forEach { if (it != null) edges.add(Edge(rootNode.id, it.id)) }
 
     return rootNode
   }

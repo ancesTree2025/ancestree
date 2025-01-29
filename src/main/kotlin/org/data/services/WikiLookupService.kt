@@ -24,19 +24,17 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
       return null
     }
 
-    val labelAndFamily = try {
-      getPersonsLabelAndFamilyMembers(qid)
-    } catch (e: NotFoundException) {
-      return null;
-    }
+    val labelAndFamily =
+      try {
+        getPersonsLabelAndFamilyMembers(qid)
+      } catch (e: NotFoundException) {
+        return null
+      }
 
+    val personalInfo = NamedRelation.from(labelAndFamily.second)
 
-    val personalInfo =
-      NamedRelation.from(
-        labelAndFamily.second
-      )
-
-    val person = Person(qid, labelAndFamily.first, labelAndFamily.second["Gender"]?.getOrNull(0) ?: "Unknown")
+    val person =
+      Person(qid, labelAndFamily.first, labelAndFamily.second["Gender"]?.getOrNull(0) ?: "Unknown")
 
     return Pair(person, personalInfo)
   }
@@ -84,7 +82,9 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
    * @param personQID The person's QID.
    * @returns Their label and a mapping of types of relation to lists of relatives in that category.
    */
-  private suspend fun getPersonsLabelAndFamilyMembers(personQID: QID): Pair<Label, PropertyMapping> {
+  private suspend fun getPersonsLabelAndFamilyMembers(
+    personQID: QID
+  ): Pair<Label, PropertyMapping> {
 
     val familyResponse = getLabelAndClaim(personQID)
     val labelFamilyMap = parseWikidataQIDs(familyResponse)
