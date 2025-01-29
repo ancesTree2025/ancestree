@@ -10,9 +10,9 @@ import io.ktor.client.statement.*
  * @param limit The number of results to return.
  * @return HTTP Response.
  */
-suspend fun searchWikipediaForQID(query: String, limit: Int = 1): HttpResponse {
+suspend fun searchWikidataForQID(query: String, limit: Int = 1): HttpResponse {
   val response =
-    doWikipediaRequest("query") {
+    doWikidataRequest("query") {
       parameter("generator", "search")
       parameter("gsrsearch", query)
       parameter("gsrlimit", limit)
