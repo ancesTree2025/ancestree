@@ -4,7 +4,7 @@ import java.util.*
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Edge(val node1: String, val node2: String, val type: String) {
+data class Edge(val node1: String, val node2: String) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is Edge) return false
@@ -14,6 +14,7 @@ data class Edge(val node1: String, val node2: String, val type: String) {
   }
 
   override fun hashCode(): Int {
+    if (node2 < node1) return Objects.hash(node2, node1)
     return Objects.hash(node1, node2)
   }
 }
