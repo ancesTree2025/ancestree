@@ -101,9 +101,9 @@ export async function fetchTree(name: string, useFakeData: boolean): Promise<Res
   if (useFakeData) {
     return Result.ok(apiResponseToTree(apiResponseSchema.parse(exampleData)));
   }
-  const response = await Result.fromAsyncCatching(
-    fetch(`http://localhost:8080/${name}`)
-  ).mapError(() => 'Could not connect to server');
+  const response = await Result.fromAsyncCatching(fetch(`http://localhost:8080/${name}`)).mapError(
+    () => 'Could not connect to server'
+  );
   if (response.getOrNull()?.status === 404) {
     return Result.error('Person not found');
   }
