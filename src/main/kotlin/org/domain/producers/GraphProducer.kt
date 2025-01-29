@@ -5,6 +5,6 @@ import org.domain.models.Node
 
 interface GraphProducer<Input, Output> {
   suspend fun produceGraph(root: Input): Graph<Output>
-
-  suspend fun produceNode(query: Input, depth: Int): Node<Output>
+//
+//  suspend fun produceNode(query: Input, depth: Int): Node<Output>
 }
