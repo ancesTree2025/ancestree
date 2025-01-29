@@ -6,7 +6,7 @@ class NamedRelation(
   val Mother: String = "Unknown",
   val Spouses: List<String> = emptyList(),
   val Children: List<String> = emptyList(),
-  val Siblings: List<String> = emptyList()
+  val Siblings: List<String> = emptyList(),
 ) {
   companion object {
     fun from(map: PropertyMapping): NamedRelation {
@@ -15,7 +15,7 @@ class NamedRelation(
         Mother = map["Mother"]?.getOrNull(0) ?: "Unknown",
         Spouses = map["Spouse(s)"] ?: emptyList(),
         Children = map["Child(ren)"] ?: emptyList(),
-        Siblings = map["Sibling(s)"] ?: emptyList()
+        Siblings = map["Sibling(s)"] ?: emptyList(),
       )
     }
   }
