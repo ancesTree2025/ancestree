@@ -26,8 +26,6 @@ const apiResponseSchema = z.object({
 
 type ApiResponse = z.infer<typeof apiResponseSchema>;
 
-const RETURN_SAMPLE_DATA = true;
-
 const sampleData: ApiResponse = {
   root: {
     data: {
@@ -182,9 +180,9 @@ export function apiResponseToTree(res: ApiResponse): Tree {
   };
 }
 
-export async function fetchTree(name: string): Promise<Tree> {
+export async function fetchTree(name: string, useFakeData: boolean): Promise<Tree> {
   let json: object;
-  if (RETURN_SAMPLE_DATA) {
+  if (useFakeData) {
     json = sampleData;
   } else {
     const response = await fetch(`http://localhost:8080/${name}`);

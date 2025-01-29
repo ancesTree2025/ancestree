@@ -3,16 +3,18 @@
   import type { Tree } from '$lib/familytree/models';
   import FamilyTree from '../components/FamilyTree.svelte';
   import NameInput from '../components/NameInput.svelte';
+  import { page } from '$app/stores';
 
   let name = $state<string | undefined>();
   let loading = $state(false);
 
   let tree = $state<Tree | undefined>();
+  const useFakeData = $page.url.searchParams.get('useFakeData');
 
   $effect(() => {
     if (name) {
       loading = true;
-      fetchTree(name).then((fetched) => {
+      fetchTree(name, useFakeData).then((fetched) => {
         tree = fetched;
         loading = false;
       });
