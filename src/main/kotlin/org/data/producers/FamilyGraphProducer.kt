@@ -64,8 +64,8 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     val childNodes = children.map { produceGraph(it, depth + 1) }
 
     // adds edges to set
-    spouseNodes.forEach { if (it != null) edges.add(Edge(rootNode.id, it.id, "spouse")) }
-    childNodes.forEach { if (it != null) edges.add(Edge(rootNode.id, it.id, "child")) }
+    spouseNodes.forEach { if (it != null) edges.add(Edge(rootNode.id, it.id)) }
+    childNodes.forEach { if (it != null) edges.add(Edge(rootNode.id, it.id)) }
 
     return rootNode
   }
