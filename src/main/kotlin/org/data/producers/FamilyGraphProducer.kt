@@ -1,6 +1,5 @@
 package org.data.producers
 
-import io.ktor.util.reflect.*
 import kotlin.math.abs
 import org.data.models.Label
 import org.data.models.Person
@@ -47,7 +46,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
         name = person.name,
         gender = person.gender,
       ),
-      person.name,
+      person.id,
       depth,
     )
 
@@ -59,7 +58,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     val children = relation.Children
 
     // recurse over relations
-    val parentNodes = parents.map { produceGraph(it, depth - 1) }
+    parents.map { produceGraph(it, depth - 1) }
     val spouseNodes = spouses.map { produceGraph(it, depth) }
     val childNodes = children.map { produceGraph(it, depth + 1) }
 
