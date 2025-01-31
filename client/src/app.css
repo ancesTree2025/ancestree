@@ -26,6 +26,10 @@ body > div {
   height: 100%;
 }
 
+a {
+  color: blue;
+}
+
 .loader {
   aspect-ratio: 1;
   border-radius: 50%;

@@ -36,8 +36,26 @@
     </div>
     <div class="w-48"></div>
   </nav>
-  <div class="flex-1">
-    <FamilyTree {tree} />
+  <div class="flex flex-1">
+    <div class="flex-1">
+      <FamilyTree {tree} />
+    </div>
+    <div class="flex w-96 flex-col gap-6 p-4 pt-10 text-center shadow-lg">
+      <div class="text-lg font-bold">Henry VII</div>
+      <img
+        src="https://www.rmg.co.uk/sites/default/files/styles/full_width_1440/public/Henry%20VIII.jpg?itok=jdBCof8r"
+      />
+      <div class="text-left"><b>Born:</b> 28 June 1491, Palace of Placentia</div>
+      <div class="text-left">
+        <b>Died:</b> 28 January 1547 (age 55 years), Palace of Whitehall, London
+      </div>
+      <div class="text-left">
+        Henry VIII was King of England from 22 April 1509 until his death. Henry is known for his
+        six marriages and his efforts to have his first marriage annulled. <a
+          href="https://en.wikipedia.org/wiki/Henry_VIII">Wikipedia</a
+        >
+      </div>
+    </div>
   </div>
 </div>
 
