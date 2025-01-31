@@ -2,7 +2,7 @@
   import { balanceTree } from '$lib/familytree/balanceTree';
   import { type Positions, type Tree } from '$lib/familytree/models';
 
-  let { tree }: { tree?: Tree } = $props();
+  const { tree }: { tree?: Tree } = $props();
   let positions = $state<Positions>({});
 
   $effect(() => {
