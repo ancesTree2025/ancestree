@@ -34,8 +34,9 @@ export default [
       camelcase: ['error'],
       'func-style': ['error', 'declaration'],
       'prefer-const': ['error', {
-        'destructuring': 'all'
-      }]
+        'destructuring': 'all',
+      }],
+      'no-var': 'error'
     }
   },
   pluginJs.configs.recommended,
