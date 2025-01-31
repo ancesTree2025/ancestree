@@ -39,3 +39,37 @@ test('handles basic family tree with one generation above and below', () => {
     'Father': { x: 160, y: -120 }
   })
 })
+
+test('handles a child having a spouse', () => {
+  expect(balanceTree({
+    focus: 'Focus',
+    people: [
+      'Focus',
+      'Wife',
+      'Child 1', 'Child 2', 'Child 3',
+      'Daughter in Law'
+    ].map((id) => [id, { name: id }]),
+    marriages: [
+      {
+        parents: [
+          'Focus', 'Wife'
+        ],
+        children: [
+          'Child 1', 'Child 2', 'Child 3'
+        ],
+      }, {
+        parents: [
+          'Child 2', 'Daughter in Law'
+        ],
+        children: []
+      }
+    ]
+  }, [160, 0], 160, 120)).toStrictEqual({
+    'Child 1': { x: 0, y: 120 },
+    'Child 2': { x: 160, y: 120 },
+    'Daughter in Law': { x: 320, y: 120 },
+    'Child 3': { x: 480, y: 120 },
+    'Focus': { x: 160, y: 0 },
+    'Wife': { x: 320, y: 0 },
+  })
+})

@@ -19,7 +19,7 @@ export function balanceTree(
   y = center[1];
   const supertree = new Set<PersonID>();
   const supertreeX = placeSupertree(tree.focus, supertree);
-  ``;
+
   // To make sure the focused node is at center, we need to shift
   // the nodes in the subtree and supertree
   adjustNodes(subtree, center[0] - subtreeX);
@@ -77,7 +77,17 @@ export function balanceTree(
       const left = right;
       y += GENERATION_HEIGHT;
       for (const child of children) {
-        placeSubtree(child, subtree);
+        const subsubtree = new Set<string>();
+        const minRight = right + BASE_WIDTH / 2
+        const childx = placeSubtree(child, subsubtree);
+        // Happens in case of children having spouses
+        if (childx < minRight) {
+          adjustNodes(subsubtree, minRight - childx);
+          right += minRight - childx + BASE_WIDTH / 2;
+        }
+        for (const person of subsubtree) {
+          subtree.add(person);
+        }
       }
       y -= GENERATION_HEIGHT;
 
