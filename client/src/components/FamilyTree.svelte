@@ -37,7 +37,7 @@
               y1={mother.y}
               x2={father.x}
               y2={father.y}
-              class="stroke-node stroke-line"
+              class="stroke-edge stroke-line"
             />
           {:else}
             <line
@@ -45,21 +45,21 @@
               y1={mother.y}
               x2={parentsX}
               y2={mother.y}
-              class="stroke-node stroke-line"
+              class="stroke-edge stroke-line"
             />
             <line
               x1={parentsX}
               y1={mother.y}
               x2={parentsX}
               y2={father.y}
-              class="stroke-node stroke-line"
+              class="stroke-edge stroke-line"
             />
             <line
               x1={father.x}
               y1={father.y}
               x2={parentsX}
               y2={father.y}
-              class="stroke-node stroke-line"
+              class="stroke-edge stroke-line"
             />
           {/if}
 
@@ -73,7 +73,7 @@
               y1={parentsY}
               x2={parentsX}
               y2={midY}
-              class="stroke-node stroke-line"
+              class="stroke-edge stroke-line"
             />
 
             <!-- Draw children line -->
@@ -90,7 +90,7 @@
               y1={midY}
               x2={rightChildX}
               y2={midY}
-              class="stroke-node stroke-line"
+              class="stroke-edge stroke-line"
             />
 
             <!-- Draw line from each child to children line -->
@@ -101,7 +101,7 @@
                   y1={midY}
                   x2={child.x}
                   y2={child.y}
-                  class="stroke-node stroke-line"
+                  class="stroke-edge stroke-line"
                 />
               {/if}
             {/each}
@@ -121,12 +121,12 @@
               class="fill-node"
             ></rect>
             <foreignObject
-              x={-RECT_WIDTH / 2}
+              x={-RECT_WIDTH / 2 + 2}
               y={-RECT_HEIGHT / 2}
-              width={RECT_WIDTH}
-              height={RECT_HEIGHT}
+              width={RECT_WIDTH - 2}
+              height={RECT_HEIGHT - 2}
             >
-              <div class="flex h-full w-full items-center justify-center text-center">
+              <div class="flex rounded-lg border-2 border-indigo-100 h-full w-full items-center justify-center text-center">
                 {person.name}
               </div>
             </foreignObject>
