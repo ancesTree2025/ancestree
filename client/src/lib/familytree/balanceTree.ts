@@ -1,9 +1,11 @@
 import type { Positions, PersonID, Tree } from './models';
 
-const BASE_WIDTH = 160;
-const GENERATION_HEIGHT = 120;
-
-export function balanceTree(tree: Tree, center: [number, number]): Positions {
+export function balanceTree(
+  tree: Tree,
+  center: [number, number],
+  BASE_WIDTH = 160,
+  GENERATION_HEIGHT = 120
+): Positions {
   const positions: Positions = {};
 
   // The x position of the current "right edge" of the graph
@@ -17,7 +19,7 @@ export function balanceTree(tree: Tree, center: [number, number]): Positions {
   y = center[1];
   const supertree = new Set<PersonID>();
   const supertreeX = placeSupertree(tree.focus, supertree);
-
+  ``;
   // To make sure the focused node is at center, we need to shift
   // the nodes in the subtree and supertree
   adjustNodes(subtree, center[0] - subtreeX);
@@ -60,7 +62,7 @@ export function balanceTree(tree: Tree, center: [number, number]): Positions {
     // assuming someone has at most one marriage, and assuming no cycles
     if (marriages.length == 1) {
       const marriage = marriages[0];
-      // assuming a marraige has only one spouse
+      // assuming a marriage has only one spouse
       const spouse = marriage.parents.find((p) => p !== focused)!;
       subtree.add(spouse);
       const children = marriage.children;

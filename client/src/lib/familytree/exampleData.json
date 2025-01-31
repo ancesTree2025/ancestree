@@ -53,6 +53,33 @@
       },
       "id": "5",
       "depth": -1
+    },
+    {
+      "data": {
+        "id": "6",
+        "name": "Mary 2",
+        "gender": "female"
+      },
+      "id": "6",
+      "depth": 1
+    },
+    {
+      "data": {
+        "id": "7",
+        "name": "Mary 3",
+        "gender": "female"
+      },
+      "id": "7",
+      "depth": 1
+    },
+    {
+      "data": {
+        "id": "8",
+        "name": "Husband 1",
+        "gender": "male"
+      },
+      "id": "8",
+      "depth": 1
     }
   ],
   "edges": [
@@ -67,6 +94,26 @@
     {
       "node1": "2",
       "node2": "3"
+    },
+    {
+      "node1": "1",
+      "node2": "6"
+    },
+    {
+      "node1": "2",
+      "node2": "6"
+    },
+    {
+      "node1": "1",
+      "node2": "7"
+    },
+    {
+      "node1": "2",
+      "node2": "7"
+    },
+    {
+      "node1": "6",
+      "node2": "8"
     },
     {
       "node1": "4",

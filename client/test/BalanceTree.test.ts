@@ -1,0 +1,41 @@
+import { expect, test } from 'vitest';
+import { balanceTree } from '../src/lib/familytree/balanceTree';
+import { strictEqual } from 'assert';
+
+test('handles basic family tree with one generation above and below', () => {
+  expect(balanceTree({
+    focus: 'Focus',
+    people: [
+      'Focus',
+      'Wife',
+      'Child 1', 'Child 2', 'Child 3',
+      'Mother',
+      'Father'
+    ].map((id) => [id, { name: id }]),
+    marriages: [
+      {
+        parents: [
+          'Focus', 'Wife'
+        ],
+        children: [
+          'Child 1', 'Child 2', 'Child 3'
+        ],
+      }, {
+        parents: [
+          'Mother', 'Father'
+        ],
+        children: [
+          'Focus'
+        ]
+      }
+    ]
+  }, [80, 0], 160, 120)).toStrictEqual({
+    'Child 1': { x: 0, y: 120 },
+    'Child 2': { x: 160, y: 120 },
+    'Child 3': { x: 320, y: 120 },
+    'Focus': { x: 80, y: 0 },
+    'Wife': { x: 240, y: 0 },
+    'Mother': { x: 0, y: -120 },
+    'Father': { x: 160, y: -120 }
+  })
+})
