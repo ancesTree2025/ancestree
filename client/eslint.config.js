@@ -33,9 +33,12 @@ export default [
       'no-unneeded-ternary': ['error'],
       camelcase: ['error'],
       'func-style': ['error', 'declaration'],
-      'prefer-const': ['error', {
-        'destructuring': 'all',
-      }],
+      'prefer-const': [
+        'error',
+        {
+          destructuring: 'all'
+        }
+      ],
       'no-var': 'error'
     }
   },
