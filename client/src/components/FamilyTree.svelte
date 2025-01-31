@@ -31,7 +31,7 @@
         {#if mother && father}
           <!-- Draw marriage lines -->
           {@const parentsX = (mother.x + father.x) / 2}
-          {#if mother.y == father.y}
+          {#if mother.y === father.y}
             <line
               x1={mother.x}
               y1={mother.y}

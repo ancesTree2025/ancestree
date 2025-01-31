@@ -58,7 +58,7 @@ export function balanceTree(tree: Tree, center: [number, number]): Positions {
     }
 
     // assuming someone has at most one marriage, and assuming no cycles
-    if (marriages.length == 1) {
+    if (marriages.length === 1) {
       const marriage = marriages[0];
       // assuming a marraige has only one spouse
       const spouse = marriage.parents.find((p) => p !== focused)!;
@@ -104,7 +104,7 @@ export function balanceTree(tree: Tree, center: [number, number]): Positions {
     // assuming someone has exactly two parents from one marriage, or no parent marriage
     const parentMarriage = tree.marriages.find((m) => m.children.includes(person));
 
-    if (parentMarriage == undefined) {
+    if (parentMarriage === undefined) {
       const meX = right + BASE_WIDTH / 2;
       addPerson(person, meX, y);
       right += BASE_WIDTH;

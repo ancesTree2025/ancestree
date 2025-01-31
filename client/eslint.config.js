@@ -28,7 +28,10 @@ export default [
           argsIgnorePattern: '^_',
           caughtErrorsIgnorePattern: '^_'
         }
-      ]
+      ],
+      'eqeqeq': ['error', 'smart'],
+      'no-unneeded-ternary': ['error'],
+      'camelcase': ['error']
     }
   },
   pluginJs.configs.recommended,
