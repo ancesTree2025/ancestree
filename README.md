@@ -1,5 +1,7 @@
 # AncesTree
 
+https://ancestree-2025.atlassian.net/wiki/spaces/SCRUM/overview?homepageId=66037
+
 ## Project Prerequisites
 
 Install [Bun](https://bun.sh) and execute `bun install` in the `client` directory to install all the frontend
