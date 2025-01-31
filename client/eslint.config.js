@@ -29,9 +29,9 @@ export default [
           caughtErrorsIgnorePattern: '^_'
         }
       ],
-      'eqeqeq': ['error', 'smart'],
+      eqeqeq: ['error', 'smart'],
       'no-unneeded-ternary': ['error'],
-      'camelcase': ['error']
+      camelcase: ['error']
     }
   },
   pluginJs.configs.recommended,
