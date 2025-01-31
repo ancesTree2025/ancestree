@@ -11,14 +11,13 @@ export default {
       white: '#fff',
       black: '#222',
       input: '#eee',
-      node: '#fff',
-      edge: '#222',
+      node: '#ddd',
       red: '#f44',
       transparent: 'transparent'
     },
     extend: {
       strokeWidth: {
-        line: '1'
+        line: '3'
       }
     }
   },
