@@ -26,9 +26,9 @@ export function balanceTree(tree: Tree, center: [number, number]): Positions {
   return positions;
 
   // Shifts all nodes by a certain X
-  function adjustNodes(set: Set<PersonID>, x: number) {
+  function adjustNodes(set: Set<PersonID>, dx: number) {
     for (const node of set) {
-      positions[node].x += x;
+      positions[node].x += dx;
     }
   }
 
