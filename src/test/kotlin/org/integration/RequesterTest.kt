@@ -16,6 +16,17 @@ class RequesterTest {
   private val timeout = 120.seconds
   private val json = Json { ignoreUnknownKeys = true }
 
+  /*
+  Bad requests but we can check that there is a connection. Returns roughly the following JSON structure.
+
+    error:
+      code: "badvalue"
+      info: "Unrecognized value for parameter "action": ."
+      *: "See https://en.wikipedia.org/w/api.php for API usage..."
+    servedby: ...
+
+   */
+
   @Test
   fun `can successfully make a request to the Wikipedia API`() =
     runTest(timeout = timeout) {
@@ -29,6 +40,8 @@ class RequesterTest {
       val httpResponse = BaseRequester.doWikidataRequest("") {}
       assertEquals(200, httpResponse.status.value)
     }
+
+  // These JSONs are serialised to type PagesResponse and WikidataResponse
 
   @Test
   fun `can successfully fetch a QID from Wikidata given a name`() =
@@ -57,4 +70,10 @@ class RequesterTest {
       assertNotNull(result.entities["Q317521"])
       assertNotNull(result.entities["Q317521"]?.labels?.en)
     }
+}
+
+
+suspend fun main() {
+  val httpResponse = BaseRequester.doWikipediaRequest("") {}
+  println(httpResponse)
 }
