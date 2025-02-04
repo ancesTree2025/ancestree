@@ -45,6 +45,7 @@ export function balanceTree(
   // Set the position of a node if they have not already been given a position
   function addPerson(personId: PersonID, x: number, y: number) {
     if (positions[personId] !== undefined) return;
+    right = Math.max(right, x + BASE_WIDTH / 2);
     positions[personId] = { x, y };
   }
 
@@ -63,7 +64,6 @@ export function balanceTree(
       // Places a single node and pushes the right edge right by 1 base width
       const meX = right + BASE_WIDTH / 2;
       addPerson(focused, meX, y);
-      right += BASE_WIDTH;
       return meX;
     }
 
@@ -85,7 +85,7 @@ export function balanceTree(
       // if we only have one child, the width of the two parents (2 * BASE_WIDTH)
       // is larger than the width of the child (BASE_WIDTH), so pad both sides
       // by half of BASE_WIDTH
-      if (children.length < 2) {
+      if (children.length === 1) {
         right += BASE_WIDTH / 2;
       }
 
@@ -99,7 +99,7 @@ export function balanceTree(
         // Happens in case of children having spouses
         if (childx < minChildx) {
           adjustNodes(subsubtree, minChildx - childx);
-          right += minChildx - childx + BASE_WIDTH / 2;
+          right += minChildx - childx;
         }
         for (const person of subsubtree) {
           subtree.add(person);
@@ -108,14 +108,14 @@ export function balanceTree(
       y -= GENERATION_HEIGHT;
 
       // render parents at the midpoint of the children's width
-      const mid = (left + right) / 2;
+      const mid = children.length === 0 ? right + BASE_WIDTH : (left + right) / 2;
       addPerson(spouse, mid + BASE_WIDTH / 2, y);
       if (i == 0) {
         meX = mid - BASE_WIDTH / 2;
         addPerson(focused, meX, y);
       }
 
-      if (children.length < 2) {
+      if (children.length === 1) {
         right += BASE_WIDTH / 2;
       }
     }
@@ -135,11 +135,10 @@ export function balanceTree(
     if (parentMarriage == undefined) {
       const meX = right + BASE_WIDTH / 2;
       addPerson(person, meX, y);
-      right += BASE_WIDTH;
       return meX;
     }
 
-    visMarriages.push(parentMarriage)
+    visMarriages.push(parentMarriage);
 
     const mother = parentMarriage.parents[0];
     const father = parentMarriage.parents[1];
