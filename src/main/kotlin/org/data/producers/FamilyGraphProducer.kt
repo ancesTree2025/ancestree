@@ -34,9 +34,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
 
     // return empty node if not found from lookup
     val wikiResponse =
-      WikiLookupService().query(query) ?: return Node(
-        Person("Missing", query, "???")
-        , query, depth)
+      WikiLookupService().query(query) ?: return Node(Person("Missing", query, "???"), query, depth)
 
     val person = wikiResponse.first
     val relation = wikiResponse.second

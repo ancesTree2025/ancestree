@@ -1,11 +1,13 @@
 package org.core
 
 import io.ktor.client.*
+import io.ktor.client.plugins.websocket.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.data.models.Person
+import org.data.services.WikiLookupService
 import org.domain.producers.GraphProducer
 import org.kodein.di.factory
 import org.kodein.di.instance
@@ -28,6 +30,21 @@ fun Application.configureRouting() {
       if (graph.isEmpty()) return@get call.respond(HttpStatusCode.NoContent)
 
       call.respond(graph)
+    }
+  }
+
+  routing {
+    get("/info") {
+      val qid =
+        call.request.queryParameters["qid"]
+          ?: return@get call.respond(
+            HttpStatusCode.BadRequest,
+            "qid is required. Nothing was passed",
+          )
+
+      val wikiLookupService = WikiLookupService()
+      val personInfo = wikiLookupService.getDetailedInfo(qid)
+      call.respond(personInfo!!)
     }
   }
 }

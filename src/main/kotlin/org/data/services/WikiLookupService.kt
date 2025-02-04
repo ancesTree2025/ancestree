@@ -1,9 +1,16 @@
 package org.data.services
 
 import io.ktor.server.plugins.*
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.data.models.*
+import org.data.models.WikidataProperties.propertyQIDMapPersonal
+import org.data.parsers.parseWikidataEntities
 import org.data.parsers.parseWikidataIDLookup
-import org.data.parsers.parseWikidataQIDs
 import org.data.requests.getLabelAndClaim
 import org.data.requests.searchWikidataForQID
 
@@ -40,6 +47,86 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
   }
 
   /**
+   * A new exposed function, to be used for getting more specific info from Wikidata about
+   * individuals.
+   *
+   * @param qid The person's Wikidata QID.
+   * @returns A various info and personal attributes.
+   */
+  suspend fun getDetailedInfo(qid: QID): PersonalInfo {
+
+    val familyResponse = getLabelAndClaim(qid)
+    val allInfo = parseWikidataEntities(familyResponse, propertyQIDMapPersonal)
+    val infoMap = allInfo[qid]!!.second
+
+    val imageString = mkImage(infoMap["Wikimedia Image File"]!!)
+
+    val PoB = getPlaceName(infoMap["PoB"]!![0])
+    val PoD = getPlaceName(infoMap["PoD"]!![0])
+
+    val info =
+      PersonalInfo(
+        imageString,
+        mapOf(
+          "Born" to formatDatePlaceInfo(PoB, infoMap["DoB"]!![0]),
+          "Died" to formatDatePlaceInfo(PoD, infoMap["DoD"]!![0]),
+        ),
+        "stub",
+        "stub",
+      )
+
+    return info
+  }
+
+  /**
+   * A simple function to format a date and a place into a single string for returning.
+   *
+   * @param place The place of birth/death.
+   * @param date The time of birth/death.
+   * @returns A various info and personal attributes.
+   */
+  private fun formatDatePlaceInfo(place: String, date: String): String {
+    val dateString = date.substringBefore("T").removePrefix("+")
+    val formattedDate = LocalDate.parse(dateString).format(DateTimeFormatter.ofPattern("d/M/yyyy"))
+    return "$place, $formattedDate."
+  }
+
+  /**
+   * A simple function to query Wikidata to retrieve a place name using its QID.
+   *
+   * @param locQID The relevant place's QID.
+   * @returns A various info and personal attributes.
+   */
+  private suspend fun getPlaceName(locQID: QID): Label {
+    val locReq = getLabelAndClaim(locQID)
+    val locInfo = parseWikidataEntities(locReq, parseClaims = false)
+    val name = locInfo[locQID]!!.first
+    return name
+  }
+
+  /**
+   * A simple function to format an image URL in the style of Wikimedia Commons.
+   *
+   * @param images A list of relevant images, though we only consider index 0.
+   * @returns A formed URL to query for the image.
+   */
+  private suspend fun mkImage(images: List<String>): String {
+    if (images.isEmpty()) {
+      return "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
+    }
+
+    val formattedFilename = images[0].replace(" ", "_")
+
+    val encodedFilename =
+      withContext(Dispatchers.IO) {
+          URLEncoder.encode(formattedFilename, StandardCharsets.UTF_8.toString())
+        }
+        .replace("+", "%20")
+
+    return "https://commons.wikimedia.org/wiki/Special:FilePath/$encodedFilename"
+  }
+
+  /**
    * Searches for a person and returns their QID. We first query the cache and then Wikipedia.
    *
    * @param name The person's name.
@@ -69,7 +156,7 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
 
     val idsParam = allIds.joinToString("|")
     val nameResponse = getLabelAndClaim(idsParam)
-    val labelClaimPair = parseWikidataQIDs(nameResponse)
+    val labelClaimPair = parseWikidataEntities(nameResponse)
 
     labelClaimPair.forEach { (qid, pair) -> readableNames[qid] = pair.first }
 
@@ -87,7 +174,7 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
   ): Pair<Label, PropertyMapping> {
 
     val familyResponse = getLabelAndClaim(personQID)
-    val labelFamilyMap = parseWikidataQIDs(familyResponse)
+    val labelFamilyMap = parseWikidataEntities(familyResponse)
 
     val labelFamilyPair =
       labelFamilyMap[personQID]
