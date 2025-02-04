@@ -2,10 +2,8 @@ package org.data.services
 
 import io.ktor.server.plugins.*
 import org.data.models.*
-import org.data.parsers.parseWikidataIDLookup
-import org.data.parsers.parseWikidataQIDs
-import org.data.requests.getLabelAndClaim
-import org.data.requests.searchWikidataForQID
+import org.data.parsers.WikiRequestParser
+import org.data.requests.*
 
 /** Service class for performing Wikipedia/Wikidata lookups. */
 class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
@@ -46,8 +44,8 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
    * @returns Their Wikidata QID as a string.
    */
   private suspend fun searchForPersonsQID(name: String): QID? {
-    val response = searchWikidataForQID(name)
-    val qid = parseWikidataIDLookup(response)
+    val response = ComplexRequester.searchWikidataForQID(name)
+    val qid = WikiRequestParser.parseWikidataIDLookup(response)
     return qid
   }
 
@@ -67,9 +65,8 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
 
     val readableNames = mutableMapOf<String, String>()
 
-    val idsParam = allIds.joinToString("|")
-    val nameResponse = getLabelAndClaim(idsParam)
-    val labelClaimPair = parseWikidataQIDs(nameResponse)
+    val nameResponse = ComplexRequester.getLabelAndClaim(allIds)
+    val labelClaimPair = WikiRequestParser.parseWikidataQIDs(nameResponse)
 
     labelClaimPair.forEach { (qid, pair) -> readableNames[qid] = pair.first }
 
@@ -86,8 +83,8 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
     personQID: QID
   ): Pair<Label, PropertyMapping> {
 
-    val familyResponse = getLabelAndClaim(personQID)
-    val labelFamilyMap = parseWikidataQIDs(familyResponse)
+    val familyResponse = ComplexRequester.getLabelAndClaim(listOf(personQID))
+    val labelFamilyMap = WikiRequestParser.parseWikidataQIDs(familyResponse)
 
     val labelFamilyPair =
       labelFamilyMap[personQID]
