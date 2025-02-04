@@ -2,8 +2,10 @@
   import { balanceTree } from '$lib/familytree/balanceTree';
   import { type Marriages, type Positions, type Tree } from '$lib/familytree/models';
 
-  const { tree, getPersonInfo }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } =
-    $props();
+  const {
+    tree,
+    getPersonInfo
+  }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } = $props();
   let visMarriages = $state<Marriages | undefined>(tree?.marriages);
   let positions = $state<Positions>({});
 
