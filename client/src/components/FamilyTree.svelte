@@ -9,7 +9,7 @@
 
   $effect(() => {
     if (tree) {
-      [positions, visMarriages] = balanceTree(tree, [0, 0]);
+      [positions, visMarriages] = balanceTree(tree, [-500, 0]);
     } else {
       positions = {};
     }

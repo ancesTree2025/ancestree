@@ -1,14 +1,26 @@
 {
-  "focus": "Focus",
+  "focus": "F",
   "people": [
-    ["Focus", { "name": "F" }],
-    ["Wife 1", { "name": "W1" }],
-    ["Wife 2", { "name": "W2" }],
-    ["Child 1", { "name": "C1" }],
-    ["Child 2", { "name": "C2" }],
-    ["Child 3", { "name": "C3" }],
-    ["Child 4", { "name": "C4" }]
+    ["F", { "name": "Focus" }],
+    ["W1", { "name": "Wife 1" }],
+    ["W2", { "name": "Wife 2" }],
+    ["C1", { "name": "Child 1" }],
+    ["C2", { "name": "Child 2" }],
+    ["C3", { "name": "Child 3" }],
+    ["DiL", { "name": "Daughter in Law" }],
+    ["C4", { "name": "Child 4" }],
+    ["GC", { "name": "Grand Child" }]
   ],
   "marriages": [
+    {
+      "parents": ["F", "W1"],
+      "children": ["C1"]
+    }, {
+      "parents": ["F", "W2"],
+      "children": ["C2", "C3", "C4"]
+    }, {
+      "parents": ["C3", "DiL"],
+      "children": ["GC"]
+    }
   ]
 }
