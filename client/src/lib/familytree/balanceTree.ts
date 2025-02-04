@@ -1,6 +1,6 @@
 import type { Positions, PersonID, Tree, Marriages } from './models';
 
-/* visParents are the parents used for the purpose of the tree
+/* visMarraiges are the marriages used for the purpose of the tree
      visualisation. If Focus has Wife 1, Wife 2 and Wife 3 then they
      will be drawn in a line as follows: Wife 1 == Focus == Wife 2 -- Wife 3.
      So any children Focus has with Wife 3 will be drawn as if they are
