@@ -5,12 +5,15 @@
   import IconAlert from '~icons/tabler/alert-triangle-filled';
   import type { Status } from '$lib/status';
   import { scale } from 'svelte/transition';
+  import { fetchNames } from '$lib';
 
   let { nameInput = $bindable(), status }: { nameInput?: string; status: Status } = $props();
 
   let name = $state('');
   let searching = $state(false);
+  let searchResults = $state<string[]>([]);
   let timer: number | null = null;
+
   $effect(() => {
     if (name) {
       searching = true;
@@ -21,11 +24,25 @@
         timer && clearTimeout(timer);
         searching = false;
       };
+    } else {
+      searching = false;
+      searchResults = [];
     }
-  })
-  function searchByName() {
-    console.log('searching by name', name);
-    searching = false;
+  });
+  async function searchByName() {
+    const result = await fetchNames(name, true);
+    try {
+      searchResults = result.getOrThrow();
+    } catch (e: any) {
+      // TODO: handle error
+    } finally {
+      searching = false;
+    }
+  }
+  function selectName(selectedName: string) {
+    searchResults = [];
+    name = selectedName;
+    submitAction();
   }
 
   function submitIfEnter(event: KeyboardEvent) {
@@ -67,6 +84,20 @@
         <p class="mt-2 text-nowrap rounded-xl bg-red px-8 py-1 text-center text-sm text-white">
           {status.error}
         </p>
+      </div>
+    </div>
+  {/if}
+  {#if searchResults.length}
+    <div class="absolute left-0 right-0 top-full mx-5">
+      <div class="rounded-lg bg-white shadow-lg">
+        {#each searchResults as result}
+          <button
+            class="block w-full cursor-pointer p-2 text-left hover:bg-gray"
+            onclick={() => selectName(result)}
+          >
+            {result}
+          </button>
+        {/each}
       </div>
     </div>
   {/if}
