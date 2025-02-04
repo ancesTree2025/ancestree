@@ -1,8 +1,10 @@
 package org.data.services
 
+import io.ktor.client.statement.*
 import io.ktor.server.plugins.*
 import org.data.models.*
 import org.data.parsers.WikiRequestParser
+import org.data.parsers.parseGoogleKnowledgeLookup
 import org.data.requests.*
 
 /** Service class for performing Wikipedia/Wikidata lookups. */
@@ -95,5 +97,17 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
     val familyInfo = replaceQIDsWithNames(labelFamilyPair.second)
 
     return Pair(label, familyInfo)
+  }
+
+  /**
+   * Fetches autocomplete results from the connected database for search input.
+   *
+   * @param input The part of the query that the user intends to ask.
+   * @return A list of complete queries that the user may want to input.
+   */
+  override suspend fun fetchAutocomplete(input: String): List<String> {
+    val response = ComplexRequester.getAutocompleteNames(input)
+
+    return parseGoogleKnowledgeLookup(response)
   }
 }

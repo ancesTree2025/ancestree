@@ -2,9 +2,9 @@
   import { balanceTree } from '$lib/familytree/balanceTree';
   import { type Marriages, type Positions, type Tree } from '$lib/familytree/models';
 
-  let { tree, getPersonInfo }: { tree?: Tree; getPersonInfo: (name: string) => void } = $props();
+  let { tree, getPersonInfo }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } =
+    $props();
   let visMarriages = $state<Marriages | undefined>(tree?.marriages);
-
   let positions = $state<Positions>({});
 
   $effect(() => {
@@ -131,7 +131,7 @@
               height={RECT_HEIGHT}
             >
               <button
-                onclick={() => getPersonInfo(person.name)}
+                onclick={() => getPersonInfo(id, person.name)}
                 class="flex h-full w-full cursor-pointer items-center justify-center text-center"
               >
                 {person.name}
