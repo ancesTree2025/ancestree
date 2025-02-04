@@ -11,6 +11,7 @@ export default {
       white: '#fff',
       black: '#222',
       input: '#eee',
+      gray: '#f3f4f6',
       node: '#ddd',
       red: '#f44',
       transparent: 'transparent'
