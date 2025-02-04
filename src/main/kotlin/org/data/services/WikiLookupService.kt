@@ -4,8 +4,8 @@ import io.ktor.client.statement.*
 import io.ktor.server.plugins.*
 import org.data.models.*
 import org.data.parsers.WikiRequestParser
-import org.data.requests.*
 import org.data.parsers.parseGoogleKnowledgeLookup
+import org.data.requests.*
 
 /** Service class for performing Wikipedia/Wikidata lookups. */
 class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {

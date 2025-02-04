@@ -31,9 +31,7 @@ object BaseRequester {
     configParams: HttpRequestBuilder.() -> Unit,
   ): HttpResponse {
     val client = HttpClientProvider.httpClient
-    return client.get(endpoint.baseUrl) {
-      configParams()
-    }
+    return client.get(endpoint.baseUrl) { configParams() }
   }
 
   /**
