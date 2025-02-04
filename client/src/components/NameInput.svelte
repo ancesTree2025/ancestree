@@ -10,16 +10,29 @@
   let { nameInput = $bindable(), status }: { nameInput?: string; status: Status } = $props();
 
   let name = $state('');
+  
+  /**
+   * A loading state to notify the user when
+   * the search for autocomplete suggestions is in progress
+   */
   let searching = $state(false);
+  /**
+   * A list of search results to show as autocomplete suggestions
+   */
   let searchResults = $state<string[]>([]);
+  /**
+   * A timer to debounce the search request
+   * Debouncing is done to prevent making too many requests.
+   * The search request is made only after the user has stopped typing for 500ms.
+   */
   let timer: number | null = null;
-
   $effect(() => {
     if (name) {
       searching = true;
       timer && clearTimeout(timer);
       timer = setTimeout(searchByName, 500);
 
+      // On cleanup, clear the timer and set searching to false
       return () => {
         timer && clearTimeout(timer);
         searching = false;
@@ -39,9 +52,13 @@
       searching = false;
     }
   }
+  /**
+   * Handler to select a name from the autocomplete suggestions
+   * @param selectedName the chosen name from the autocomplete suggestions
+   */
   function selectName(selectedName: string) {
     searchResults = [];
-    name = selectedName;
+    name = selectedName; // Replaces the typed name with the selected name
     submitAction();
   }
 
