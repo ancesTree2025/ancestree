@@ -43,7 +43,7 @@
     }
   });
   async function searchByName() {
-    const result = await fetchNames(name, true);
+    const result = await fetchNames(name);
     try {
       searchResults = result.getOrThrow();
     } catch (_e) {
