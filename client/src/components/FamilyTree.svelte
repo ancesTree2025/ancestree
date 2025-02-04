@@ -1,14 +1,15 @@
 <script lang="ts">
   import { balanceTree } from '$lib/familytree/balanceTree';
-  import { type Positions, type Tree } from '$lib/familytree/models';
+  import { type Marriages, type Positions, type Tree } from '$lib/familytree/models';
 
-  const { tree }: { tree?: Tree } = $props();
+  const { tree, getPersonInfo }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } =
+    $props();
+  let visMarriages = $state<Marriages | undefined>(tree?.marriages);
   let positions = $state<Positions>({});
 
   $effect(() => {
     if (tree) {
-      const newPositions = balanceTree(tree, [0, 0]);
-      positions = newPositions;
+      [positions, visMarriages] = balanceTree(tree, [-500, 0]);
     } else {
       positions = {};
     }
@@ -17,12 +18,15 @@
   const RECT_HEIGHT = 60;
   const RECT_WIDTH = 120;
   const RECT_RADIUS = 10;
+
+  let width = $state(0);
+  let height = $state(0);
 </script>
 
-<svg class="h-full w-full">
-  <g style="transform: translate(50%, 50%)">
-    {#if tree}
-      {#each tree.marriages as marriage}
+<svg class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
+  <g style={`transform: translate(${width / 2}px, ${height / 2}px)`}>
+    {#if tree && visMarriages}
+      {#each visMarriages as marriage}
         <!-- fetch Person for each parent, child -->
         {@const mother = positions[marriage.parents[0]]}
         {@const father = positions[marriage.parents[1]]}
@@ -126,9 +130,12 @@
               width={RECT_WIDTH}
               height={RECT_HEIGHT}
             >
-              <div class="flex h-full w-full items-center justify-center text-center">
+              <button
+                onclick={() => getPersonInfo(id, person.name)}
+                class="flex h-full w-full cursor-pointer items-center justify-center text-center"
+              >
                 {person.name}
-              </div>
+              </button>
             </foreignObject>
           </g>
         {/if}
