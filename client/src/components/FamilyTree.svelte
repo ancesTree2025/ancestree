@@ -121,17 +121,17 @@
               class="fill-node"
             ></rect>
             <foreignObject
-              onclick={() => getPersonInfo(person.name)}
               x={-RECT_WIDTH / 2}
               y={-RECT_HEIGHT / 2}
               width={RECT_WIDTH}
               height={RECT_HEIGHT}
             >
-              <div
+              <button
+                onclick={() => getPersonInfo(person.name)}
                 class="flex h-full w-full cursor-pointer items-center justify-center text-center"
               >
                 {person.name}
-              </div>
+              </button>
             </foreignObject>
           </g>
         {/if}
