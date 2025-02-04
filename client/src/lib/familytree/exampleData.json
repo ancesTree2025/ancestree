@@ -1,84 +1,22 @@
 {
-  "root": {
-    "data": {
-      "id": "1",
-      "name": "Focus",
-      "gender": "male"
-    },
-    "id": "1",
-    "depth": 0
-  },
-  "nodes": [
-    {
-      "data": {
-        "id": "1",
-        "name": "Focus",
-        "gender": "male"
-      },
-      "id": "1",
-      "depth": 0
-    },
-    {
-      "data": {
-        "id": "10",
-        "name": "Wife 1",
-        "gender": "male"
-      },
-      "id": "10",
-      "depth": 0
-    },
-    {
-      "data": {
-        "id": "2",
-        "name": "Wife 2",
-        "gender": "male"
-      },
-      "id": "2",
-      "depth": 0
-    },
-    {
-      "data": {
-        "id": "3",
-        "name": "Child 1",
-        "gender": "male"
-      },
-      "id": "3",
-      "depth": 1
-    },
-    {
-      "data": {
-        "id": "4",
-        "name": "Child 2",
-        "gender": "male"
-      },
-      "id": "4",
-      "depth": 1
-    }
+  "focus": "Focus",
+  "people": [
+    ["Focus", { "name": "F" }],
+    ["Wife 1", { "name": "W1" }],
+    ["Wife 2", { "name": "W2" }],
+    ["Child 1", { "name": "C1" }],
+    ["Child 2", { "name": "C2" }],
+    ["Child 3", { "name": "C3" }],
+    ["Child 4", { "name": "C4" }]
   ],
-  "edges": [
+  "marriages": [
     {
-      "node1": "1",
-      "node2": "10"
+      "parents": ["Focus", "Wife 1"],
+      "children": ["Child 1"]
     },
     {
-      "node1": "1",
-      "node2": "2"
-    },
-    {
-      "node1": "1",
-      "node2": "3"
-    },
-    {
-      "node1": "10",
-      "node2": "3"
-    },
-    {
-      "node1": "1",
-      "node2": "4"
-    },
-    {
-      "node1": "2",
-      "node2": "4"
+      "parents": ["Focus", "Wife 2"],
+      "children": ["Child 2", "Child 3", "Child 4"]
     }
   ]
 }
