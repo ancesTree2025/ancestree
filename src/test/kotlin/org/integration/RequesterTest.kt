@@ -71,9 +71,3 @@ class RequesterTest {
       assertNotNull(result.entities["Q317521"]?.labels?.en)
     }
 }
-
-
-suspend fun main() {
-  val httpResponse = BaseRequester.doWikipediaRequest("") {}
-  println(httpResponse)
-}
