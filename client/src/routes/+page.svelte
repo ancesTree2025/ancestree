@@ -6,6 +6,8 @@
   import NameInput from '../components/NameInput.svelte';
   // @ts-expect-error $app/stores is valid but not recognised
   import { page } from '$app/stores';
+  import SidePanel from '../components/SidePanel.svelte';
+  import { fetchInfo, type PersonInfo } from '$lib/info/fetchInfo';
 
   let name = $state<string | undefined>();
   let status = $state<Status>({ state: 'idle' });
@@ -27,6 +29,19 @@
       });
     }
   });
+
+  let showSidePanel = $state(false);
+  let sidePanelName = $state<string | undefined>(undefined);
+  let sidePanelData = $state<PersonInfo | undefined>(undefined);
+
+  async function getPersonInfo(qid: string, name: string) {
+    const [fetched] = (await fetchInfo(qid, useFakeData)).toTuple();
+    if (fetched) {
+      sidePanelData = fetched;
+      sidePanelName = name;
+      showSidePanel = true;
+    }
+  }
 </script>
 
 <div class="flex h-full flex-col">
@@ -37,8 +52,16 @@
     </div>
     <div class="w-48"></div>
   </nav>
-  <div class="flex-1">
-    <FamilyTree {tree} />
+  <div class="flex flex-1">
+    <div class="flex-1">
+      <FamilyTree {getPersonInfo} {tree} />
+    </div>
+    <SidePanel
+      name={sidePanelName}
+      show={showSidePanel}
+      data={sidePanelData}
+      close={() => (showSidePanel = false)}
+    />
   </div>
 </div>
 

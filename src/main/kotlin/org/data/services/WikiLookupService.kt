@@ -1,5 +1,6 @@
 package org.data.services
 
+import io.ktor.client.statement.*
 import io.ktor.server.plugins.*
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -9,10 +10,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.data.models.*
 import org.data.models.WikidataProperties.propertyQIDMapPersonal
-import org.data.parsers.parseWikidataEntities
-import org.data.parsers.parseWikidataIDLookup
-import org.data.requests.getLabelAndClaim
-import org.data.requests.searchWikidataForQID
+import org.data.parsers.WikiRequestParser
+import org.data.parsers.parseGoogleKnowledgeLookup
+import org.data.requests.*
+import org.data.requests.ComplexRequester
 
 /** Service class for performing Wikipedia/Wikidata lookups. */
 class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
@@ -55,21 +56,21 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
    */
   suspend fun getDetailedInfo(qid: QID): PersonalInfo {
 
-    val familyResponse = getLabelAndClaim(qid)
-    val allInfo = parseWikidataEntities(familyResponse, propertyQIDMapPersonal)
+    val familyResponse = ComplexRequester.getLabelAndClaim(listOf(qid))
+    val allInfo = WikiRequestParser.parseWikidataEntities(familyResponse, propertyQIDMapPersonal)
     val infoMap = allInfo[qid]!!.second
 
     val imageString = mkImage(infoMap["Wikimedia Image File"]!!)
 
-    val PoB = getPlaceName(infoMap["PoB"]!![0])
-    val PoD = getPlaceName(infoMap["PoD"]!![0])
+    val PoB = getPlaceName(infoMap["PoB"]!!.getOrNull(0))
+    val PoD = getPlaceName(infoMap["PoD"]!!.getOrNull(0))
 
     val info =
       PersonalInfo(
         imageString,
         mapOf(
-          "Born" to formatDatePlaceInfo(PoB, infoMap["DoB"]!![0]),
-          "Died" to formatDatePlaceInfo(PoD, infoMap["DoD"]!![0]),
+          "Born" to formatDatePlaceInfo(PoB, infoMap["DoB"]),
+          "Died" to formatDatePlaceInfo(PoD, infoMap["DoD"]),
         ),
         "stub",
         "stub",
@@ -85,8 +86,11 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
    * @param date The time of birth/death.
    * @returns A various info and personal attributes.
    */
-  private fun formatDatePlaceInfo(place: String, date: String): String {
-    val dateString = date.substringBefore("T").removePrefix("+")
+  private fun formatDatePlaceInfo(place: String, date: List<String>?): String {
+    if (date.isNullOrEmpty() && place == "Unknown") {
+      return "Still alive"
+    }
+    val dateString = date!![0].substringBefore("T").removePrefix("+")
     val formattedDate = LocalDate.parse(dateString).format(DateTimeFormatter.ofPattern("d/M/yyyy"))
     return "$place, $formattedDate."
   }
@@ -97,9 +101,10 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
    * @param locQID The relevant place's QID.
    * @returns A various info and personal attributes.
    */
-  private suspend fun getPlaceName(locQID: QID): Label {
-    val locReq = getLabelAndClaim(locQID)
-    val locInfo = parseWikidataEntities(locReq, parseClaims = false)
+  private suspend fun getPlaceName(locQID: QID?): Label {
+    if (locQID == null) return "Unknown"
+    val locReq = ComplexRequester.getLabelAndClaim(listOf(locQID))
+    val locInfo = WikiRequestParser.parseWikidataEntities(locReq, parseClaims = false)
     val name = locInfo[locQID]!!.first
     return name
   }
@@ -133,8 +138,8 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
    * @returns Their Wikidata QID as a string.
    */
   private suspend fun searchForPersonsQID(name: String): QID? {
-    val response = searchWikidataForQID(name)
-    val qid = parseWikidataIDLookup(response)
+    val response = ComplexRequester.searchWikidataForQID(name)
+    val qid = WikiRequestParser.parseWikidataIDLookup(response)
     return qid
   }
 
@@ -154,9 +159,8 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
 
     val readableNames = mutableMapOf<String, String>()
 
-    val idsParam = allIds.joinToString("|")
-    val nameResponse = getLabelAndClaim(idsParam)
-    val labelClaimPair = parseWikidataEntities(nameResponse)
+    val nameResponse = ComplexRequester.getLabelAndClaim(allIds)
+    val labelClaimPair = WikiRequestParser.parseWikidataEntities(nameResponse)
 
     labelClaimPair.forEach { (qid, pair) -> readableNames[qid] = pair.first }
 
@@ -173,8 +177,8 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
     personQID: QID
   ): Pair<Label, PropertyMapping> {
 
-    val familyResponse = getLabelAndClaim(personQID)
-    val labelFamilyMap = parseWikidataEntities(familyResponse)
+    val familyResponse = ComplexRequester.getLabelAndClaim(listOf(personQID))
+    val labelFamilyMap = WikiRequestParser.parseWikidataEntities(familyResponse)
 
     val labelFamilyPair =
       labelFamilyMap[personQID]
@@ -185,5 +189,17 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
     val familyInfo = replaceQIDsWithNames(labelFamilyPair.second)
 
     return Pair(label, familyInfo)
+  }
+
+  /**
+   * Fetches autocomplete results from the connected database for search input.
+   *
+   * @param input The part of the query that the user intends to ask.
+   * @return A list of complete queries that the user may want to input.
+   */
+  override suspend fun fetchAutocomplete(input: String): List<String> {
+    val response = ComplexRequester.getAutocompleteNames(input)
+
+    return parseGoogleKnowledgeLookup(response)
   }
 }
