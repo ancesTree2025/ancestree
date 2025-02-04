@@ -17,10 +17,13 @@
   const RECT_HEIGHT = 60;
   const RECT_WIDTH = 120;
   const RECT_RADIUS = 10;
+
+  let width = $state(0);
+  let height = $state(0);
 </script>
 
-<svg class="h-full w-full">
-  <g style="transform: translate(50%, 50%)">
+<svg class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
+  <g style={`transform: translate(${width / 2}px, ${height / 2}px)`}>
     {#if tree}
       {#each tree.marriages as marriage}
         <!-- fetch Person for each parent, child -->
