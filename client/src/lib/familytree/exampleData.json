@@ -15,10 +15,12 @@
     {
       "parents": ["F", "W1"],
       "children": ["C1"]
-    }, {
+    },
+    {
       "parents": ["F", "W2"],
       "children": ["C2", "C3", "C4"]
-    }, {
+    },
+    {
       "parents": ["C3", "DiL"],
       "children": ["GC"]
     }
