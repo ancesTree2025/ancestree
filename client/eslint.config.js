@@ -1,5 +1,5 @@
 import pluginJs from '@eslint/js';
-import globals from "globals";
+import globals from 'globals';
 import tsEslint from 'typescript-eslint';
 import * as svelteParser from 'svelte-eslint-parser';
 import * as typescriptParser from '@typescript-eslint/parser';

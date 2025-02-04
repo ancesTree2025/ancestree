@@ -10,7 +10,7 @@
   let { nameInput = $bindable(), status }: { nameInput?: string; status: Status } = $props();
 
   let name = $state('');
-  
+
   /**
    * A loading state to notify the user when
    * the search for autocomplete suggestions is in progress
@@ -29,12 +29,12 @@
   $effect(() => {
     if (name) {
       searching = true;
-      if(timer) clearTimeout(timer);
+      if (timer) clearTimeout(timer);
       timer = setTimeout(searchByName, 500);
 
       // On cleanup, clear the timer and set searching to false
       return () => {
-        if(timer) clearTimeout(timer);
+        if (timer) clearTimeout(timer);
         searching = false;
       };
     } else {
