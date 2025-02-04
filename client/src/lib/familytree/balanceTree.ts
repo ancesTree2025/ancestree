@@ -1,4 +1,4 @@
-import type { Positions, PersonID, Tree, Marriages } from './models';
+import type { Positions, PersonID, Tree, Marriages, Marriage } from './models';
 
 /* visParents are the parents used for the purpose of the tree
      visualisation. If Focus has Wife 1, Wife 2 and Wife 3 then they
@@ -11,10 +11,10 @@ export function balanceTree(
   center: [number, number],
   BASE_WIDTH = 160,
   GENERATION_HEIGHT = 120
-): [Positions, Marriages] {
+): [Positions, (Marriage & { actualMarriage: boolean })[]] {
   const positions: Positions = {};
 
-  const visMarriages: Marriages = [];
+  const visMarriages: (Marriage & { actualMarriage: boolean })[] = [];
 
   // The x position of the current "right edge" of the graph
   // Accumulates as nodes are added to the right.
@@ -75,10 +75,14 @@ export function balanceTree(
       if (i > 0) {
         visMarriages.push({
           parents: [marriages[i - 1].parents.find((p) => p !== focused)!, spouse],
-          children: marriage.children
+          children: marriage.children,
+          actualMarriage: false
         });
       } else {
-        visMarriages.push(marriage);
+        visMarriages.push({
+          ...marriage,
+          actualMarriage: true
+        });
       }
       subtree.add(spouse);
       const children = marriage.children;
@@ -139,7 +143,10 @@ export function balanceTree(
       return meX;
     }
 
-    visMarriages.push(parentMarriage)
+    visMarriages.push({
+      ...parentMarriage,
+      actualMarriage: true
+    });
 
     const mother = parentMarriage.parents[0];
     const father = parentMarriage.parents[1];

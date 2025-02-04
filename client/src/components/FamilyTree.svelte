@@ -1,9 +1,14 @@
 <script lang="ts">
   import { balanceTree } from '$lib/familytree/balanceTree';
-  import { type Marriages, type Positions, type Tree } from '$lib/familytree/models';
+  import { type Marriage, type Positions, type Tree } from '$lib/familytree/models';
 
   let { tree }: { tree?: Tree } = $props();
-  let visMarriages = $state<Marriages | undefined>(tree?.marriages);
+  let visMarriages = $state<(Marriage & { actualMarriage: boolean })[] | undefined>(
+    tree?.marriages.map((x) => ({
+      ...x,
+      actualMarriage: true
+    }))
+  );
   let positions = $state<Positions>({});
 
   $effect(() => {
@@ -37,6 +42,7 @@
               y1={mother.y}
               x2={father.x}
               y2={father.y}
+              stroke-dasharray={marriage.actualMarriage ? '0' : '3'}
               class="stroke-node stroke-line"
             />
           {:else}
