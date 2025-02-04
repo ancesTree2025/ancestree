@@ -3,7 +3,7 @@ package org.data.parsers
 import io.ktor.client.statement.*
 import kotlinx.serialization.json.*
 import org.data.models.*
-import org.data.models.WikidataProperties.relevantProperties
+import org.data.models.WikidataProperties.propertyQIDMap
 
 object WikiRequestParser {
   /**
@@ -30,32 +30,44 @@ object WikiRequestParser {
    * @param response The HTTP response from Wikidata.
    * @returns A mapping of QIDs to a pair of the name and the relation.
    */
-  suspend fun parseWikidataQIDs(response: HttpResponse): Map<QID, Pair<Label, PropertyMapping>> {
+  suspend fun parseWikidataEntities(
+    response: HttpResponse,
+    properties: Map<String, String> = propertyQIDMap,
+    parseClaims: Boolean = true,
+  ): Map<QID, Pair<Label, PropertyMapping>> {
     val json = Json { ignoreUnknownKeys = true }
     val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
     return result.entities.mapValues { (_, entityInfo) ->
-      val label = entityInfo.labels.en?.value ?: "DEBUG: Label not found in english"
+      val label = entityInfo.labels.en?.value ?: "decidedly NOT poggers"
 
-      val familyInfo =
-        relevantProperties.entries
-          .associate { (key, value) ->
-            value to
-              (entityInfo.claims[key]?.flatMap { claim ->
-                claim.mainsnak.datavalue
-                  ?.value
-                  ?.jsonObject
-                  ?.get("id")
-                  ?.jsonPrimitive
-                  ?.content
-                  ?.let { listOf(it) } ?: emptyList()
-              } ?: emptyList())
-          }
-          .toMutableMap()
+      var familyInfo = mutableMapOf<String, List<String>>()
 
-      relevantProperties.values.forEach { relation ->
-        familyInfo.putIfAbsent(relation, emptyList())
+      if (parseClaims) {
+        familyInfo =
+          properties.entries
+            .associate { (key, value) ->
+              value to
+                (entityInfo.claims[key]?.flatMap { claim ->
+                  when (val dataValue = claim.mainsnak.datavalue?.value) {
+                    is JsonObject -> {
+                      when {
+                        dataValue.containsKey("id") ->
+                          listOf(dataValue["id"]!!.jsonPrimitive.content)
+                        dataValue.containsKey("time") ->
+                          listOf(dataValue["time"]!!.jsonPrimitive.content)
+                        else -> emptyList()
+                      }
+                    }
+                    is JsonPrimitive -> listOf(dataValue.content)
+                    else -> emptyList()
+                  }
+                } ?: emptyList())
+            }
+            .toMutableMap()
       }
+
+      propertyQIDMap.values.forEach { relation -> familyInfo.putIfAbsent(relation, emptyList()) }
 
       label to familyInfo
     }
