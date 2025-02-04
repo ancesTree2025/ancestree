@@ -10,13 +10,5 @@
     ["Child 4", { "name": "C4" }]
   ],
   "marriages": [
-    {
-      "parents": ["Focus", "Wife 1"],
-      "children": ["Child 1"]
-    },
-    {
-      "parents": ["Focus", "Wife 2"],
-      "children": ["Child 2", "Child 3", "Child 4"]
-    }
   ]
 }
