@@ -1,0 +1,1 @@
+export { fetchNames } from './fetchNames';

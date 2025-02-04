@@ -5,10 +5,62 @@
   import IconAlert from '~icons/tabler/alert-triangle-filled';
   import type { Status } from '$lib/status';
   import { scale } from 'svelte/transition';
+  import { fetchNames } from '$lib';
 
   let { nameInput = $bindable(), status }: { nameInput?: string; status: Status } = $props();
 
   let name = $state('');
+
+  /**
+   * A loading state to notify the user when
+   * the search for autocomplete suggestions is in progress
+   */
+  let searching = $state(false);
+  /**
+   * A list of search results to show as autocomplete suggestions
+   */
+  let searchResults = $state<string[]>([]);
+  /**
+   * A timer to debounce the search request
+   * Debouncing is done to prevent making too many requests.
+   * The search request is made only after the user has stopped typing for 500ms.
+   */
+  let timer: number | null = null;
+  $effect(() => {
+    if (name) {
+      searching = true;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(searchByName, 500);
+
+      // On cleanup, clear the timer and set searching to false
+      return () => {
+        if (timer) clearTimeout(timer);
+        searching = false;
+      };
+    } else {
+      searching = false;
+      searchResults = [];
+    }
+  });
+  async function searchByName() {
+    const result = await fetchNames(name, true);
+    try {
+      searchResults = result.getOrThrow();
+    } catch (_e) {
+      // TODO: handle error
+    } finally {
+      searching = false;
+    }
+  }
+  /**
+   * Handler to select a name from the autocomplete suggestions
+   * @param selectedName the chosen name from the autocomplete suggestions
+   */
+  function selectName(selectedName: string) {
+    searchResults = [];
+    name = selectedName; // Replaces the typed name with the selected name
+    submitAction();
+  }
 
   function submitIfEnter(event: KeyboardEvent) {
     if (event.key === 'Enter') {
@@ -33,7 +85,7 @@
     placeholder="Enter a name..."
     onkeydown={submitIfEnter}
   />
-  {#if status.state === 'loading'}
+  {#if status.state === 'loading' || searching}
     <div class={`${ICON_CLASS}`} transition:scale={{ duration: 150 }}>
       <div class="loader h-5 w-5 bg-black p-1 opacity-50"></div>
     </div>
@@ -49,6 +101,20 @@
         <p class="mt-2 text-nowrap rounded-xl bg-red px-8 py-1 text-center text-sm text-white">
           {status.error}
         </p>
+      </div>
+    </div>
+  {/if}
+  {#if searchResults.length}
+    <div class="absolute left-0 right-0 top-full mx-5">
+      <div class="rounded-lg bg-white shadow-lg">
+        {#each searchResults as result}
+          <button
+            class="block w-full cursor-pointer p-2 text-left hover:bg-gray"
+            onclick={() => selectName(result)}
+          >
+            {result}
+          </button>
+        {/each}
       </div>
     </div>
   {/if}
