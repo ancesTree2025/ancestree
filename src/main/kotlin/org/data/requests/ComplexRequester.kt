@@ -41,4 +41,17 @@ object ComplexRequester {
 
     return response
   }
+
+  suspend fun getAutocompleteNames(query: String, limit: Int = 5): HttpResponse {
+    val apiKey = System.getenv("GOOGLE_API_KEY")
+    val response =
+      BaseRequester.doGoogleKnowledgeRequest {
+        parameter("query", query)
+        parameter("limit", limit)
+        parameter("types", "Person")
+        parameter("key", apiKey)
+      }
+
+    return response
+  }
 }
