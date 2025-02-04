@@ -9,6 +9,24 @@
   let { nameInput = $bindable(), status }: { nameInput?: string; status: Status } = $props();
 
   let name = $state('');
+  let searching = $state(false);
+  let timer: number | null = null;
+  $effect(() => {
+    if (name) {
+      searching = true;
+      timer && clearTimeout(timer);
+      timer = setTimeout(searchByName, 500);
+
+      return () => {
+        timer && clearTimeout(timer);
+        searching = false;
+      };
+    }
+  })
+  function searchByName() {
+    console.log('searching by name', name);
+    searching = false;
+  }
 
   function submitIfEnter(event: KeyboardEvent) {
     if (event.key === 'Enter') {
@@ -33,7 +51,7 @@
     placeholder="Enter a name..."
     onkeydown={submitIfEnter}
   />
-  {#if status.state === 'loading'}
+  {#if status.state === 'loading' || searching}
     <div class={`${ICON_CLASS}`} transition:scale={{ duration: 150 }}>
       <div class="loader h-5 w-5 bg-black p-1 opacity-50"></div>
     </div>
