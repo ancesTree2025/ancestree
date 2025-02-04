@@ -16,9 +16,9 @@ export async function fetchNames(
     return Result.ok(exampleNames);
   }
 
-  const response = Result.fromAsyncCatching(fetch(`http://localhost:8080/search/${searchQuery}`)).mapError(
-    () => 'Failed to fetch names'
-  );
+  const response = Result.fromAsyncCatching(
+    fetch(`http://localhost:8080/search/${searchQuery}`)
+  ).mapError(() => 'Failed to fetch names');
 
   return response.mapCatching(
     async (res) => {
