@@ -12,6 +12,7 @@
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
     "lint": "eslint src",
+    "lint:fix": "eslint --fix src",
     "test": "bunx vitest"
   },
   "devDependencies": {

@@ -29,12 +29,12 @@
   $effect(() => {
     if (name) {
       searching = true;
-      timer && clearTimeout(timer);
+      if(timer) clearTimeout(timer);
       timer = setTimeout(searchByName, 500);
 
       // On cleanup, clear the timer and set searching to false
       return () => {
-        timer && clearTimeout(timer);
+        if(timer) clearTimeout(timer);
         searching = false;
       };
     } else {
@@ -46,7 +46,7 @@
     const result = await fetchNames(name, true);
     try {
       searchResults = result.getOrThrow();
-    } catch (e: any) {
+    } catch (_e) {
       // TODO: handle error
     } finally {
       searching = false;

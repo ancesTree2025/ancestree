@@ -7,7 +7,6 @@ const namesApiSchema = z.object({
   query: z.string(),
   autocomplete: z.array(z.string())
 });
-type NamesApiResponse = z.infer<typeof namesApiSchema>;
 
 export async function fetchNames(
   searchQuery: string,
@@ -18,7 +17,7 @@ export async function fetchNames(
   }
 
   const response = Result.fromAsyncCatching(
-    fetch(`http://localhost:8080/search/${searchQuery}`)
+    fetch(`search/${searchQuery}`)
   ).mapError(() => 'Failed to fetch names');
 
   return response.mapCatching(
