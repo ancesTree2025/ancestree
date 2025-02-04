@@ -1,118 +1,28 @@
 {
-  "root": {
-    "data": {
-      "id": "1",
-      "name": "Henry VIII",
-      "gender": "male"
-    },
-    "id": "1",
-    "depth": 0
-  },
-  "nodes": [
-    {
-      "data": {
-        "id": "1",
-        "name": "Henry VIII",
-        "gender": "male"
-      },
-      "id": "1",
-      "depth": 0
-    },
-    {
-      "data": {
-        "id": "2",
-        "name": "Catherine of Aragon",
-        "gender": "female"
-      },
-      "id": "2",
-      "depth": 0
-    },
-    {
-      "data": {
-        "id": "3",
-        "name": "Mary 1",
-        "gender": "female"
-      },
-      "id": "3",
-      "depth": 1
-    },
-    {
-      "data": {
-        "id": "4",
-        "name": "Henry VII",
-        "gender": "male"
-      },
-      "id": "4",
-      "depth": -1
-    },
-    {
-      "data": {
-        "id": "5",
-        "name": "Elizabeth of York",
-        "gender": "female"
-      },
-      "id": "5",
-      "depth": -1
-    },
-    {
-      "data": {
-        "id": "6",
-        "name": "Mary 2",
-        "gender": "female"
-      },
-      "id": "6",
-      "depth": 1
-    },
-    {
-      "data": {
-        "id": "7",
-        "name": "Mary 3",
-        "gender": "female"
-      },
-      "id": "7",
-      "depth": 1
-    }
+  "focus": "F",
+  "people": [
+    ["F", { "name": "Focus" }],
+    ["W1", { "name": "Wife 1" }],
+    ["W2", { "name": "Wife 2" }],
+    ["C1", { "name": "Child 1" }],
+    ["C2", { "name": "Child 2" }],
+    ["C3", { "name": "Child 3" }],
+    ["DiL", { "name": "Daughter in Law" }],
+    ["C4", { "name": "Child 4" }],
+    ["GC", { "name": "Grand Child" }]
   ],
-  "edges": [
+  "marriages": [
     {
-      "node1": "1",
-      "node2": "2"
+      "parents": ["F", "W1"],
+      "children": ["C1"]
     },
     {
-      "node1": "1",
-      "node2": "3"
+      "parents": ["F", "W2"],
+      "children": ["C2", "C3", "C4"]
     },
     {
-      "node1": "1",
-      "node2": "6"
-    },
-    {
-      "node1": "2",
-      "node2": "7"
-    },
-    {
-      "node1": "2",
-      "node2": "6"
-    },
-    {
-      "node1": "1",
-      "node2": "7"
-    },
-    {
-      "node1": "2",
-      "node2": "3"
-    },
-    {
-      "node1": "4",
-      "node2": "1"
-    },
-    {
-      "node1": "5",
-      "node2": "1"
-    },
-    {
-      "node1": "4",
-      "node2": "5"
+      "parents": ["C3", "DiL"],
+      "children": ["GC"]
     }
   ]
 }

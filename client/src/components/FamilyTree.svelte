@@ -1,15 +1,15 @@
 <script lang="ts">
   import { balanceTree } from '$lib/familytree/balanceTree';
-  import { type Positions, type Tree } from '$lib/familytree/models';
+  import { type Marriages, type Positions, type Tree } from '$lib/familytree/models';
 
   let { tree, getPersonInfo }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } =
     $props();
+  let visMarriages = $state<Marriages | undefined>(tree?.marriages);
   let positions = $state<Positions>({});
 
   $effect(() => {
     if (tree) {
-      const newPositions = balanceTree(tree, [0, 0]);
-      positions = newPositions;
+      [positions, visMarriages] = balanceTree(tree, [-500, 0]);
     } else {
       positions = {};
     }
@@ -25,8 +25,8 @@
 
 <svg class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
   <g style={`transform: translate(${width / 2}px, ${height / 2}px)`}>
-    {#if tree}
-      {#each tree.marriages as marriage}
+    {#if tree && visMarriages}
+      {#each visMarriages as marriage}
         <!-- fetch Person for each parent, child -->
         {@const mother = positions[marriage.parents[0]]}
         {@const father = positions[marriage.parents[1]]}
