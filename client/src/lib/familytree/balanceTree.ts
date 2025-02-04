@@ -82,12 +82,6 @@ export function balanceTree(
       }
       subtree.add(spouse);
       const children = marriage.children;
-      // if we only have one child, the width of the two parents (2 * BASE_WIDTH)
-      // is larger than the width of the child (BASE_WIDTH), so pad both sides
-      // by half of BASE_WIDTH
-      if (children.length === 1) {
-        right += BASE_WIDTH / 2;
-      }
 
       // recursively place children
       const left = right;
@@ -108,15 +102,12 @@ export function balanceTree(
       y -= GENERATION_HEIGHT;
 
       // render parents at the midpoint of the children's width
-      const mid = children.length === 0 ? right + BASE_WIDTH : (left + right) / 2;
+      const mid =
+        children.length === 0 ? (i === 0 ? right + BASE_WIDTH : right) : (left + right) / 2;
       addPerson(spouse, mid + BASE_WIDTH / 2, y);
-      if (i == 0) {
+      if (i === 0) {
         meX = mid - BASE_WIDTH / 2;
         addPerson(focused, meX, y);
-      }
-
-      if (children.length === 1) {
-        right += BASE_WIDTH / 2;
       }
     }
     return meX;
