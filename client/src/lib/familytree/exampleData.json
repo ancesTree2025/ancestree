@@ -2,7 +2,7 @@
   "root": {
     "data": {
       "id": "1",
-      "name": "Henry VIII",
+      "name": "Focus",
       "gender": "male"
     },
     "id": "1",
@@ -12,7 +12,7 @@
     {
       "data": {
         "id": "1",
-        "name": "Henry VIII",
+        "name": "Focus",
         "gender": "male"
       },
       "id": "1",
@@ -20,9 +20,18 @@
     },
     {
       "data": {
+        "id": "10",
+        "name": "Wife 1",
+        "gender": "male"
+      },
+      "id": "10",
+      "depth": 0
+    },
+    {
+      "data": {
         "id": "2",
-        "name": "Catherine of Aragon",
-        "gender": "female"
+        "name": "Wife 2",
+        "gender": "male"
       },
       "id": "2",
       "depth": 0
@@ -30,8 +39,8 @@
     {
       "data": {
         "id": "3",
-        "name": "Mary 1",
-        "gender": "female"
+        "name": "Child 1",
+        "gender": "male"
       },
       "id": "3",
       "depth": 1
@@ -39,77 +48,18 @@
     {
       "data": {
         "id": "4",
-        "name": "Henry VII",
+        "name": "Child 2",
         "gender": "male"
       },
       "id": "4",
-      "depth": -1
-    },
-    {
-      "data": {
-        "id": "5",
-        "name": "Elizabeth of York",
-        "gender": "female"
-      },
-      "id": "5",
-      "depth": -1
-    },
-    {
-      "data": {
-        "id": "6",
-        "name": "Mary 2",
-        "gender": "female"
-      },
-      "id": "6",
-      "depth": 1
-    },
-    {
-      "data": {
-        "id": "7",
-        "name": "Mary 3",
-        "gender": "female"
-      },
-      "id": "7",
-      "depth": 1
-    },
-    {
-      "data": {
-        "id": "8",
-        "name": "Husband 1",
-        "gender": "male"
-      },
-      "id": "8",
-      "depth": 1
-    },
-    {
-      "data": {
-        "id": "9",
-        "name": "Elizabeth II",
-        "gender": "female"
-      },
-      "id": "9",
-      "depth": 0
-    },
-    {
-      "data": {
-        "id": "10",
-        "name": "A",
-        "gender": "female"
-      },
-      "id": "10",
-      "depth": 1
-    },
-    {
-      "data": {
-        "id": "11",
-        "name": "B",
-        "gender": "female"
-      },
-      "id": "11",
       "depth": 1
     }
   ],
   "edges": [
+    {
+      "node1": "1",
+      "node2": "10"
+    },
     {
       "node1": "1",
       "node2": "2"
@@ -119,60 +69,16 @@
       "node2": "3"
     },
     {
-      "node1": "2",
+      "node1": "10",
       "node2": "3"
     },
     {
       "node1": "1",
-      "node2": "6"
+      "node2": "4"
     },
     {
       "node1": "2",
-      "node2": "6"
-    },
-    {
-      "node1": "1",
-      "node2": "7"
-    },
-    {
-      "node1": "2",
-      "node2": "7"
-    },
-    {
-      "node1": "6",
-      "node2": "8"
-    },
-    {
-      "node1": "4",
-      "node2": "1"
-    },
-    {
-      "node1": "5",
-      "node2": "1"
-    },
-    {
-      "node1": "4",
-      "node2": "5"
-    },
-    {
-      "node1": "1",
-      "node2": "9"
-    },
-    {
-      "node1": "9",
-      "node2": "10"
-    },
-    {
-      "node1": "9",
-      "node2": "11"
-    },
-    {
-      "node1": "1",
-      "node2": "10"
-    },
-    {
-      "node1": "1",
-      "node2": "11"
+      "node2": "4"
     }
   ]
 }
