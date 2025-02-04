@@ -94,12 +94,12 @@ export function balanceTree(
       y += GENERATION_HEIGHT;
       for (const child of children) {
         const subsubtree = new Set<string>();
-        const minRight = right + BASE_WIDTH / 2;
+        const minChildx = right + BASE_WIDTH / 2;
         const childx = placeSubtree(child, subsubtree);
         // Happens in case of children having spouses
-        if (childx < minRight) {
-          adjustNodes(subsubtree, minRight - childx);
-          right += minRight - childx + BASE_WIDTH / 2;
+        if (childx < minChildx) {
+          adjustNodes(subsubtree, minChildx - childx);
+          right += minChildx - childx + BASE_WIDTH / 2;
         }
         for (const person of subsubtree) {
           subtree.add(person);
