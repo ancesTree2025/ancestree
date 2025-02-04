@@ -1,10 +1,9 @@
 package org.data.parsers
 
 import io.ktor.client.statement.*
-import io.ktor.server.plugins.*
 import kotlinx.serialization.json.*
 import org.data.models.*
-import org.data.models.WikidataProperties.relevantProperties
+import org.data.models.WikidataProperties.propertyQIDMap
 
 /**
  * Parses Wikipedia ID Lookup responses, extracting the relevant QID.
@@ -38,7 +37,7 @@ suspend fun parseWikidataQIDs(response: HttpResponse): Map<QID, Pair<Label, Prop
     val label = entityInfo.labels.en?.value ?: "DEBUG: Label not found in english"
 
     val familyInfo =
-      relevantProperties.entries
+      propertyQIDMap.entries
         .associate { (key, value) ->
           value to
             (entityInfo.claims[key]?.flatMap { claim ->
@@ -49,7 +48,7 @@ suspend fun parseWikidataQIDs(response: HttpResponse): Map<QID, Pair<Label, Prop
         }
         .toMutableMap()
 
-    relevantProperties.values.forEach { relation -> familyInfo.putIfAbsent(relation, emptyList()) }
+    propertyQIDMap.values.forEach { relation -> familyInfo.putIfAbsent(relation, emptyList()) }
 
     label to familyInfo
   }
