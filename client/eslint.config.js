@@ -33,7 +33,6 @@ export default [
       ],
       eqeqeq: ['error', 'smart'],
       'no-unneeded-ternary': ['error'],
-      camelcase: ['error'],
       'func-style': ['error', 'declaration'],
       'prefer-const': [
         'error',
