@@ -34,8 +34,8 @@
   let sidePanelName = $state<string | undefined>(undefined);
   let sidePanelData = $state<PersonInfo | undefined>(undefined);
 
-  async function getPersonInfo(name: string) {
-    const [fetched] = (await fetchInfo(name, useFakeData)).toTuple();
+  async function getPersonInfo(qid: string, name: string) {
+    const [fetched] = (await fetchInfo(qid, useFakeData)).toTuple();
     if (fetched) {
       sidePanelData = fetched;
       sidePanelName = name;

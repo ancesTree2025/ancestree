@@ -12,14 +12,14 @@ const personInfoSchema = z.object({
 export type PersonInfo = z.infer<typeof personInfoSchema>;
 
 export async function fetchInfo(
-  name: string,
+  qid: string,
   useFakeData: boolean
 ): Promise<Result<PersonInfo, string>> {
   if (useFakeData) {
     return Result.ok(exampleData);
   }
   const response = await Result.fromAsyncCatching(
-    fetch(`http://localhost:8080/info?${new URLSearchParams({ name })}`)
+    fetch(`http://localhost:8080/info?${new URLSearchParams({ qid })}`)
   ).mapError(() => 'Could not connect to server');
   if (response.getOrNull()?.status === 404) {
     return Result.error('Person not found');
