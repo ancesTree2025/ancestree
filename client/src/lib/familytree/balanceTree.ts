@@ -1,12 +1,20 @@
-import type { Positions, PersonID, Tree } from './models';
+import type { Positions, PersonID, Tree, Marriages } from './models';
+
+/* visParents are the parents used for the purpose of the tree
+     visualisation. If Focus has Wife 1, Wife 2 and Wife 3 then they
+     will be drawn in a line as follows: Wife 1 == Focus == Wife 2 -- Wife 3.
+     So any children Focus has with Wife 3 will be drawn as if they are
+     children of Wife 2 and Wife 3 - so [Wife 2, Wife 3] are the visParents */
 
 export function balanceTree(
   tree: Tree,
   center: [number, number],
   BASE_WIDTH = 160,
   GENERATION_HEIGHT = 120
-): Positions {
+): [Positions, Marriages] {
   const positions: Positions = {};
+
+  const visMarriages: Marriages = [];
 
   // The x position of the current "right edge" of the graph
   // Accumulates as nodes are added to the right.
@@ -25,7 +33,7 @@ export function balanceTree(
   adjustNodes(subtree, center[0] - subtreeX);
   adjustNodes(supertree, center[0] - supertreeX);
 
-  return positions;
+  return [positions, visMarriages];
 
   // Shifts all nodes by a certain X
   function adjustNodes(set: Set<PersonID>, dx: number) {
@@ -60,10 +68,18 @@ export function balanceTree(
     }
 
     // assuming someone has at most one marriage, and assuming no cycles
-    if (marriages.length == 1) {
-      const marriage = marriages[0];
+    let meX: number = right;
+    for (const [i, marriage] of marriages.entries()) {
       // assuming a marriage has only one spouse
       const spouse = marriage.parents.find((p) => p !== focused)!;
+      if (i > 0) {
+        visMarriages.push({
+          parents: [marriages[i - 1].parents.find((p) => p !== focused)!, spouse],
+          children: marriage.children
+        });
+      } else {
+        visMarriages.push(marriage);
+      }
       subtree.add(spouse);
       const children = marriage.children;
       // if we only have one child, the width of the two parents (2 * BASE_WIDTH)
@@ -78,7 +94,7 @@ export function balanceTree(
       y += GENERATION_HEIGHT;
       for (const child of children) {
         const subsubtree = new Set<string>();
-        const minRight = right + BASE_WIDTH / 2
+        const minRight = right + BASE_WIDTH / 2;
         const childx = placeSubtree(child, subsubtree);
         // Happens in case of children having spouses
         if (childx < minRight) {
@@ -93,17 +109,17 @@ export function balanceTree(
 
       // render parents at the midpoint of the children's width
       const mid = (left + right) / 2;
-      const meX = mid - BASE_WIDTH / 2;
       addPerson(spouse, mid + BASE_WIDTH / 2, y);
-      addPerson(focused, meX, y);
+      if (i == 0) {
+        meX = mid - BASE_WIDTH / 2;
+        addPerson(focused, meX, y);
+      }
 
       if (children.length < 2) {
         right += BASE_WIDTH / 2;
       }
-
-      return meX;
     }
-    return right;
+    return meX;
   }
 
   /**
@@ -122,6 +138,8 @@ export function balanceTree(
       right += BASE_WIDTH;
       return meX;
     }
+
+    visMarriages.push(parentMarriage)
 
     const mother = parentMarriage.parents[0];
     const father = parentMarriage.parents[1];

@@ -80,6 +80,33 @@
       },
       "id": "8",
       "depth": 1
+    },
+    {
+      "data": {
+        "id": "9",
+        "name": "Elizabeth II",
+        "gender": "female"
+      },
+      "id": "9",
+      "depth": 0
+    },
+    {
+      "data": {
+        "id": "10",
+        "name": "A",
+        "gender": "female"
+      },
+      "id": "10",
+      "depth": 1
+    },
+    {
+      "data": {
+        "id": "11",
+        "name": "B",
+        "gender": "female"
+      },
+      "id": "11",
+      "depth": 1
     }
   ],
   "edges": [
@@ -126,6 +153,26 @@
     {
       "node1": "4",
       "node2": "5"
+    },
+    {
+      "node1": "1",
+      "node2": "9"
+    },
+    {
+      "node1": "9",
+      "node2": "10"
+    },
+    {
+      "node1": "9",
+      "node2": "11"
+    },
+    {
+      "node1": "1",
+      "node2": "10"
+    },
+    {
+      "node1": "1",
+      "node2": "11"
     }
   ]
 }
