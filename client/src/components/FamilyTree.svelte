@@ -2,7 +2,7 @@
   import { balanceTree } from '$lib/familytree/balanceTree';
   import { type Positions, type Tree } from '$lib/familytree/models';
 
-  let { tree }: { tree?: Tree } = $props();
+  let { tree, getPersonInfo }: { tree?: Tree; getPersonInfo: (name: string) => void } = $props();
   let positions = $state<Positions>({});
 
   $effect(() => {
@@ -121,12 +121,15 @@
               class="fill-node"
             ></rect>
             <foreignObject
+              onclick={() => getPersonInfo(person.name)}
               x={-RECT_WIDTH / 2}
               y={-RECT_HEIGHT / 2}
               width={RECT_WIDTH}
               height={RECT_HEIGHT}
             >
-              <div class="flex h-full w-full items-center justify-center text-center">
+              <div
+                class="flex h-full w-full cursor-pointer items-center justify-center text-center"
+              >
                 {person.name}
               </div>
             </foreignObject>
