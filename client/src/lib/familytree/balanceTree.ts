@@ -37,14 +37,18 @@ export function balanceTree(
 
   // Shifts all nodes by a certain X
   function adjustNodes(set: Set<PersonID>, dx: number) {
+    let right_ = 0;
     for (const node of set) {
       positions[node].x += dx;
+      right_ = Math.max(right, positions[node].x)
     }
+    right = Math.max(right, right_)
   }
 
   // Set the position of a node if they have not already been given a position
   function addPerson(personId: PersonID, x: number, y: number) {
     if (positions[personId] !== undefined) return;
+    right = Math.max(right, x + BASE_WIDTH / 2);
     positions[personId] = { x, y };
   }
 
@@ -63,7 +67,6 @@ export function balanceTree(
       // Places a single node and pushes the right edge right by 1 base width
       const meX = right + BASE_WIDTH / 2;
       addPerson(focused, meX, y);
-      right += BASE_WIDTH;
       return meX;
     }
 
@@ -82,12 +85,6 @@ export function balanceTree(
       }
       subtree.add(spouse);
       const children = marriage.children;
-      // if we only have one child, the width of the two parents (2 * BASE_WIDTH)
-      // is larger than the width of the child (BASE_WIDTH), so pad both sides
-      // by half of BASE_WIDTH
-      if (children.length < 2) {
-        right += BASE_WIDTH / 2;
-      }
 
       // recursively place children
       const left = right;
@@ -99,7 +96,6 @@ export function balanceTree(
         // Happens in case of children having spouses
         if (childx < minRight) {
           adjustNodes(subsubtree, minRight - childx);
-          right += minRight - childx + BASE_WIDTH / 2;
         }
         for (const person of subsubtree) {
           subtree.add(person);
@@ -113,10 +109,6 @@ export function balanceTree(
       if (i == 0) {
         meX = mid - BASE_WIDTH / 2;
         addPerson(focused, meX, y);
-      }
-
-      if (children.length < 2) {
-        right += BASE_WIDTH / 2;
       }
     }
     return meX;
@@ -135,7 +127,6 @@ export function balanceTree(
     if (parentMarriage == undefined) {
       const meX = right + BASE_WIDTH / 2;
       addPerson(person, meX, y);
-      right += BASE_WIDTH;
       return meX;
     }
 
