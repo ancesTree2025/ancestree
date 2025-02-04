@@ -68,6 +68,7 @@ export function balanceTree(
     }
 
     // assuming someone has at most one marriage, and assuming no cycles
+
     let meX: number = right;
     for (const [i, marriage] of marriages.entries()) {
       // assuming a marriage has only one spouse
@@ -123,7 +124,7 @@ export function balanceTree(
     // assuming someone has exactly two parents from one marriage, or no parent marriage
     const parentMarriage = tree.marriages.find((m) => m.children.includes(person));
 
-    if (parentMarriage == undefined) {
+    if (parentMarriage === undefined) {
       const meX = right + BASE_WIDTH / 2;
       addPerson(person, meX, y);
       return meX;

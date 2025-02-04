@@ -2,8 +2,10 @@
   import { balanceTree } from '$lib/familytree/balanceTree';
   import { type Marriages, type Positions, type Tree } from '$lib/familytree/models';
 
-  let { tree, getPersonInfo }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } =
-    $props();
+  const {
+    tree,
+    getPersonInfo
+  }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } = $props();
   let visMarriages = $state<Marriages | undefined>(tree?.marriages);
   let positions = $state<Positions>({});
 
@@ -35,7 +37,7 @@
         {#if mother && father}
           <!-- Draw marriage lines -->
           {@const parentsX = (mother.x + father.x) / 2}
-          {#if mother.y == father.y}
+          {#if mother.y === father.y}
             <line
               x1={mother.x}
               y1={mother.y}

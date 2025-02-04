@@ -30,7 +30,17 @@ export default [
           argsIgnorePattern: '^_',
           caughtErrorsIgnorePattern: '^_'
         }
-      ]
+      ],
+      eqeqeq: ['error', 'smart'],
+      'no-unneeded-ternary': ['error'],
+      'func-style': ['error', 'declaration'],
+      'prefer-const': [
+        'error',
+        {
+          destructuring: 'all'
+        }
+      ],
+      'no-var': 'error'
     }
   },
   pluginJs.configs.recommended,
