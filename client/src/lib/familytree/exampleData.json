@@ -16,7 +16,7 @@
   "marriages": [
     {
       "parents": ["F", "W1"],
-      "children": ["C1"]
+      "children": []
     },
     {
       "parents": ["M", "D"],
@@ -24,7 +24,7 @@
     },
     {
       "parents": ["F", "W2"],
-      "children": ["C2", "C3", "C4"]
+      "children": []
     },
     {
       "parents": ["C3", "DiL"],

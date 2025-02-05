@@ -70,21 +70,25 @@ test('handles a child having a spouse', () => {
     Wife: { x: 320, y: 0 }
   });
 });
-/*
-test('handles two spouses', () => {
+
+test('handles two spouses correctly with parents', () => {
   expect(
     balanceTree(
       {
         focus: 'Focus',
-        people: ['Focus', 'Wife 1', 'Wife 2', 'Child 1', 'Child 2'].map((id) => [id, { name: id }]),
+        people: ['Focus', 'Wife 1', 'Wife 2', 'Parent 1', 'Parent 2'].map((id) => [id, { name: id }]),
         marriages: [
           {
             parents: ['Focus', 'Wife 1'],
-            children: ['Child 1']
+            children: []
           },
           {
             parents: ['Focus', 'Wife 2'],
-            children: ['Child 2']
+            children: []
+          },
+          {
+            parents: ['Parent 1', 'Parent 2'],
+            children: ['Focus']
           }
         ]
       },
@@ -94,10 +98,9 @@ test('handles two spouses', () => {
     )[0]
   ).toStrictEqual({
     'Focus': { x: 0, y: 0 },
-    'Wife 1': { x: 160, y: 0 },
-    'Wife 2': { x: 320, y: 0 },
-    'Child 1': { x: 80, y: 120 },
-    'Child 2': { x: 240, y: 120 }
+    'Wife 1': { x: -160, y: 0 },
+    'Wife 2': { x: 160, y: 0 },
+    'Parent 1': { x: -80, y: -120 },
+    'Parent 2': { x: 80, y: -120 }
   });
 });
-*/
