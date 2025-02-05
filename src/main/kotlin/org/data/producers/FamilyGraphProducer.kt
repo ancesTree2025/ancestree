@@ -33,7 +33,6 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     visited.clear()
     nodes.clear()
     edges.clear()
-    
 
     if (root=="favicon.ico") {
       return Graph(Node(Person(), "", 0), emptySet(), emptySet())
