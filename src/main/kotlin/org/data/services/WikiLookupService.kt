@@ -1,6 +1,5 @@
 package org.data.services
 
-import io.ktor.client.statement.*
 import io.ktor.server.plugins.*
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -12,7 +11,6 @@ import org.data.models.*
 import org.data.models.WikidataProperties.propertyQIDMapPersonal
 import org.data.parsers.WikiRequestParser
 import org.data.parsers.parseGoogleKnowledgeLookup
-import org.data.requests.*
 import org.data.requests.ComplexRequester
 
 /** Service class for performing Wikipedia/Wikidata lookups. */
@@ -72,7 +70,7 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
           "Born" to formatDatePlaceInfo(PoB, infoMap["DoB"]),
           "Died" to formatDatePlaceInfo(PoD, infoMap["DoD"]),
         ),
-        "stub",
+        ChatGPTDescriptionService.summarise(allInfo[qid]!!.first),
         "stub",
       )
 

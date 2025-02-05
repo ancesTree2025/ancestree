@@ -7,6 +7,7 @@ ktfmt-version = "0.21.0"
 kodein-version = "7.22.0"
 mockk-version = "1.13.16"
 coroutines-test-version = "1.7.3"
+dotenv-version = "6.5.0"
 
 [libraries]
 ktor-cors = { module = "io.ktor:ktor-server-cors", version.ref = "ktor-version" }
@@ -28,6 +29,8 @@ mockk = { module = "io.mockk:mockk", version.ref = "mockk-version" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines-test-version" }
 
 ktor-client-logging = { module = "io.ktor:ktor-client-logging-jvm", version.ref = "ktor-version" }
+
+dotenv-kotlin = { module = "io.github.cdimascio:dotenv-kotlin", version.ref = "dotenv-version" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }
