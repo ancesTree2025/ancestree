@@ -18,7 +18,9 @@ object GoogleKnowledgeRequestParser {
 
     val autocompleteList = mutableListOf<String>()
 
-    result.itemListElement.forEach { resultObject -> autocompleteList.add(resultObject.result.name) }
+    result.itemListElement.forEach { resultObject ->
+      autocompleteList.add(resultObject.result.name)
+    }
 
     return autocompleteList
   }
