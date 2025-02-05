@@ -59,7 +59,7 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
     val labelAndFamilyList =
       try {
         getPersonsLabelAndFamilyMembersAll(qids)
-      } catch (e: NotFoundException) {
+      } catch (e: Throwable) {
         return mutableListOf()
       }
 
