@@ -9,8 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.data.models.*
 import org.data.models.WikidataProperties.propertyQIDMapPersonal
+import org.data.parsers.GoogleKnowledgeRequestParser
 import org.data.parsers.WikiRequestParser
-import org.data.parsers.parseGoogleKnowledgeLookup
 import org.data.requests.ComplexRequester
 
 /** Service class for performing Wikipedia/Wikidata lookups. */
@@ -198,6 +198,6 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
   override suspend fun fetchAutocomplete(input: String): List<String> {
     val response = ComplexRequester.getAutocompleteNames(input)
 
-    return parseGoogleKnowledgeLookup(response)
+    return GoogleKnowledgeRequestParser.parseGoogleKnowledgeLookup(response)
   }
 }
