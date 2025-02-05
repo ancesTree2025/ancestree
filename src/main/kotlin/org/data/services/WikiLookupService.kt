@@ -22,7 +22,7 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
    * of querying.
    *
    * @param input The person's name.
-   * @returns A 3-tuple of QID, Label and Family Relations.
+   * @returns A pair of Person objects for the desired person, and their Family Relations.
    */
   override suspend fun query(input: String): Pair<Person, NamedRelation>? {
     val qid = searchForPersonsQID(input)
@@ -46,6 +46,13 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
     return Pair(person, personalInfo)
   }
 
+  /**
+   * A new exposed function that allows for querying multiple QIDs at the same time. This is
+   * massively preferable to the previous approach.
+   *
+   * @param input A list of input string names.
+   * @returns A list of pairs of Person objects for the desired people, and their Family Relations.
+   */
   suspend fun queryAll(input: List<String>): List<Pair<Person, NamedRelation>> {
     val qids = mutableListOf<QID>()
 
@@ -192,13 +199,12 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
       return familyInfo
     }
 
-    val unseen = allIds.filter {
-      WikiCacheManager.getLabel(it).isNullOrEmpty()
-    }
+    val unseen = allIds.filter { WikiCacheManager.getLabel(it).isNullOrEmpty() }
 
     if (unseen.isNotEmpty()) {
       val nameResponse = ComplexRequester.getLabelAndClaim(unseen)
-      val labelClaimPair = WikiRequestParser.parseWikidataEntities(nameResponse, parseClaims = false)
+      val labelClaimPair =
+        WikiRequestParser.parseWikidataEntities(nameResponse, parseClaims = false)
 
       labelClaimPair.forEach { (qid, pair) ->
         WikiCacheManager.putQID(pair.first, qid)
@@ -206,7 +212,9 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
       }
     }
 
-    return familyInfo.mapValues { (_, ids) -> ids.map { id -> WikiCacheManager.getLabel(id) ?: "Unknown" } }
+    return familyInfo.mapValues { (_, ids) ->
+      ids.map { id -> WikiCacheManager.getLabel(id) ?: "Unknown" }
+    }
   }
 
   /**
@@ -233,6 +241,13 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
     return Pair(label, familyInfo)
   }
 
+  /**
+   * Like the above method, but for multiple people.
+   *
+   * @param personQIDs A list of people's QID.
+   * @returns A list of pairs, with their labels and a mapping of types of relation to relatives in
+   *   that category.
+   */
   private suspend fun getPersonsLabelAndFamilyMembersAll(
     personQIDs: List<QID>
   ): List<Pair<Label, PropertyMapping>> {
