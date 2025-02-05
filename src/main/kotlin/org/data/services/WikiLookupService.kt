@@ -7,6 +7,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.data.caches.WikiCacheManager
 import org.data.models.*
 import org.data.models.WikidataProperties.propertyQIDMapPersonal
 import org.data.parsers.WikiRequestParser
@@ -43,6 +44,38 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
       Person(qid, labelAndFamily.first, labelAndFamily.second["Gender"]?.getOrNull(0) ?: "Unknown")
 
     return Pair(person, personalInfo)
+  }
+
+  suspend fun queryAll(input: List<String>): List<Pair<Person, NamedRelation>> {
+    val qids = mutableListOf<QID>()
+
+    input.forEach {
+      val qid = searchForPersonsQID(it)
+      if (!qid.isNullOrEmpty()) {
+        qids.add(qid)
+      }
+    }
+
+    val labelAndFamilyList =
+      try {
+        getPersonsLabelAndFamilyMembersAll(qids)
+      } catch (e: NotFoundException) {
+        return mutableListOf()
+      }
+
+    val personList = mutableListOf<Pair<Person, NamedRelation>>()
+
+    labelAndFamilyList.forEach {
+      val label = it.first
+      val personalInfo = NamedRelation.from(it.second)
+      val qid = WikiCacheManager.getQID(label)
+
+      val relPerson = Person(qid!!, label, it.second["Gender"]?.getOrNull(0) ?: "Unknown")
+
+      personList.add(Pair(relPerson, personalInfo))
+    }
+
+    return personList
   }
 
   /**
@@ -136,6 +169,10 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
    * @returns Their Wikidata QID as a string.
    */
   private suspend fun searchForPersonsQID(name: String): QID? {
+    if (WikiCacheManager.getQID(name) != null) {
+      return WikiCacheManager.getQID(name)!!
+    }
+
     val response = ComplexRequester.searchWikidataForQID(name)
     val qid = WikiRequestParser.parseWikidataIDLookup(response)
     return qid
@@ -155,14 +192,21 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
       return familyInfo
     }
 
-    val readableNames = mutableMapOf<String, String>()
+    val unseen = allIds.filter {
+      WikiCacheManager.getLabel(it).isNullOrEmpty()
+    }
 
-    val nameResponse = ComplexRequester.getLabelAndClaim(allIds)
-    val labelClaimPair = WikiRequestParser.parseWikidataEntities(nameResponse)
+    if (unseen.isNotEmpty()) {
+      val nameResponse = ComplexRequester.getLabelAndClaim(unseen)
+      val labelClaimPair = WikiRequestParser.parseWikidataEntities(nameResponse, parseClaims = false)
 
-    labelClaimPair.forEach { (qid, pair) -> readableNames[qid] = pair.first }
+      labelClaimPair.forEach { (qid, pair) ->
+        WikiCacheManager.putQID(pair.first, qid)
+        WikiCacheManager.putLabel(qid, pair.first)
+      }
+    }
 
-    return familyInfo.mapValues { (_, ids) -> ids.map { id -> readableNames[id] ?: "Unknown" } }
+    return familyInfo.mapValues { (_, ids) -> ids.map { id -> WikiCacheManager.getLabel(id) ?: "Unknown" } }
   }
 
   /**
@@ -187,6 +231,25 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
     val familyInfo = replaceQIDsWithNames(labelFamilyPair.second)
 
     return Pair(label, familyInfo)
+  }
+
+  private suspend fun getPersonsLabelAndFamilyMembersAll(
+    personQIDs: List<QID>
+  ): List<Pair<Label, PropertyMapping>> {
+
+    val familyResponse = ComplexRequester.getLabelAndClaim(personQIDs)
+    val labelFamilyMap = WikiRequestParser.parseWikidataEntities(familyResponse)
+
+    val ls = mutableListOf<Pair<Label, PropertyMapping>>()
+
+    personQIDs.forEach {
+      val relPair = labelFamilyMap[it]!!
+      ls.add(Pair(relPair.first, replaceQIDsWithNames(relPair.second)))
+      WikiCacheManager.putLabel(it, relPair.first)
+      WikiCacheManager.putQID(relPair.first, it)
+    }
+
+    return ls
   }
 
   /**

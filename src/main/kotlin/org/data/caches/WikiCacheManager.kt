@@ -1,33 +1,25 @@
 package org.data.caches
 
-import kotlinx.serialization.json.JsonObject
+import org.data.models.Label
+import org.data.models.QID
 
 /** Simple cache manager for storing Wikidata claims and QIDs. */
 object WikiCacheManager {
-  /** QID to Claim. Used to reduce Wikidata queries. */
-  private val claimCache = mutableMapOf<String, JsonObject>()
-
   /** Label to QID. Used to reduce Wikipedia queries. */
-  private val qidCache = mutableMapOf<String, String>()
+  private val labelToQIDCache = mutableMapOf<Label, QID>()
 
-  /** QID to Label. Used to avoid backwards traversal of qidCache. */
-  private val labelCache = mutableMapOf<String, String>()
+  /** QID to Label. Used to avoid backwards traversal Label qidCache. */
+  private val qidToLabelCache = mutableMapOf<QID, Label>()
 
-  fun getClaim(id: String): JsonObject? = claimCache[id]
+  fun getQID(id: Label): QID? = labelToQIDCache[id]
 
-  fun putClaim(id: String, entity: JsonObject) {
-    claimCache[id] = entity
+  fun putQID(id: Label, entity: QID) {
+    labelToQIDCache[id] = entity
   }
 
-  fun getQID(id: String): String? = qidCache[id]
+  fun getLabel(id: QID): Label? = qidToLabelCache[id]
 
-  fun putQID(id: String, entity: String) {
-    qidCache[id] = entity
-  }
-
-  fun getLabel(id: String): String? = labelCache[id]
-
-  fun putLabel(id: String, entity: String) {
-    labelCache[id] = entity
+  fun putLabel(id: QID, entity: Label) {
+    qidToLabelCache[id] = entity
   }
 }

@@ -4,6 +4,7 @@ import io.ktor.client.statement.*
 import kotlinx.serialization.json.*
 import org.data.models.*
 import org.data.models.WikidataProperties.propertyQIDMap
+import kotlin.system.exitProcess
 
 object WikiRequestParser {
   /**
@@ -36,6 +37,7 @@ object WikiRequestParser {
     parseClaims: Boolean = true,
   ): Map<QID, Pair<Label, PropertyMapping>> {
     val json = Json { ignoreUnknownKeys = true }
+
     val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
     return result.entities.mapValues { (_, entityInfo) ->
@@ -48,21 +50,21 @@ object WikiRequestParser {
           properties.entries
             .associate { (key, value) ->
               value to
-                (entityInfo.claims[key]?.flatMap { claim ->
-                  when (val dataValue = claim.mainsnak.datavalue?.value) {
-                    is JsonObject -> {
-                      when {
-                        dataValue.containsKey("id") ->
-                          listOf(dataValue["id"]!!.jsonPrimitive.content)
-                        dataValue.containsKey("time") ->
-                          listOf(dataValue["time"]!!.jsonPrimitive.content)
-                        else -> emptyList()
+                  (entityInfo.claims[key]?.flatMap { claim ->
+                    when (val dataValue = claim.mainsnak.datavalue?.value) {
+                      is JsonObject -> {
+                        when {
+                          dataValue.containsKey("id") ->
+                            listOf(dataValue["id"]!!.jsonPrimitive.content)
+                          dataValue.containsKey("time") ->
+                            listOf(dataValue["time"]!!.jsonPrimitive.content)
+                          else -> emptyList()
+                        }
                       }
+                      is JsonPrimitive -> listOf(dataValue.content)
+                      else -> emptyList()
                     }
-                    is JsonPrimitive -> listOf(dataValue.content)
-                    else -> emptyList()
-                  }
-                } ?: emptyList())
+                  } ?: emptyList())
             }
             .toMutableMap()
       }

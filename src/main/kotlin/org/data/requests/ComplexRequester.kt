@@ -32,6 +32,10 @@ object ComplexRequester {
    * @returns HTTP response.
    */
   suspend fun getLabelAndClaim(qids: List<String>): HttpResponse {
+
+    println("Getting QIDS: ${qids.size}")
+    println("QID String: ${qids.joinToString("|")}")
+
     val response =
       BaseRequester.doWikidataRequest("wbgetentities") {
         parameter("ids", qids.joinToString("|"))
