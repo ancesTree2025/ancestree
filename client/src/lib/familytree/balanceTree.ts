@@ -73,7 +73,7 @@ export function balanceTree(
     for (const [i, marriage] of marriages.entries()) {
       // assuming a marriage has only one spouse
       const spouse = marriage.parents.find((p) => p !== focused)!;
-      if (i > 0) {
+      if (i > 1) {
         visMarriages.push({
           parents: [marriages[i - 1].parents.find((p) => p !== focused)!, spouse],
           children: marriage.children
@@ -102,13 +102,29 @@ export function balanceTree(
       }
       y -= GENERATION_HEIGHT;
 
+      let personLeft: PersonID | undefined;
+      let personRight: PersonID;
+
+      if (i === 0) {
+        if (marriages.length > 1) {
+          personLeft = spouse;
+          personRight = focused;
+        } else {
+          personLeft = focused;
+          personRight = spouse;
+        }
+      } else {
+        personLeft = undefined;
+        personRight = spouse;
+      }
+
       // render parents at the midpoint of the children's width
       const mid =
         children.length === 0 ? (i === 0 ? right + BASE_WIDTH : right) : (left + right) / 2;
-      addPerson(spouse, mid + BASE_WIDTH / 2, y);
-      if (i === 0) {
+      addPerson(personRight, mid + BASE_WIDTH / 2, y);
+      if (personLeft !== undefined) {
         meX = mid - BASE_WIDTH / 2;
-        addPerson(focused, meX, y);
+        addPerson(personLeft, meX, y);
       }
     }
     return meX;
