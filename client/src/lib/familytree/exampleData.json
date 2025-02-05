@@ -2,6 +2,8 @@
   "focus": "F",
   "people": [
     ["F", { "name": "Focus" }],
+    ["M", { "name": "Mum"}],
+    ["D", { "name": "Dad"}],
     ["W1", { "name": "Wife 1" }],
     ["W2", { "name": "Wife 2" }],
     ["C1", { "name": "Child 1" }],
@@ -15,6 +17,10 @@
     {
       "parents": ["F", "W1"],
       "children": ["C1"]
+    },
+    {
+      "parents": ["M", "D"],
+      "children": ["F"]
     },
     {
       "parents": ["F", "W2"],

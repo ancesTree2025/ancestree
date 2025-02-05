@@ -125,6 +125,9 @@ export function balanceTree(
       if (personLeft !== undefined) {
         meX = mid - BASE_WIDTH / 2;
         addPerson(personLeft, meX, y);
+        if (personRight === focused) {
+          meX += BASE_WIDTH;
+        }
       }
     }
     return meX;
