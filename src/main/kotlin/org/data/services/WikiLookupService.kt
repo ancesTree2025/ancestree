@@ -21,7 +21,7 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
    * of querying.
    *
    * @param input The person's name.
-   * @returns A 3-tuple of QID, Label and Family Relations.
+   * @returns A 3-tuple of QID, Label and Family Relations. // TODO: this is outdated PLEASE CHANGE FUNCTION DESCRIPTIONS WHEN YOU CHANGE FUNCTIONS
    */
   override suspend fun query(input: String): Pair<Person, NamedRelation>? {
     val qid = searchForPersonsQID(input)
