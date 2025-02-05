@@ -76,7 +76,10 @@ test('handles two spouses correctly with parents', () => {
     balanceTree(
       {
         focus: 'Focus',
-        people: ['Focus', 'Wife 1', 'Wife 2', 'Parent 1', 'Parent 2'].map((id) => [id, { name: id }]),
+        people: ['Focus', 'Wife 1', 'Wife 2', 'Parent 1', 'Parent 2'].map((id) => [
+          id,
+          { name: id }
+        ]),
         marriages: [
           {
             parents: ['Focus', 'Wife 1'],
@@ -97,7 +100,7 @@ test('handles two spouses correctly with parents', () => {
       120
     )[0]
   ).toStrictEqual({
-    'Focus': { x: 0, y: 0 },
+    Focus: { x: 0, y: 0 },
     'Wife 1': { x: -160, y: 0 },
     'Wife 2': { x: 160, y: 0 },
     'Parent 1': { x: -80, y: -120 },

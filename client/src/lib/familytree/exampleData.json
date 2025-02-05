@@ -2,8 +2,8 @@
   "focus": "F",
   "people": [
     ["F", { "name": "Focus" }],
-    ["M", { "name": "Mum"}],
-    ["D", { "name": "Dad"}],
+    ["M", { "name": "Mum" }],
+    ["D", { "name": "Dad" }],
     ["W1", { "name": "Wife 1" }],
     ["W2", { "name": "Wife 2" }],
     ["C1", { "name": "Child 1" }],
@@ -16,7 +16,7 @@
   "marriages": [
     {
       "parents": ["F", "W1"],
-      "children": []
+      "children": ["C1"]
     },
     {
       "parents": ["M", "D"],
@@ -24,7 +24,7 @@
     },
     {
       "parents": ["F", "W2"],
-      "children": []
+      "children": ["C2", "C3", "C4"]
     },
     {
       "parents": ["C3", "DiL"],
