@@ -20,6 +20,13 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
   private val nodes = mutableMapOf<Label, Node<Person>>()
   private val edges = mutableSetOf<Edge>()
 
+  private enum class RelationType{
+    Parent,
+    Child,
+    Spouse,
+    Root
+  }
+
   /**
    * An internal queue item used for BFS processing.
    *
@@ -27,7 +34,8 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
    * @param depth The current depth of this node relative to the root.
    * @param parentId The QID of the parent node (or source node) that references this person.
    */
-  private data class QueueItem(var name: String, val depth: Int, val parentId: String?)
+  private data class QueueItem(var name: String, val depth: Int, val parentId: String?,
+    val type: RelationType)
 
   override suspend fun produceGraph(root: Label): Graph<Person> {
     visited.clear()
@@ -38,7 +46,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
       return Graph(Node(Person(), "", 0), emptySet(), emptySet())
     }
 
-    val queue = mutableListOf(QueueItem(root, 0, parentId = null))
+    val queue = mutableListOf(QueueItem(root, 0, parentId = null, RelationType.Root))
 
     val wikiService = WikiLookupService()
 
@@ -69,28 +77,40 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
 
         if (resultMap.containsKey(item.name)) {
 
-          val (person, relation) =resultMap[item.name]!!
+          val (person, relation) = resultMap[item.name]!!
 
           if (!nodes.containsKey(person.id)) {
             nodes[person.id] = Node(person, person.id, item.depth)
           }
-          item.parentId?.let { parentId ->
-            edges.add(Edge(parentId, person.id))
+
+          when (item.type) {
+            RelationType.Parent -> {
+              edges.add(Edge(person.id, item.parentId!!))
+            }
+            RelationType.Child -> {
+              edges.add(Edge(item.parentId!!, person.id))
+            }
+            RelationType.Spouse -> {
+              edges.add(Edge(item.parentId!!, person.id))
+            }
+            RelationType.Root -> {
+
+            }
           }
 
           if (abs(item.depth - 1) <= MAX_DEPTH) {
             if (relation.Father.isNotBlank() && relation.Father !in visited) {
-              queue.add(QueueItem(relation.Father, item.depth - 1, person.id))
+              queue.add(QueueItem(relation.Father, item.depth - 1, person.id, RelationType.Parent))
             }
             if (relation.Mother.isNotBlank() && relation.Mother !in visited) {
-              queue.add(QueueItem(relation.Mother, item.depth - 1, person.id))
+              queue.add(QueueItem(relation.Mother, item.depth - 1, person.id, RelationType.Parent))
             }
           }
 
           if (abs(item.depth) <= MAX_DEPTH) {
             for (spouse in relation.Spouses) {
               if (spouse.isNotBlank() && spouse !in visited) {
-                queue.add(QueueItem(spouse, item.depth, person.id))
+                queue.add(QueueItem(spouse, item.depth, person.id, RelationType.Spouse))
               }
             }
           }
@@ -98,18 +118,12 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
           if (abs(item.depth + 1) <= MAX_DEPTH) {
             for (child in relation.Children) {
               if (child.isNotBlank() && child !in visited) {
-                queue.add(QueueItem(child, item.depth + 1, person.id))
+                queue.add(QueueItem(child, item.depth + 1, person.id, RelationType.Child))
               }
             }
           }
         } else {
-          val dummyPerson = Person("???", item.name, "???")
-          if (!nodes.containsKey(item.name)) {
-            nodes[item.name] = Node(dummyPerson, item.name, item.depth)
-          }
-          item.parentId?.let { parentId ->
-            edges.add(Edge(parentId, item.name))
-          }
+          continue
         }
       }
       queue.removeAll { it.name in visited }
