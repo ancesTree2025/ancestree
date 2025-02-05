@@ -20,13 +20,11 @@ export function balanceTree(
   // Accumulates as nodes are added to the right.
   let right = 0;
 
-  let y = center[1];
   const subtree = new Set<PersonID>();
-  const subtreeX = placeSubtree(tree.focus, subtree);
+  const subtreeX = placeSubtree(tree.focus, subtree, center[1]);
 
-  y = center[1];
   const supertree = new Set<PersonID>();
-  const supertreeX = placeSupertree(tree.focus, supertree);
+  const supertreeX = placeSupertree(tree.focus, supertree, center[1]);
 
   // To make sure the focused node is at center, we need to shift
   // the nodes in the subtree and supertree
@@ -55,7 +53,7 @@ export function balanceTree(
    * @param subtree A mutable set of nodes currently included in the subtree (including focused node)
    * @returns The x position of the focused node
    */
-  function placeSubtree(focused: PersonID, subtree: Set<PersonID>): number {
+  function placeSubtree(focused: PersonID, subtree: Set<PersonID>, y: number): number {
     subtree.add(focused);
 
     // finds any marriages for which this node is a parent
@@ -86,11 +84,10 @@ export function balanceTree(
 
       // recursively place children
       const left = right;
-      y += GENERATION_HEIGHT;
       for (const child of children) {
         const subsubtree = new Set<string>();
         const minChildx = right + BASE_WIDTH / 2;
-        const childx = placeSubtree(child, subsubtree);
+        const childx = placeSubtree(child, subsubtree, y + GENERATION_HEIGHT);
         // Happens in case of children having spouses
         if (childx < minChildx) {
           adjustNodes(subsubtree, minChildx - childx);
@@ -100,7 +97,6 @@ export function balanceTree(
           subtree.add(person);
         }
       }
-      y -= GENERATION_HEIGHT;
 
       let personLeft: PersonID | undefined;
       let personRight: PersonID;
@@ -139,7 +135,7 @@ export function balanceTree(
    * @param subtree A mutable set of nodes currently included in the supertree (excluding focused node)
    * @returns The x position of the focused node
    */
-  function placeSupertree(person: PersonID, supertree: Set<PersonID>): number {
+  function placeSupertree(person: PersonID, supertree: Set<PersonID>, y: number): number {
     // assuming someone has exactly two parents from one marriage, or no parent marriage
     const parentMarriage = tree.marriages.find((m) => m.children.includes(person));
 
@@ -157,10 +153,8 @@ export function balanceTree(
     supertree.add(mother);
     supertree.add(father);
 
-    y -= GENERATION_HEIGHT;
-    const motherX = placeSupertree(mother, supertree);
-    const fatherX = placeSupertree(father, supertree);
-    y += GENERATION_HEIGHT;
+    const motherX = placeSupertree(mother, supertree, y - GENERATION_HEIGHT);
+    const fatherX = placeSupertree(father, supertree, y - GENERATION_HEIGHT);
 
     const mid = (motherX + fatherX) / 2;
     addPerson(person, mid, y);
