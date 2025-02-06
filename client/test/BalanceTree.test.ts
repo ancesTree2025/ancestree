@@ -32,8 +32,8 @@ test('handles basic family tree with one generation above and below', () => {
     'Child 3': { x: 320, y: 120 },
     Focus: { x: 80, y: 0 },
     Wife: { x: 240, y: 0 },
-    Mother: { x: 0, y: -120 },
-    Father: { x: 160, y: -120 }
+    Mother: { x: 80, y: -120 },
+    Father: { x: 240, y: -120 }
   });
 });
 

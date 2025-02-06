@@ -21,17 +21,30 @@ export function balanceTree(
   let right = 0;
 
   const subtree = new Set<PersonID>();
-  const subtreeX = placeSubtree(tree.focus, subtree, center[1]);
+  const parent1 = findParents(tree.focus)[0];
+  const subtreeX = placeSubtree(
+    parent1 ?? tree.focus,
+    subtree,
+    center[1] - (parent1 ? GENERATION_HEIGHT : 0)
+  );
 
   const supertree = new Set<PersonID>();
-  const supertreeX = placeSupertree(tree.focus, supertree, center[1]);
+  const supertreeX = placeSupertree(
+    parent1 ?? tree.focus,
+    supertree,
+    center[1] - (parent1 ? GENERATION_HEIGHT : 0)
+  );
 
   // To make sure the focused node is at center, we need to shift
   // the nodes in the subtree and supertree
-  adjustNodes(subtree, center[0] - subtreeX);
-  adjustNodes(supertree, center[0] - supertreeX);
+  adjustNodes(subtree, center[0] - positions[tree.focus].x);
+  adjustNodes(supertree, center[0] - positions[tree.focus].x);
 
   return [positions, visMarriages];
+
+  function findParents(id: PersonID): PersonID[] {
+    return tree.marriages.find((m) => m.children.includes(id))?.parents ?? [];
+  }
 
   // Shifts all nodes by a certain X
   function adjustNodes(set: Set<PersonID>, dx: number) {
@@ -116,7 +129,11 @@ export function balanceTree(
 
       // render parents at the midpoint of the children's width
       const mid =
-        children.length === 0 ? (i === 0 ? right + BASE_WIDTH : right) : (left + right) / 2;
+        children.length === 0
+          ? i === 0
+            ? right + BASE_WIDTH
+            : right + BASE_WIDTH
+          : (left + right) / 2;
       addPerson(personRight, mid + BASE_WIDTH / 2, y);
       if (personLeft !== undefined) {
         meX = mid - BASE_WIDTH / 2;
