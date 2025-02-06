@@ -22,14 +22,14 @@ export function balanceTree(
 
   const subtree = new Set<PersonID>();
   const parent1 = findParents(tree.focus)[0];
-  const subtreeX = placeSubtree(
+  placeSubtree(
     parent1 ?? tree.focus,
     subtree,
     center[1] - (parent1 ? GENERATION_HEIGHT : 0)
   );
 
   const supertree = new Set<PersonID>();
-  const supertreeX = placeSupertree(
+  placeSupertree(
     parent1 ?? tree.focus,
     supertree,
     center[1] - (parent1 ? GENERATION_HEIGHT : 0)
