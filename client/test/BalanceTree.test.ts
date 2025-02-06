@@ -21,6 +21,7 @@ test('handles basic family tree with one generation above and below', () => {
             children: ['Focus']
           }
         ]
+
       },
       [80, 0],
       160,
