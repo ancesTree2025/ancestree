@@ -126,11 +126,19 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
    */
   private fun formatDatePlaceInfo(place: String, date: List<String>?): String {
     if (date.isNullOrEmpty() && place == "Unknown") {
-      return "Still alive"
+      return "Unknown"
     }
-    val dateString = date!![0].substringBefore("T").removePrefix("+")
-    val formattedDate = LocalDate.parse(dateString).format(DateTimeFormatter.ofPattern("d/M/yyyy"))
-    return "$place, $formattedDate."
+
+    var dateString = date!![0].substringBefore("T").removePrefix("+")
+    var fmtDate: String
+
+    try {
+      fmtDate = LocalDate.parse(dateString).format(DateTimeFormatter.ofPattern("d/M/yyyy"))
+    } catch (e: Throwable) {
+      fmtDate = dateString.takeWhile { (it != '-') }
+    }
+
+    return "$place, $fmtDate."
   }
 
   /**
