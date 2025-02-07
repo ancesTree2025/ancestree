@@ -21,12 +21,12 @@
       "children": ["C1"]
     },
     {
-      "parents": ["M", "D"],
-      "children": ["F", "B", "S"]
-    },
-    {
       "parents": ["F", "W2"],
       "children": ["C2", "C3", "C4"]
+    },
+    {
+      "parents": ["M", "D"],
+      "children": ["F", "B", "S"]
     },
     {
       "parents": ["C3", "DiL"],

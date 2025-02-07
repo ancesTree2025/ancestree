@@ -18,6 +18,7 @@ export function balanceTree(
 
   // The x position of the current "right edge" of the graph
   // Accumulates as nodes are added to the right.
+  let left = 0;
   let right = 0;
 
   const subtree = new Set<PersonID>();
@@ -29,8 +30,8 @@ export function balanceTree(
 
   // To make sure the focused node is at center, we need to shift
   // the nodes in the subtree and supertree
-  adjustNodes(subtree, center[0] - positions[tree.focus].x);
-  adjustNodes(supertree, center[0] - positions[tree.focus].x);
+  adjustNodes(subtree, center[0] - left);
+  adjustNodes(supertree, center[0] - left);
 
   return [positions, visMarriages];
 
@@ -48,6 +49,7 @@ export function balanceTree(
   // Set the position of a node if they have not already been given a position
   function addPerson(personId: PersonID, x: number, y: number) {
     if (positions[personId] !== undefined) return;
+    left = Math.min(left, x - BASE_WIDTH / 2);
     right = Math.max(right, x + BASE_WIDTH / 2);
     positions[personId] = { x, y };
   }
@@ -76,7 +78,6 @@ export function balanceTree(
     for (const [i, marriage] of marriages.entries()) {
       // assuming a marriage has only one spouse
       const spouse = marriage.parents.find((p) => p !== focused)!;
-      console.log(spouse, right);
       if (i > 1) {
         visMarriages.push({
           parents: [marriages[i - 1].parents.find((p) => p !== focused)!, spouse],
@@ -89,7 +90,7 @@ export function balanceTree(
       const children = marriage.children;
 
       // recursively place children
-      const left = right;
+      const start = right;
       for (const child of children) {
         const subsubtree = new Set<string>();
         const minChildx = right + BASE_WIDTH / 2;
@@ -122,7 +123,7 @@ export function balanceTree(
 
       // render parents at the midpoint of the children's width
       const mid =
-        children.length === 0 ? (i === 0 ? right + BASE_WIDTH : right) : (left + right) / 2;
+        children.length === 0 ? (i === 0 ? right + BASE_WIDTH : right) : (start + right) / 2;
       addPerson(personRight, mid + BASE_WIDTH / 2, y);
       if (personLeft !== undefined) {
         meX = mid - BASE_WIDTH / 2;
