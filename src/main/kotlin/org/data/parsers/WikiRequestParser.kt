@@ -36,6 +36,7 @@ object WikiRequestParser {
     parseClaims: Boolean = true,
   ): Map<QID, Pair<Label, PropertyMapping>> {
     val json = Json { ignoreUnknownKeys = true }
+
     val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
     return result.entities.mapValues { (_, entityInfo) ->
