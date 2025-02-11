@@ -28,49 +28,57 @@ object WikiRequestParser {
    * family members.
    *
    * @param response The HTTP response from Wikidata.
-   * @returns A mapping of QIDs to a pair of the name and the relation.
+   * @returns A mapping of QIDs to ist relations.
    */
-  suspend fun parseWikidataEntities(
+  suspend fun parseWikidataClaims(
     response: HttpResponse,
     properties: Map<String, String> = propertyQIDMap,
-    parseClaims: Boolean = true,
-  ): Map<QID, Pair<Label, PropertyMapping>> {
+  ): Map<QID, PropertyMapping> {
     val json = Json { ignoreUnknownKeys = true }
 
     val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
     return result.entities.mapValues { (_, entityInfo) ->
-      val label = entityInfo.labels.en?.value ?: "decidedly NOT poggers"
 
       var familyInfo = mutableMapOf<String, List<String>>()
 
-      if (parseClaims) {
-        familyInfo =
-          properties.entries
-            .associate { (key, value) ->
-              value to
-                (entityInfo.claims[key]?.flatMap { claim ->
-                  when (val dataValue = claim.mainsnak.datavalue?.value) {
-                    is JsonObject -> {
-                      when {
-                        dataValue.containsKey("id") ->
-                          listOf(dataValue["id"]!!.jsonPrimitive.content)
-                        dataValue.containsKey("time") ->
-                          listOf(dataValue["time"]!!.jsonPrimitive.content)
-                        else -> emptyList()
-                      }
+      familyInfo =
+        properties.entries
+          .associate { (key, value) ->
+            value to
+              (entityInfo.claims[key]?.flatMap { claim ->
+                when (val dataValue = claim.mainsnak.datavalue?.value) {
+                  is JsonObject -> {
+                    when {
+                      dataValue.containsKey("id") ->
+                        listOf(dataValue["id"]!!.jsonPrimitive.content)
+                      dataValue.containsKey("time") ->
+                        listOf(dataValue["time"]!!.jsonPrimitive.content)
+                      else -> emptyList()
                     }
-                    is JsonPrimitive -> listOf(dataValue.content)
-                    else -> emptyList()
                   }
-                } ?: emptyList())
-            }
-            .toMutableMap()
-      }
+                  is JsonPrimitive -> listOf(dataValue.content)
+                  else -> emptyList()
+                }
+              } ?: emptyList())
+          }
+          .toMutableMap()
 
       propertyQIDMap.values.forEach { relation -> familyInfo.putIfAbsent(relation, emptyList()) }
 
-      label to familyInfo
+      familyInfo
+    }
+  }
+
+  suspend fun parseWikidataLabels(
+    response: HttpResponse
+  ): List<Label> {
+    val json = Json { ignoreUnknownKeys = true }
+
+    val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
+
+    return result.entities.map { (_, entityInfo) ->
+      entityInfo.labels.en?.value ?: error("Label not found from entity query.")
     }
   }
 }

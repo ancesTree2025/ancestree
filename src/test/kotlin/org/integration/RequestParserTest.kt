@@ -29,7 +29,7 @@ class RequestParserTest {
   @Test
   fun `can parse wikidata request response into one label and its claims`() =
     runTest(timeout = timeout) {
-      val labelClaimPair = WikiRequestParser.parseWikidataEntities(response)
+      val labelClaimPair = WikiRequestParser.parseWikidataClaims(response)
       assert(labelClaimPair.size == 1)
       assertEquals("Elon Musk", labelClaimPair["Q317521"]?.first)
       assertNotNull(labelClaimPair["Q317521"]?.second)
@@ -38,7 +38,7 @@ class RequestParserTest {
   @Test
   fun `can parse wikidata request response for personal props`() =
     runTest(timeout = timeout) {
-      val labelClaimPair = WikiRequestParser.parseWikidataEntities(response, propertyQIDMapPersonal)
+      val labelClaimPair = WikiRequestParser.parseWikidataClaims(response, propertyQIDMapPersonal)
       val claim = labelClaimPair["Q317521"]?.second
       assertEquals("Elon Musk", labelClaimPair["Q317521"]?.first)
       for ((_, prop) in propertyQIDMapPersonal) {
@@ -50,7 +50,7 @@ class RequestParserTest {
   fun `can parse wikidata response for location name`() =
     runTest(timeout = timeout) {
       val response = ComplexRequester.getLabelAndClaim(listOf("Q189022"))
-      val locInfo = WikiRequestParser.parseWikidataEntities(response, parseClaims = false)
+      val locInfo = WikiRequestParser.parseWikidataClaims(response, parseClaims = false)
       assertEquals("Imperial College London", locInfo["Q189022"]?.first)
     }
 }

@@ -2,8 +2,9 @@ package org.data.producers
 
 import kotlin.math.abs
 import org.data.models.Label
-import org.data.models.NamedRelation
+import org.data.models.Relations
 import org.data.models.Person
+import org.data.models.QID
 import org.data.services.WikiLookupService
 import org.domain.models.Edge
 import org.domain.models.Graph
@@ -18,8 +19,8 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
   }
 
   /** Various maps and sets to be used during graph generation. */
-  private val visited = mutableSetOf<Label>()
-  private val nodes = mutableMapOf<Label, Node<Person>>()
+  private val visited = mutableSetOf<QID>()
+  private val nodes = mutableMapOf<QID, Node<Person>>()
   private val edges = mutableSetOf<Edge>()
   private val childToParents = mutableMapOf<String, MutableSet<String>>()
 
@@ -111,8 +112,8 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
        * wasting most of our time with the initial algorithm. We then create resultsMap, which maps
        * a person's name (i.e., Hitler) to their Person object and relation mapping. */
       val namesToQuery = batchItems.map { it.name }.distinct()
-      val queryResults: List<Pair<Person, NamedRelation>> = wikiService.queryAll(namesToQuery)
-      val resultMap: Map<String, Pair<Person, NamedRelation>> =
+      val queryResults: List<Pair<Person, Relations>> = wikiService.queryAll(namesToQuery)
+      val resultMap: Map<String, Pair<Person, Relations>> =
         queryResults.associateBy { it.first.name }
 
       /* We now go over each of our items in the batch. */

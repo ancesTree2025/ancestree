@@ -2,6 +2,7 @@ package org.data.requests
 
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import org.data.models.QID
 
 object ComplexRequester {
 
@@ -28,14 +29,31 @@ object ComplexRequester {
   /**
    * Converts Wikidata IDs to human-readable names.
    *
-   * @param qids A list of QIDs to retrieve labels and claims for.
+   * @param qids A list of QIDs to retrieve claims for.
    * @returns HTTP response.
    */
-  suspend fun getLabelAndClaim(qids: List<String>): HttpResponse {
+  suspend fun getClaims(qids: List<QID>): HttpResponse {
     val response =
       BaseRequester.doWikidataRequest("wbgetentities") {
         parameter("ids", qids.joinToString("|"))
-        parameter("props", "labels|claims")
+        parameter("props", "claims")
+        parameter("languages", "en")
+      }
+
+    return response
+  }
+
+  /**
+   * Converts Wikidata IDs to human-readable names.
+   *
+   * @param qids A list of QIDs to retrieve claims for.
+   * @returns HTTP response.
+   */
+  suspend fun getLabels(qids: List<QID>): HttpResponse {
+    val response =
+      BaseRequester.doWikidataRequest("wbgetentities") {
+        parameter("ids", qids.joinToString("|"))
+        parameter("props", "labels")
         parameter("languages", "en")
       }
 

@@ -35,7 +35,7 @@ class WikiLookupServiceTest {
   fun `querying a person's name returns their QID, label and relations`() =
     runTest(timeout = timeout) {
       coEvery { WikiRequestParser.parseWikidataIDLookup(any()) } returns "Q317521"
-      coEvery { WikiRequestParser.parseWikidataEntities(any()) } returns
+      coEvery { WikiRequestParser.parseWikidataClaims(any()) } returns
         mapOf(Pair("Q317521", Pair("Elon Musk", mapOf())))
 
       val response = WikiLookupService().query("Elon Musk")

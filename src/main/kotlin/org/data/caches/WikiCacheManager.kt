@@ -1,7 +1,9 @@
 package org.data.caches
 
 import org.data.models.Label
+import org.data.models.PropertyMapping
 import org.data.models.QID
+import org.data.models.Relations
 
 /** Simple cache manager for storing Wikidata claims and QIDs. */
 object WikiCacheManager {
@@ -10,6 +12,8 @@ object WikiCacheManager {
 
   /** QID to Label. Used to avoid backwards traversal Label qidCache. */
   private val qidToLabelCache = mutableMapOf<QID, Label>()
+
+  private val qidToPropsCache = mutableMapOf<QID, PropertyMapping>()
 
   fun getQID(id: Label): QID? = labelToQIDCache[id]
 
@@ -22,4 +26,12 @@ object WikiCacheManager {
   fun putLabel(id: QID, entity: Label) {
     qidToLabelCache[id] = entity
   }
+
+  fun getProps(id: QID): PropertyMapping? = qidToPropsCache[id]
+
+  fun putProps(id: QID, entity: PropertyMapping) {
+    qidToPropsCache[id] = entity
+  }
+
+
 }

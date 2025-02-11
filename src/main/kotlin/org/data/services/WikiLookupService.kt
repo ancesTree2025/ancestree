@@ -15,75 +15,73 @@ import org.data.parsers.WikiRequestParser
 import org.data.requests.ComplexRequester
 
 /** Service class for performing Wikipedia/Wikidata lookups. */
-class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
-
-  // TODO: this is outdated PLEASE CHANGE FUNCTION DESCRIPTIONS WHEN YOU CHANGE FUNCTIONS
-  /**
-   * The only exposed function, to be used for interaction with Wikipedia/Wikidata and for any sort
-   * of querying.
-   *
-   * @param input The person's name.
-   * @returns A pair of Person objects for the desired person, and their Family Relations.
-   */
-  override suspend fun query(input: String): Pair<Person, NamedRelation>? {
-    val qid = searchForPersonsQID(input)
-
-    if (qid.isNullOrEmpty()) {
-      return null
-    }
-
-    val labelAndFamily =
-      try {
-        getPersonsLabelAndFamilyMembers(qid)
-      } catch (e: NotFoundException) {
-        return null
-      }
-
-    val personalInfo = NamedRelation.from(labelAndFamily.second)
-
-    val person =
-      Person(qid, labelAndFamily.first, labelAndFamily.second["Gender"]?.getOrNull(0) ?: "Unknown")
-
-    return Pair(person, personalInfo)
-  }
+class WikiLookupService: LookupService<List<String>, List<Pair<Person, Relations>>> {
 
   /**
-   * A new exposed function that allows for querying multiple QIDs at the same time. This is
-   * massively preferable to the previous approach.
+   * Query function that takes in a number of names and returns pairs of their person objects
+   * and relations for family members.
    *
-   * @param input A list of input string names.
-   * @returns A list of pairs of Person objects for the desired people, and their Family Relations.
-   */
-  suspend fun queryAll(input: List<String>): List<Pair<Person, NamedRelation>> {
+   * @param input A list of names.
+   * @returns A list of person-relation pairs.
+   * */
+  override suspend fun query(input: List<String>): List<Pair<Person, Relations>> {
+
     val qids = mutableListOf<QID>()
 
     input.forEach {
-      val qid = searchForPersonsQID(it)
-      if (!qid.isNullOrEmpty()) {
-        qids.add(qid)
+      if (WikiCacheManager.getQID(it).isNullOrEmpty()) {
+
+        val qidResp = ComplexRequester.searchWikidataForQID(it)
+        val qid = WikiRequestParser.parseWikidataIDLookup(qidResp)
+
+        if (qid == null) {
+          println("QID not found: $it")
+        } else {
+          WikiCacheManager.putQID(it, qid)
+          qids.add(qid)
+        }
+
+      } else {
+        qids.add(WikiCacheManager.getQID(it)!!)
       }
     }
 
-    val labelAndFamilyList =
-      try {
-        getPersonsLabelAndFamilyMembersAll(qids)
-      } catch (e: Throwable) {
-        return mutableListOf()
+    return queryQIDS(qids)
+  }
+
+  /**
+   * A QID-specific query function which fulfils much the same purpose of query.
+   *
+   * @param qids A list of QIDs.
+   * @returns A list of person-relation pairs.
+   * */
+  suspend fun queryQIDS(qids: List<QID>): List<Pair<Person, Relations>> {
+
+    val unseenQids = mutableListOf<QID>()
+
+    val finalRelations = mutableListOf<Pair<Person, Relations>>()
+
+    qids.forEach {
+      if (WikiCacheManager.getProps(it) == null) {
+        unseenQids.add(it)
+      } else {
+        val props = WikiCacheManager.getProps(it)!!
+        val person = Person(it, "", props["Gender"]?.getOrNull(0) ?: "Unknown")
+        finalRelations.add(Pair(person, Relations.from(props)))
       }
-
-    val personList = mutableListOf<Pair<Person, NamedRelation>>()
-
-    labelAndFamilyList.forEach {
-      val label = it.first
-      val personalInfo = NamedRelation.from(it.second)
-      val qid = WikiCacheManager.getQID(label)
-
-      val relPerson = Person(qid!!, label, it.second["Gender"]?.getOrNull(0) ?: "Unknown")
-
-      personList.add(Pair(relPerson, personalInfo))
     }
 
-    return personList
+    val claimsResp = ComplexRequester.getClaims(unseenQids)
+    val mappings = WikiRequestParser.parseWikidataClaims(claimsResp)
+
+    unseenQids.forEach {
+      val props = mappings[it]!!
+      WikiCacheManager.putProps(it, props)
+      val person = Person(it, "", props["Gender"]?.getOrNull(0) ?: "Unknown")
+      finalRelations.add(Pair(person, Relations.from(props)))
+    }
+
+    return finalRelations
   }
 
   /**
@@ -95,14 +93,30 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
    */
   suspend fun getDetailedInfo(qid: QID): PersonalInfo {
 
-    val familyResponse = ComplexRequester.getLabelAndClaim(listOf(qid))
-    val allInfo = WikiRequestParser.parseWikidataEntities(familyResponse, propertyQIDMapPersonal)
-    val infoMap = allInfo[qid]!!.second
+    lateinit var infoMap: PropertyMapping
+    lateinit var label: Label
+
+    if (WikiCacheManager.getProps(qid) == null) {
+      val familyResp = ComplexRequester.getClaims(listOf(qid))
+      infoMap = WikiRequestParser.parseWikidataClaims(familyResp, propertyQIDMapPersonal)[qid]!!
+      WikiCacheManager.putProps(qid, infoMap)
+    } else {
+      infoMap = WikiCacheManager.getProps(qid)!!
+    }
 
     val imageString = mkImage(infoMap["Wikimedia Image File"]!!)
 
     val PoB = getPlaceName(infoMap["PoB"]!!.getOrNull(0))
     val PoD = getPlaceName(infoMap["PoD"]!!.getOrNull(0))
+
+
+    if (WikiCacheManager.getLabel(qid) == null) {
+      val labelResp = ComplexRequester.getLabels(listOf(qid))
+      label = WikiRequestParser.parseWikidataLabels(labelResp).getOrElse(0) {"???"}
+      WikiCacheManager.putLabel(qid, label)
+    } else {
+      label = WikiCacheManager.getLabel(qid)!!
+    }
 
     val info =
       PersonalInfo(
@@ -111,7 +125,7 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
           "Born" to formatDatePlaceInfo(PoB, infoMap["DoB"]),
           "Died" to formatDatePlaceInfo(PoD, infoMap["DoD"]),
         ),
-        ChatGPTDescriptionService.summarise(allInfo[qid]!!.first),
+        ChatGPTDescriptionService.summarise(label),
         "stub",
       )
 
@@ -130,13 +144,12 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
       return "Unknown"
     }
 
-    var dateString = date!![0].substringBefore("T").removePrefix("+")
-    var fmtDate: String
+    val dateString = date!![0].substringBefore("T").removePrefix("+")
 
-    try {
-      fmtDate = LocalDate.parse(dateString).format(DateTimeFormatter.ofPattern("d/M/yyyy"))
+    val fmtDate: String = try {
+      LocalDate.parse(dateString).format(DateTimeFormatter.ofPattern("d/M/yyyy"))
     } catch (e: Throwable) {
-      fmtDate = dateString.takeWhile { (it != '-') }
+      dateString.takeWhile { (it != '-') }
     }
 
     return "$place, $fmtDate."
@@ -150,10 +163,16 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
    */
   private suspend fun getPlaceName(locQID: QID?): Label {
     if (locQID == null) return "Unknown"
-    val locReq = ComplexRequester.getLabelAndClaim(listOf(locQID))
-    val locInfo = WikiRequestParser.parseWikidataEntities(locReq, parseClaims = false)
-    val name = locInfo[locQID]!!.first
-    return name
+
+    if (WikiCacheManager.getLabel(locQID) == null) {
+      val locReq = ComplexRequester.getLabels(listOf(locQID))
+      val locInfo = WikiRequestParser.parseWikidataLabels(locReq)
+      val name = locInfo.getOrElse(0) {"???"}
+      WikiCacheManager.putLabel(locQID, name)
+      return name
+    } else {
+      return WikiCacheManager.getLabel(locQID)!!
+    }
   }
 
   /**
@@ -179,110 +198,12 @@ class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
   }
 
   /**
-   * Searches for a person and returns their QID. We first query the cache and then Wikipedia.
-   *
-   * @param name The person's name.
-   * @returns Their Wikidata QID as a string.
-   */
-  private suspend fun searchForPersonsQID(name: String): QID? {
-    if (WikiCacheManager.getQID(name) != null) {
-      return WikiCacheManager.getQID(name)!!
-    }
-
-    val response = ComplexRequester.searchWikidataForQID(name)
-    val qid = WikiRequestParser.parseWikidataIDLookup(response)
-    return qid
-  }
-
-  /**
-   * Replaces QIDs in a family relation mapping with their labels.
-   *
-   * @param familyInfo A mapping of type of relation to a list of QIDs for individuals of that type.
-   * @returns A human-readable mapping without QIDs.
-   */
-  private suspend fun replaceQIDsWithNames(familyInfo: PropertyMapping): PropertyMapping {
-    /** We then select those names which don't appear in the cache, to query and store. */
-    val allIds = familyInfo.values.flatten()
-
-    if (allIds.isEmpty()) {
-      return familyInfo
-    }
-
-    val unseen = allIds.filter { WikiCacheManager.getLabel(it).isNullOrEmpty() }
-
-    if (unseen.isNotEmpty()) {
-      val nameResponse = ComplexRequester.getLabelAndClaim(unseen)
-      val labelClaimPair =
-        WikiRequestParser.parseWikidataEntities(nameResponse, parseClaims = false)
-
-      labelClaimPair.forEach { (qid, pair) ->
-        WikiCacheManager.putQID(pair.first, qid)
-        WikiCacheManager.putLabel(qid, pair.first)
-      }
-    }
-
-    return familyInfo.mapValues { (_, ids) ->
-      ids.map { id -> WikiCacheManager.getLabel(id) ?: "Unknown" }
-    }
-  }
-
-  /**
-   * Uses a person's QID to retrieve information about their family.
-   *
-   * @param personQID The person's QID.
-   * @returns Their label and a mapping of types of relation to lists of relatives in that category.
-   */
-  private suspend fun getPersonsLabelAndFamilyMembers(
-    personQID: QID
-  ): Pair<Label, PropertyMapping> {
-
-    val familyResponse = ComplexRequester.getLabelAndClaim(listOf(personQID))
-    val labelFamilyMap = WikiRequestParser.parseWikidataEntities(familyResponse)
-
-    val labelFamilyPair =
-      labelFamilyMap[personQID]
-        ?: throw NotFoundException("Label Family pair not found in singleton map.")
-
-    val label = labelFamilyPair.first
-
-    val familyInfo = replaceQIDsWithNames(labelFamilyPair.second)
-
-    return Pair(label, familyInfo)
-  }
-
-  /**
-   * Like the above method, but for multiple people.
-   *
-   * @param personQIDs A list of people's QID.
-   * @returns A list of pairs, with their labels and a mapping of types of relation to relatives in
-   *   that category.
-   */
-  private suspend fun getPersonsLabelAndFamilyMembersAll(
-    personQIDs: List<QID>
-  ): List<Pair<Label, PropertyMapping>> {
-
-    val familyResponse = ComplexRequester.getLabelAndClaim(personQIDs)
-    val labelFamilyMap = WikiRequestParser.parseWikidataEntities(familyResponse)
-
-    val ls = mutableListOf<Pair<Label, PropertyMapping>>()
-
-    personQIDs.forEach {
-      val relPair = labelFamilyMap[it]!!
-      ls.add(Pair(relPair.first, replaceQIDsWithNames(relPair.second)))
-      WikiCacheManager.putLabel(it, relPair.first)
-      WikiCacheManager.putQID(relPair.first, it)
-    }
-
-    return ls
-  }
-
-  /**
    * Fetches autocomplete results from the connected database for search input.
    *
    * @param input The part of the query that the user intends to ask.
    * @return A list of complete queries that the user may want to input.
    */
-  override suspend fun fetchAutocomplete(input: String): List<String> {
+  suspend fun fetchAutocomplete(input: String): List<String> {
     val response = ComplexRequester.getAutocompleteNames(input)
 
     return GoogleKnowledgeRequestParser.parseGoogleKnowledgeLookup(response)

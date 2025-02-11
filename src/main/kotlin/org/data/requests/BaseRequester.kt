@@ -11,7 +11,6 @@ object BaseRequester {
 
   /** Simple enum with a list of the URLs we will query frequently. */
   enum class WikiEndpoint(override val baseUrl: String) : Endpoint {
-    WIKIPEDIA("https://en.wikipedia.org/w/api.php"),
     WIKIDATA("https://www.wikidata.org/w/api.php"),
   }
 
@@ -32,24 +31,6 @@ object BaseRequester {
   ): HttpResponse {
     val client = HttpClientProvider.httpClient
     return client.get(endpoint.baseUrl) { configParams() }
-  }
-
-  /**
-   * Template request function for querying Wikipedia.
-   *
-   * @param action The type of action to take (separated from params for distinction).
-   * @param configParams A list of query parameters to be passed.
-   * @returns The HTTP response from the URL.
-   */
-  suspend fun doWikipediaRequest( // TODO: unused?
-    action: String,
-    configParams: HttpRequestBuilder.() -> Unit,
-  ): HttpResponse {
-    return doRequest(WikiEndpoint.WIKIPEDIA) {
-      parameter("action", action)
-      parameter("format", "json")
-      configParams()
-    }
   }
 
   /**
