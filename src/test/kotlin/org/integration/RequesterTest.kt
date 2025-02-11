@@ -13,7 +13,7 @@ import org.data.requests.BaseRequester
 import org.data.requests.ComplexRequester
 
 class RequesterTest {
-  private val timeout = 120.seconds
+  private val timeout = 60.seconds
   private val json = Json { ignoreUnknownKeys = true }
 
   /*
@@ -28,14 +28,14 @@ class RequesterTest {
    */
 
   @Test
-  fun `can successfully make a request to the Wikipedia API`() =
+  fun `can successfully connect to the Wikipedia API`() =
     runTest(timeout = timeout) {
       val httpResponse = BaseRequester.doWikipediaRequest("") {}
       assertEquals(200, httpResponse.status.value)
     }
 
   @Test
-  fun `can successfully make a request to the Wikidata API`() =
+  fun `can successfully connect to the Wikidata API`() =
     runTest(timeout = timeout) {
       val httpResponse = BaseRequester.doWikidataRequest("") {}
       assertEquals(200, httpResponse.status.value)
@@ -55,12 +55,13 @@ class RequesterTest {
       assertNotNull(result.query)
       assertNotNull(result.query?.pages)
       assert(result.query?.pages?.isNotEmpty() ?: false)
+      assert(httpResponse.bodyAsText().contains("Q317521"))
     }
 
   @Test
   fun `can successfully fetch a label and claims from Wikidata given a QID`() =
     runTest(timeout = timeout) {
-      val httpResponse = ComplexRequester.getLabelAndClaim(listOf("Q317521"))
+      val httpResponse = ComplexRequester.getLabelAndClaim(listOf("Q317521")) // Elon Musk
       val result = json.decodeFromString<WikidataResponse>(httpResponse.bodyAsText())
 
       assertEquals(200, httpResponse.status.value)
@@ -69,5 +70,7 @@ class RequesterTest {
       assert(result.entities.isNotEmpty())
       assertNotNull(result.entities["Q317521"])
       assertNotNull(result.entities["Q317521"]?.labels?.en)
+      assert(httpResponse.bodyAsText().contains("Elon Musk"))
+      assertNotNull(result.entities["Q317521"]?.claims)
     }
 }

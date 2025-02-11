@@ -49,3 +49,7 @@ ktfmt {
     googleStyle()
     maxWidth = 100
 }
+
+tasks.test {
+    exclude("org/integration/**")
+}
