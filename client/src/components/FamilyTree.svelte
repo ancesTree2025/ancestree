@@ -20,8 +20,10 @@
   });
 
   $effect(() => {
+    /* eslint-disable  @typescript-eslint/no-explicit-any */
     d3.select('#svg-root').call(d3.zoom().on('zoom', zoomed) as any);
 
+    /* eslint-disable  @typescript-eslint/no-explicit-any */
     function zoomed(event: any) {
       d3.select('#zoom-group').attr('transform', event.transform);
     }
