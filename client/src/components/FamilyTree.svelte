@@ -7,13 +7,16 @@
     tree,
     getPersonInfo
   }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } = $props();
-  let visMarriages = $state<Marriages | undefined>(tree?.marriages);
   let positions = $state<Positions>({});
+  let visMarriages = $state<Marriages | undefined>(tree?.marriages);
   let treeWidth = $state<number>();
 
   $effect(() => {
     if (tree) {
-      [positions, visMarriages, treeWidth] = balanceTree(tree, [500, 300]);
+      const result = balanceTree(tree, [500, 300]);
+      positions = result.positions;
+      visMarriages = result.visMarriages;
+      treeWidth = result.treeWidth;
     } else {
       positions = {};
     }
