@@ -113,7 +113,9 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
         }
 
         val (person, relation) = resultMap[item.qid]!!
-        genders.add(person.gender)
+        if (person.gender != "Unknown") {
+          genders.add(person.gender)
+        }
         if (!nodes.containsKey(person.qid)) {
           nodes[person.qid] = Node(person, person.qid, item.depth)
         }
@@ -167,19 +169,26 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     }
 
 
-    val rootNode = nodes.values.find { it.data.qid == rootQid } ?: error("Root not found...")
-
     val qidsToReplace = mutableListOf<QID>()
     qidsToReplace.addAll(nodes.keys)
     qidsToReplace.addAll(genders)
 
-    val labels = wikiService.getAllLabels(qidsToReplace)
+    val labels = wikiService.getAllLabels(qidsToReplace).toMutableMap()
+    labels["Unknown"] = "Unknown"
 
     nodes.map {
       it.value.data.name = labels[it.key]!!
       it.value.data.gender = labels[it.value.data.gender]!!
     }
 
-    return Graph(rootNode, nodes.values.toSet(), edges)
+    val newNodes = mutableSetOf<Node<Person>>()
+
+    nodes.forEach {
+      newNodes.add(Node(it.value.data, it.value.data.name, it.value.depth))
+    }
+
+    val rootNode = newNodes.find { it.data.qid == rootQid } ?: error("Root not found...")
+
+    return Graph(rootNode, newNodes, edges)
   }
 }
