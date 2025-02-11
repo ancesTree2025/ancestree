@@ -116,6 +116,26 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Build and Check Format
+        run: ./gradlew build
+
+      - name: Stop Gradle Daemon
+        run: ./gradlew --stop
+
+  test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Run unit tests
         run: ./gradlew check
 
       - name: Stop Gradle Daemon
