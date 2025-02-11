@@ -40,10 +40,7 @@ object WikiRequestParser {
 
     return result.entities.mapValues { (_, entityInfo) ->
 
-      var familyInfo = mutableMapOf<String, List<String>>()
-
-      familyInfo =
-        properties.entries
+      val familyInfo: MutableMap<String, List<String>> = properties.entries
           .associate { (key, value) ->
             value to
               (entityInfo.claims[key]?.flatMap { claim ->
@@ -72,12 +69,12 @@ object WikiRequestParser {
 
   suspend fun parseWikidataLabels(
     response: HttpResponse
-  ): List<Label> {
+  ): Map<QID, Label> {
     val json = Json { ignoreUnknownKeys = true }
 
     val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
-    return result.entities.map { (_, entityInfo) ->
+    return result.entities.mapValues { (_, entityInfo) ->
       entityInfo.labels.en?.value ?: error("Label not found from entity query.")
     }
   }

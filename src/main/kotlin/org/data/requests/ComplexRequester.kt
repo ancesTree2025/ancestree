@@ -32,28 +32,11 @@ object ComplexRequester {
    * @param qids A list of QIDs to retrieve claims for.
    * @returns HTTP response.
    */
-  suspend fun getClaims(qids: List<QID>): HttpResponse {
+  suspend fun getLabelsOrClaims(qids: List<QID>): HttpResponse {
     val response =
       BaseRequester.doWikidataRequest("wbgetentities") {
         parameter("ids", qids.joinToString("|"))
-        parameter("props", "claims")
-        parameter("languages", "en")
-      }
-
-    return response
-  }
-
-  /**
-   * Converts Wikidata IDs to human-readable names.
-   *
-   * @param qids A list of QIDs to retrieve claims for.
-   * @returns HTTP response.
-   */
-  suspend fun getLabels(qids: List<QID>): HttpResponse {
-    val response =
-      BaseRequester.doWikidataRequest("wbgetentities") {
-        parameter("ids", qids.joinToString("|"))
-        parameter("props", "labels")
+        parameter("props", "labels|claims")
         parameter("languages", "en")
       }
 

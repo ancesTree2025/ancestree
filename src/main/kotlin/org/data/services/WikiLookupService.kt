@@ -1,6 +1,5 @@
 package org.data.services
 
-import io.ktor.server.plugins.*
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
@@ -57,8 +56,11 @@ class WikiLookupService: LookupService<List<String>, List<Pair<Person, Relations
    * */
   suspend fun queryQIDS(qids: List<QID>): List<Pair<Person, Relations>> {
 
-    val unseenQids = mutableListOf<QID>()
+    if (qids.isEmpty()) {
+      return listOf()
+    }
 
+    val unseenQids = mutableListOf<QID>()
     val finalRelations = mutableListOf<Pair<Person, Relations>>()
 
     qids.forEach {
@@ -71,8 +73,16 @@ class WikiLookupService: LookupService<List<String>, List<Pair<Person, Relations
       }
     }
 
-    val claimsResp = ComplexRequester.getClaims(unseenQids)
-    val mappings = WikiRequestParser.parseWikidataClaims(claimsResp)
+    if (unseenQids.isEmpty()) {
+      return finalRelations
+    }
+
+    val mappings = mutableMapOf<QID, PropertyMapping>()
+    val subQs = unseenQids.chunked(45)
+    subQs.forEach {
+      val claimsResp = ComplexRequester.getLabelsOrClaims(it)
+      mappings.putAll(WikiRequestParser.parseWikidataClaims(claimsResp))
+    }
 
     unseenQids.forEach {
       val props = mappings[it]!!
@@ -97,7 +107,7 @@ class WikiLookupService: LookupService<List<String>, List<Pair<Person, Relations
     lateinit var label: Label
 
     if (WikiCacheManager.getProps(qid) == null) {
-      val familyResp = ComplexRequester.getClaims(listOf(qid))
+      val familyResp = ComplexRequester.getLabelsOrClaims(listOf(qid))
       infoMap = WikiRequestParser.parseWikidataClaims(familyResp, propertyQIDMapPersonal)[qid]!!
       WikiCacheManager.putProps(qid, infoMap)
     } else {
@@ -111,8 +121,8 @@ class WikiLookupService: LookupService<List<String>, List<Pair<Person, Relations
 
 
     if (WikiCacheManager.getLabel(qid) == null) {
-      val labelResp = ComplexRequester.getLabels(listOf(qid))
-      label = WikiRequestParser.parseWikidataLabels(labelResp).getOrElse(0) {"???"}
+      val labelResp = ComplexRequester.getLabelsOrClaims(listOf(qid))
+      label = WikiRequestParser.parseWikidataLabels(labelResp)[qid]!!
       WikiCacheManager.putLabel(qid, label)
     } else {
       label = WikiCacheManager.getLabel(qid)!!
@@ -130,6 +140,38 @@ class WikiLookupService: LookupService<List<String>, List<Pair<Person, Relations
       )
 
     return info
+  }
+
+  /**
+   * Returns a list of all the labels for some number of QIDs.
+   *
+   * @param qids A list of qids.
+   * @returns A map of QID to the respective label.
+   * */
+  suspend fun getAllLabels(qids: List<QID>): Map<QID, Label> {
+
+    val unseenQids = mutableListOf<Label>()
+    val finalLabels = mutableMapOf<QID, Label>()
+
+    qids.forEach {
+      if (WikiCacheManager.getLabel(it) == null) {
+        unseenQids.add(it)
+      } else {
+        finalLabels[it] = WikiCacheManager.getLabel(it)!!
+      }
+    }
+
+    if (unseenQids.isEmpty()) {
+      return finalLabels
+    }
+
+    val subQs = unseenQids.chunked(45)
+    subQs.forEach {
+      val claimsResp = ComplexRequester.getLabelsOrClaims(it)
+      finalLabels.putAll(WikiRequestParser.parseWikidataLabels(claimsResp))
+    }
+
+    return finalLabels
   }
 
   /**
@@ -165,9 +207,9 @@ class WikiLookupService: LookupService<List<String>, List<Pair<Person, Relations
     if (locQID == null) return "Unknown"
 
     if (WikiCacheManager.getLabel(locQID) == null) {
-      val locReq = ComplexRequester.getLabels(listOf(locQID))
+      val locReq = ComplexRequester.getLabelsOrClaims(listOf(locQID))
       val locInfo = WikiRequestParser.parseWikidataLabels(locReq)
-      val name = locInfo.getOrElse(0) {"???"}
+      val name = locInfo[locQID]!!
       WikiCacheManager.putLabel(locQID, name)
       return name
     } else {
