@@ -9,17 +9,18 @@
   }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } = $props();
   let visMarriages = $state<Marriages | undefined>(tree?.marriages);
   let positions = $state<Positions>({});
+  let treeWidth = $state<number>();
 
   $effect(() => {
     if (tree) {
-      [positions, visMarriages] = balanceTree(tree, [500, 300]);
+      [positions, visMarriages, treeWidth] = balanceTree(tree, [500, 300]);
     } else {
       positions = {};
     }
   });
 
   $effect(() => {
-    const svg = d3.select('#svg-root').call(d3.zoom().on('zoom', zoomed) as any);
+    d3.select('#svg-root').call(d3.zoom().on('zoom', zoomed) as any);
 
     function zoomed(event: any) {
       d3.select("#zoom-group").attr('transform', event.transform);
@@ -29,11 +30,13 @@
   const RECT_HEIGHT = 60;
   const RECT_WIDTH = 120;
   const RECT_RADIUS = 10;
-  const ZOOM_FACTOR = 1;
 
-  let width = $state(0);
   let height = $state(0);
+  let width = $state(0);
+
+  let ZOOM_FACTOR = $derived(Math.min(1, treeWidth ? width / treeWidth : 1));
 </script>
+
 
 <svg id="svg-root" class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
   <g id="zoom-group">

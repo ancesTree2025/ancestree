@@ -11,7 +11,7 @@ export function balanceTree(
   center: [number, number],
   BASE_WIDTH = 160,
   GENERATION_HEIGHT = 120
-): [Positions, Marriages] {
+): [Positions, Marriages, number] {
   const positions: Positions = {};
 
   const visMarriages: Marriages = [];
@@ -33,7 +33,19 @@ export function balanceTree(
   adjustNodes(subtree, center[0] - subtreeX);
   adjustNodes(supertree, center[0] - supertreeX);
 
-  return [positions, visMarriages];
+  right = 0;
+
+  for (const person of subtree) {
+    right = Math.max(positions[person].x + BASE_WIDTH / 2, right);
+  }
+
+  let left = right;
+
+  for (const person of subtree) {
+    left = Math.min(positions[person].x - BASE_WIDTH / 2, left);
+  }
+
+  return [positions, visMarriages, right - left];
 
   // Shifts all nodes by a certain X
   function adjustNodes(set: Set<PersonID>, dx: number) {
