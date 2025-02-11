@@ -181,14 +181,8 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
       it.value.data.gender = labels[it.value.data.gender]!!
     }
 
-    val newNodes = mutableSetOf<Node<Person>>()
+    val rootNode = nodes.values.find { it.data.qid == rootQid } ?: error("Root not found...")
 
-    nodes.forEach {
-      newNodes.add(Node(it.value.data, it.value.data.name, it.value.depth))
-    }
-
-    val rootNode = newNodes.find { it.data.qid == rootQid } ?: error("Root not found...")
-
-    return Graph(rootNode, newNodes, edges)
+    return Graph(rootNode, nodes.values.toSet(), edges)
   }
 }
