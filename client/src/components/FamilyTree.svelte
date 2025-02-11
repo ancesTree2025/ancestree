@@ -62,34 +62,33 @@
           <!-- Draw marriage lines -->
           {@const parentsX = (mother.x + father.x) / 2}
           {#if mother.y === father.y}
-          {console.log(mother.x)}
             <line
-              x1={transformX(mother.x)}
-              y1={transformY(mother.y)}
-              x2={transformX(father.x)}
-              y2={transformY(father.y)}
+              x1={ZOOM_FACTOR * mother.x + ((treeWidth !== undefined && treeWidth < width) ? (width - treeWidth) / 2 : 0)}
+              y1={ZOOM_FACTOR * mother.y}
+              x2={ZOOM_FACTOR * father.x + ((treeWidth !== undefined && treeWidth < width) ? (width - treeWidth) / 2 : 0)}
+              y2={ZOOM_FACTOR * father.y}
               class="stroke-node stroke-line"
             />
           {:else}
             <line
-              x1={transformX(mother.x)}
-              y1={transformY(mother.y)}
-              x2={transformX(parentsX)}
-              y2={transformY(mother.y)}
+              x1={ZOOM_FACTOR * mother.x + ((treeWidth !== undefined && treeWidth < width) ? (width - treeWidth) / 2 : 0)}
+              y1={ZOOM_FACTOR * mother.y}
+              x2={ZOOM_FACTOR * parentsX + ((treeWidth !== undefined && treeWidth < width) ? (width - treeWidth) / 2 : 0)}
+              y2={ZOOM_FACTOR * mother.y}
               class="stroke-node stroke-line"
             />
             <line
-              x1={transformX(parentsX)}
-              y1={transformY(mother.y)}
-              x2={transformX(parentsX)}
-              y2={transformY(father.y)}
+              x1={ZOOM_FACTOR * parentsX + ((treeWidth !== undefined && treeWidth < width) ? (width - treeWidth) / 2 : 0)}
+              y1={ZOOM_FACTOR * mother.y}
+              x2={ZOOM_FACTOR * parentsX + ((treeWidth !== undefined && treeWidth < width) ? (width - treeWidth) / 2 : 0)}
+              y2={ZOOM_FACTOR * father.y}
               class="stroke-node stroke-line"
             />
             <line
-              x1={transformX(father.x)}
-              y1={transformY(father.y)}
-              x2={transformX(parentsX)}
-              y2={transformY(father.y)}
+              x1={ZOOM_FACTOR * father.x + ((treeWidth !== undefined && treeWidth < width) ? (width - treeWidth) / 2 : 0)}
+              y1={ZOOM_FACTOR * father.y}
+              x2={ZOOM_FACTOR * parentsX + ((treeWidth !== undefined && treeWidth < width) ? (width - treeWidth) / 2 : 0)}
+              y2={ZOOM_FACTOR * father.y}
               class="stroke-node stroke-line"
             />
           {/if}
@@ -100,10 +99,10 @@
             {@const childrenY = Math.min(...children.map((child) => child?.y ?? Infinity))}
             {@const midY = (parentsY + childrenY) / 2}
             <line
-              x1={transformX(parentsX)}
-              y1={transformY(parentsY)}
-              x2={transformX(parentsX)}
-              y2={transformY(midY)}
+              x1={ZOOM_FACTOR * parentsX + ((treeWidth !== undefined && treeWidth < width) ? (width - treeWidth) / 2 : 0)}
+              y1={ZOOM_FACTOR * parentsY}
+              x2={ZOOM_FACTOR * parentsX + ((treeWidth !== undefined && treeWidth < width) ? (width - treeWidth) / 2 : 0)}
+              y2={ZOOM_FACTOR * midY}
               class="stroke-node stroke-line"
             />
 
@@ -117,10 +116,10 @@
               ...children.map((child) => child?.x ?? -Infinity)
             )}
             <line
-              x1={transformX(leftChildX)}
-              y1={transformY(midY)}
-              x2={transformX(rightChildX)}
-              y2={transformY(midY)}
+              x1={ZOOM_FACTOR * leftChildX + ((treeWidth !== undefined && treeWidth < width) ? (width - treeWidth) / 2 : 0)}
+              y1={ZOOM_FACTOR * midY}
+              x2={ZOOM_FACTOR * rightChildX + ((treeWidth !== undefined && treeWidth < width) ? (width - treeWidth) / 2 : 0)}
+              y2={ZOOM_FACTOR * midY}
               class="stroke-node stroke-line"
             />
 
@@ -128,10 +127,10 @@
             {#each children as child}
               {#if child}
                 <line
-                  x1={transformX(child.x)}
-                  y1={transformY(midY)}
-                  x2={transformX(child.x)}
-                  y2={transformY(child.y)}
+                  x1={ZOOM_FACTOR * child.x + ((treeWidth !== undefined && treeWidth < width) ? (width - treeWidth) / 2 : 0)}
+                  y1={ZOOM_FACTOR * midY}
+                  x2={ZOOM_FACTOR * child.x + ((treeWidth !== undefined && treeWidth < width) ? (width - treeWidth) / 2 : 0)}
+                  y2={ZOOM_FACTOR * child.y}
                   class="stroke-node stroke-line"
                 />
               {/if}
@@ -142,7 +141,7 @@
       {#each tree.people as [id, person]}
         {@const position = positions[id]}
         {#if position}
-          <g transform="translate({transformX(position.x)},{transformY(position.y)})">
+          <g transform="translate({ZOOM_FACTOR * position.x},{ZOOM_FACTOR * position.y + ((treeWidth !== undefined && treeWidth < width) ? (width - treeWidth) / 2 : 0)}">
             <rect
               x={-RECT_WIDTH * ZOOM_FACTOR / 2}
               y={-RECT_HEIGHT  * ZOOM_FACTOR/ 2}
