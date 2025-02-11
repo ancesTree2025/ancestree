@@ -27,9 +27,9 @@ object ComplexRequester {
   }
 
   /**
-   * Converts Wikidata IDs to human-readable names.
+   * Gets the label and claims for particular QIDs passed in.
    *
-   * @param qids A list of QIDs to retrieve claims for.
+   * @param qids A list of QIDs to retrieve labels or claims for.
    * @returns HTTP response.
    */
   suspend fun getLabelsOrClaims(qids: List<QID>): HttpResponse {

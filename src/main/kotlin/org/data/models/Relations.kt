@@ -1,6 +1,6 @@
 package org.data.models
 
-/** Class to relations for a given entity */
+/** Class of family relations for a given entity. */
 class Relations(
   val Father: String = "",
   val Mother: String = "",

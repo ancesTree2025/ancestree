@@ -14,7 +14,12 @@ import org.data.parsers.WikiRequestParser
 import org.data.requests.ComplexRequester
 
 /** Service class for performing Wikipedia/Wikidata lookups. */
-class WikiLookupService : LookupService<List<String>, List<Pair<Person, Relations>>> {
+class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
+
+  /** A companion object housing API configuration details. */
+  companion object {
+    const val CHUNK_SIZE = 45
+  }
 
   /**
    * Query function that takes in a number of names and returns pairs of their person objects and
@@ -77,7 +82,7 @@ class WikiLookupService : LookupService<List<String>, List<Pair<Person, Relation
     }
 
     val mappings = mutableMapOf<QID, PropertyMapping>()
-    val subQs = unseenQids.chunked(45)
+    val subQs = unseenQids.chunked(CHUNK_SIZE)
     subQs.forEach {
       val claimsResp = ComplexRequester.getLabelsOrClaims(it)
       mappings.putAll(WikiRequestParser.parseWikidataClaims(claimsResp))

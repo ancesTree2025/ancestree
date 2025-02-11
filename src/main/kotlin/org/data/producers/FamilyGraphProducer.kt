@@ -41,14 +41,10 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
   /**
    * An internal queue item used for a BFS-style traversal.
    *
-   * @param The query string (person's name) to be looked up. In the first iteration with the root
-   *   string, this will be what the user types into ancestree, but after that we can expect a
-   *   formal Wikidata label.
+   * @param qid The QID of the person represented by the QueueItem.
    * @param depth The current depth of this node relative to the root.
    * @param parentId The QID of the node that references this person.
    * @param type See the description for RelationType.
-   *
-   * TODO(Change this description! We use QID now!!!)
    */
   private data class QueueItem(
     var qid: QID,
@@ -80,15 +76,22 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
    */
   override suspend fun produceGraph(root: Label): Graph<Person> {
 
+    /** Clearing the used sets */
     visited.clear()
     nodes.clear()
     edges.clear()
 
+    /*TODO(Extremely bizarre bug, needs DESPERATE fixing.)
+     * As of the latest push, I don't understand why this is happening, but after some debugging,
+     * I found that for whatever reason, something is trying to produce a graph with this string.
+     * Obviously it isn't a person and so on, so it just wastes time. For now, I just catch and discard it,
+     * but we need to determine the underlying cause and remove it.
+     * */
     if (root == "favicon.ico") {
       return Graph(Node(Person(), "", 0), emptySet(), emptySet())
     }
 
-    /* We initialise the service we will be using, and a queue with just the root information in it. */
+    /** Initializing service, queue and root */
     val wikiService = WikiLookupService()
 
     val rootInfo =
@@ -99,24 +102,25 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
 
     var traversals = 0
 
-    /* Now we start traversal... */
+    /** Beginning traversal */
     while (queue.isNotEmpty()) {
 
+      /** Early stopping for exceeding horizontal width */
       println(traversals)
-
       if (traversals++ == MAX_WIDTH) {
         break
       }
 
+      /** Producing the result map of QIDs to relations */
       val batchItems = queue.filter { abs(it.depth) <= MAX_DEPTH }
       if (batchItems.isEmpty()) break
 
       val namesToQuery = batchItems.map { it.qid }.distinct()
-
       val queryResults: List<Pair<Person, Relations>> = wikiService.queryQIDS(namesToQuery)
 
       val resultMap: Map<String, Pair<Person, Relations>> = queryResults.associateBy { it.first.id }
 
+      /** Iterating through batch items to repopulate queue and create edges */
       for (item in batchItems) {
 
         if (!resultMap.containsKey(item.qid)) {
@@ -132,6 +136,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
           nodes[person.id] = Node(person, person.id, item.depth)
         }
 
+        /** Creating edges */
         when (item.type) {
           RelationType.Parent -> {
             edges.add(Edge(person.id, item.parentId))
@@ -147,6 +152,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
           RelationType.Root -> {}
         }
 
+        /** Repopulating queue */
         if (!visited.contains(Pair(item.qid, item.parentId))) {
 
           if (abs(item.depth - 1) <= MAX_DEPTH) {
@@ -180,6 +186,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
       queue.removeAll { batchItems.contains(it) }
     }
 
+    /** Connecting unmarried people with children */
     for ((_, parentSet) in childToParents) {
       val parents = parentSet.toList()
       if (parents.size >= 2) {
@@ -191,6 +198,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
       }
     }
 
+    /** Re-labelling nodes with name and gender, from QID */
     val qidsToReplace = mutableListOf<QID>()
     qidsToReplace.addAll(nodes.keys)
     qidsToReplace.addAll(genders)

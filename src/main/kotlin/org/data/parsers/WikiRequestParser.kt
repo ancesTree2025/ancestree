@@ -24,11 +24,12 @@ object WikiRequestParser {
   }
 
   /**
-   * Parses Wikidata entity lookup responses, caching claims and finding labels of all the relevant
-   * family members.
+   * Parses Wikidata claims for particular Q-items, returning the relevant properties as a property
+   * map.
    *
    * @param response The HTTP response from Wikidata.
-   * @returns A mapping of QIDs to ist relations.
+   * @param properties A map specifying properties of relevance, and their meaning.
+   * @returns A mapping of QIDs to property maps determined by the passed properties.
    */
   suspend fun parseWikidataClaims(
     response: HttpResponse,
@@ -66,6 +67,12 @@ object WikiRequestParser {
     }
   }
 
+  /**
+   * Parses Wikidata label for particular Q-items, returning a map of QID to label .
+   *
+   * @param response The HTTP response from Wikidata.
+   * @returns A mapping of QIDs to labels.
+   */
   suspend fun parseWikidataLabels(response: HttpResponse): Map<QID, Label> {
     val json = Json { ignoreUnknownKeys = true }
 
