@@ -105,13 +105,8 @@ class WikiLookupService : LookupService<List<String>, List<Pair<Person, Relation
     lateinit var infoMap: PropertyMapping
     lateinit var label: Label
 
-    if (WikiCacheManager.getProps(qid) == null) {
-      val familyResp = ComplexRequester.getLabelsOrClaims(listOf(qid))
-      infoMap = WikiRequestParser.parseWikidataClaims(familyResp, propertyQIDMapPersonal)[qid]!!
-      WikiCacheManager.putProps(qid, infoMap)
-    } else {
-      infoMap = WikiCacheManager.getProps(qid)!!
-    }
+    val familyResp = ComplexRequester.getLabelsOrClaims(listOf(qid))
+    infoMap = WikiRequestParser.parseWikidataClaims(familyResp, propertyQIDMapPersonal)[qid]!!
 
     val imageString = mkImage(infoMap["Wikimedia Image File"]!!)
 

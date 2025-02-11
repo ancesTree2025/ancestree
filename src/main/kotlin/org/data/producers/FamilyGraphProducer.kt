@@ -15,8 +15,8 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
 
   /** A companion object housing graph configuration details. */
   companion object {
-    const val MAX_DEPTH = 2
-    const val MAX_WIDTH = 5
+    const val MAX_DEPTH = 4
+    const val MAX_WIDTH = 4
   }
 
   /** Various maps and sets to be used during graph generation. */
@@ -104,10 +104,9 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
 
       println(traversals)
 
-      if (traversals == MAX_WIDTH) {
+      if (traversals++ == MAX_WIDTH) {
         break
       }
-      traversals++
 
       val batchItems = queue.filter { abs(it.depth) <= MAX_DEPTH }
       if (batchItems.isEmpty()) break
