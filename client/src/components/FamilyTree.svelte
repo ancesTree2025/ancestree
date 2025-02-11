@@ -36,7 +36,7 @@
   let height = $state(0);
   let width = $state(0);
 
-  const ZOOM_FACTOR = $derived(Math.min(1, treeWidth ? width / treeWidth : 1));
+  const zoomFactor = $derived(Math.min(1, treeWidth ? width / treeWidth : 1));
 
   const xOffset = $derived(
     treeWidth !== undefined && treeWidth < width ? (width - treeWidth) / 2 : 0
@@ -57,32 +57,32 @@
           {@const parentsX = (mother.x + father.x) / 2}
           {#if mother.y === father.y}
             <line
-              x1={ZOOM_FACTOR * mother.x + xOffset}
-              y1={ZOOM_FACTOR * mother.y}
-              x2={ZOOM_FACTOR * father.x + xOffset}
-              y2={ZOOM_FACTOR * father.y}
+              x1={zoomFactor * mother.x + xOffset}
+              y1={zoomFactor * mother.y}
+              x2={zoomFactor * father.x + xOffset}
+              y2={zoomFactor * father.y}
               class="stroke-node stroke-line"
             />
           {:else}
             <line
-              x1={ZOOM_FACTOR * mother.x + xOffset}
-              y1={ZOOM_FACTOR * mother.y}
-              x2={ZOOM_FACTOR * parentsX + xOffset}
-              y2={ZOOM_FACTOR * mother.y}
+              x1={zoomFactor * mother.x + xOffset}
+              y1={zoomFactor * mother.y}
+              x2={zoomFactor * parentsX + xOffset}
+              y2={zoomFactor * mother.y}
               class="stroke-node stroke-line"
             />
             <line
-              x1={ZOOM_FACTOR * parentsX + xOffset}
-              y1={ZOOM_FACTOR * mother.y}
-              x2={ZOOM_FACTOR * parentsX + xOffset}
-              y2={ZOOM_FACTOR * father.y}
+              x1={zoomFactor * parentsX + xOffset}
+              y1={zoomFactor * mother.y}
+              x2={zoomFactor * parentsX + xOffset}
+              y2={zoomFactor * father.y}
               class="stroke-node stroke-line"
             />
             <line
-              x1={ZOOM_FACTOR * father.x + xOffset}
-              y1={ZOOM_FACTOR * father.y}
-              x2={ZOOM_FACTOR * parentsX + xOffset}
-              y2={ZOOM_FACTOR * father.y}
+              x1={zoomFactor * father.x + xOffset}
+              y1={zoomFactor * father.y}
+              x2={zoomFactor * parentsX + xOffset}
+              y2={zoomFactor * father.y}
               class="stroke-node stroke-line"
             />
           {/if}
@@ -93,10 +93,10 @@
             {@const childrenY = Math.min(...children.map((child) => child?.y ?? Infinity))}
             {@const midY = (parentsY + childrenY) / 2}
             <line
-              x1={ZOOM_FACTOR * parentsX + xOffset}
-              y1={ZOOM_FACTOR * parentsY}
-              x2={ZOOM_FACTOR * parentsX + xOffset}
-              y2={ZOOM_FACTOR * midY}
+              x1={zoomFactor * parentsX + xOffset}
+              y1={zoomFactor * parentsY}
+              x2={zoomFactor * parentsX + xOffset}
+              y2={zoomFactor * midY}
               class="stroke-node stroke-line"
             />
 
@@ -110,10 +110,10 @@
               ...children.map((child) => child?.x ?? -Infinity)
             )}
             <line
-              x1={ZOOM_FACTOR * leftChildX + xOffset}
-              y1={ZOOM_FACTOR * midY}
-              x2={ZOOM_FACTOR * rightChildX + xOffset}
-              y2={ZOOM_FACTOR * midY}
+              x1={zoomFactor * leftChildX + xOffset}
+              y1={zoomFactor * midY}
+              x2={zoomFactor * rightChildX + xOffset}
+              y2={zoomFactor * midY}
               class="stroke-node stroke-line"
             />
 
@@ -121,10 +121,10 @@
             {#each children as child}
               {#if child}
                 <line
-                  x1={ZOOM_FACTOR * child.x + xOffset}
-                  y1={ZOOM_FACTOR * midY}
-                  x2={ZOOM_FACTOR * child.x + xOffset}
-                  y2={ZOOM_FACTOR * child.y}
+                  x1={zoomFactor * child.x + xOffset}
+                  y1={zoomFactor * midY}
+                  x2={zoomFactor * child.x + xOffset}
+                  y2={zoomFactor * child.y}
                   class="stroke-node stroke-line"
                 />
               {/if}
@@ -135,24 +135,24 @@
       {#each tree.people as [id, person]}
         {@const position = positions[id]}
         {#if position}
-          <g transform="translate({ZOOM_FACTOR * position.x + xOffset},{ZOOM_FACTOR * position.y})">
+          <g transform="translate({zoomFactor * position.x + xOffset},{zoomFactor * position.y})">
             <rect
-              x={(-RECT_WIDTH * ZOOM_FACTOR) / 2}
-              y={(-RECT_HEIGHT * ZOOM_FACTOR) / 2}
-              width={RECT_WIDTH * ZOOM_FACTOR}
-              height={RECT_HEIGHT * ZOOM_FACTOR}
-              rx={RECT_RADIUS * ZOOM_FACTOR}
+              x={(-RECT_WIDTH * zoomFactor) / 2}
+              y={(-RECT_HEIGHT * zoomFactor) / 2}
+              width={RECT_WIDTH * zoomFactor}
+              height={RECT_HEIGHT * zoomFactor}
+              rx={RECT_RADIUS * zoomFactor}
               class="fill-node"
             ></rect>
             <foreignObject
-              x={(-RECT_WIDTH * ZOOM_FACTOR) / 2}
-              y={(-RECT_HEIGHT * ZOOM_FACTOR) / 2}
-              width={RECT_WIDTH * ZOOM_FACTOR}
-              height={RECT_HEIGHT * ZOOM_FACTOR}
+              x={(-RECT_WIDTH * zoomFactor) / 2}
+              y={(-RECT_HEIGHT * zoomFactor) / 2}
+              width={RECT_WIDTH * zoomFactor}
+              height={RECT_HEIGHT * zoomFactor}
             >
               <button
                 onclick={() => getPersonInfo(id, person.name)}
-                style="font-size: {16 * ZOOM_FACTOR}px;"
+                style="font-size: {16 * zoomFactor}px;"
                 class="flex h-full w-full cursor-pointer items-center justify-center text-center"
               >
                 {person.name}
