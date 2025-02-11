@@ -48,7 +48,6 @@ class WikiLookupServiceTest {
       assertEquals("Q317521", person.id)
       assertEquals("Elon Musk", person.name)
       // TODO: test rest of query response
-      assert(false)
 
       coVerify(inverse = true) {
         HttpClientProvider.httpClient

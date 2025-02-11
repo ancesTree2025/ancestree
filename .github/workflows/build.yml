@@ -101,7 +101,7 @@ jobs:
       - name: Check Format
         run: bun run format:check
 
-  build-backend:
+  build-and-test-backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -115,27 +115,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Build and Check Format
-        run: ./gradlew build
-
-      - name: Stop Gradle Daemon
-        run: ./gradlew --stop
-
-  test-backend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: Run unit tests
+      - name: Build, Check Format and Run Unit Tests
         run: ./gradlew check
 
       - name: Stop Gradle Daemon
