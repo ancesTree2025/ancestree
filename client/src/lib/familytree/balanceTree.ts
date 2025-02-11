@@ -12,9 +12,9 @@ export function balanceTree(
   BASE_WIDTH = 160,
   GENERATION_HEIGHT = 120
 ): {
-  positions: Positions,
-  visMarriages: Marriages,
-  treeWidth: number
+  positions: Positions;
+  visMarriages: Marriages;
+  treeWidth: number;
 } {
   const positions: Positions = {};
 
@@ -50,7 +50,9 @@ export function balanceTree(
   adjustNodes(supertree, -supertreeX + subtreeX - left);
 
   return {
-    positions, visMarriages, treeWidth: right - left
+    positions,
+    visMarriages,
+    treeWidth: right - left
   };
 
   // Shifts all nodes by a certain X
