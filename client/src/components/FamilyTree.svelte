@@ -23,7 +23,7 @@
     d3.select('#svg-root').call(d3.zoom().on('zoom', zoomed) as any);
 
     function zoomed(event: any) {
-      d3.select('#zoom-group').attr('transform', event.transform);
+      d3.select("#zoom-group").attr('transform', event.transform);
     }
   });
 
@@ -36,17 +36,18 @@
 
   let ZOOM_FACTOR = $derived(Math.min(1, treeWidth ? width / treeWidth : 1));
 
-  const transformX = (coord: number, zoomFactor: () => number, treeWidth: () => number | undefined, width: () => number) => {
-    let result = coord * zoomFactor();
-    if (treeWidth() !== undefined && treeWidth()! < width()) {
-      result += (width() - treeWidth()!) / 2;
+  let transformX = (coord: number) => {
+    let result = coord * ZOOM_FACTOR;
+    if (treeWidth !== undefined && treeWidth < width) {
+      result += (width - treeWidth) / 2;
     }
-    console.log(result);
     return result;
-  };
+  }
 
-  const transformY = (coord: number, zoomFactor: () => number) => zoomFactor() * coord;
+  let transformY = (coord: number) => ZOOM_FACTOR * coord;
+
 </script>
+
 
 <svg id="svg-root" class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
   <g id="zoom-group">
@@ -61,33 +62,34 @@
           <!-- Draw marriage lines -->
           {@const parentsX = (mother.x + father.x) / 2}
           {#if mother.y === father.y}
+          {console.log(mother.x)}
             <line
-              x1={transformX(mother.x, () => ZOOM_FACTOR, () => treeWidth, () => width)}
-              y1={transformY(mother.y, () => ZOOM_FACTOR)}
-              x2={transformX(father.x, () => ZOOM_FACTOR, () => treeWidth, () => width)}
-              y2={transformY(father.y, () => ZOOM_FACTOR)}
+              x1={transformX(mother.x)}
+              y1={transformY(mother.y)}
+              x2={transformX(father.x)}
+              y2={transformY(father.y)}
               class="stroke-node stroke-line"
             />
           {:else}
             <line
-              x1={transformX(mother.x, () => ZOOM_FACTOR, () => treeWidth, () => width)}
-              y1={transformY(mother.y, () => ZOOM_FACTOR)}
-              x2={transformX(parentsX, () => ZOOM_FACTOR, () => treeWidth, () => width)}
-              y2={transformY(mother.y, () => ZOOM_FACTOR)}
+              x1={transformX(mother.x)}
+              y1={transformY(mother.y)}
+              x2={transformX(parentsX)}
+              y2={transformY(mother.y)}
               class="stroke-node stroke-line"
             />
             <line
-              x1={transformX(parentsX, () => ZOOM_FACTOR, () => treeWidth, () => width)}
-              y1={transformY(mother.y, () => ZOOM_FACTOR)}
-              x2={transformX(parentsX, () => ZOOM_FACTOR, () => treeWidth, () => width)}
-              y2={transformY(father.y, () => ZOOM_FACTOR)}
+              x1={transformX(parentsX)}
+              y1={transformY(mother.y)}
+              x2={transformX(parentsX)}
+              y2={transformY(father.y)}
               class="stroke-node stroke-line"
             />
             <line
-              x1={transformX(father.x, () => ZOOM_FACTOR, () => treeWidth, () => width)}
-              y1={transformY(father.y, () => ZOOM_FACTOR)}
-              x2={transformX(parentsX, () => ZOOM_FACTOR, () => treeWidth, () => width)}
-              y2={transformY(father.y, () => ZOOM_FACTOR)}
+              x1={transformX(father.x)}
+              y1={transformY(father.y)}
+              x2={transformX(parentsX)}
+              y2={transformY(father.y)}
               class="stroke-node stroke-line"
             />
           {/if}
@@ -98,10 +100,10 @@
             {@const childrenY = Math.min(...children.map((child) => child?.y ?? Infinity))}
             {@const midY = (parentsY + childrenY) / 2}
             <line
-              x1={transformX(parentsX, () => ZOOM_FACTOR, () => treeWidth, () => width)}
-              y1={transformY(parentsY, () => ZOOM_FACTOR)}
-              x2={transformX(parentsX, () => ZOOM_FACTOR, () => treeWidth, () => width)}
-              y2={transformY(midY, () => ZOOM_FACTOR)}
+              x1={transformX(parentsX)}
+              y1={transformY(parentsY)}
+              x2={transformX(parentsX)}
+              y2={transformY(midY)}
               class="stroke-node stroke-line"
             />
 
@@ -115,10 +117,10 @@
               ...children.map((child) => child?.x ?? -Infinity)
             )}
             <line
-              x1={transformX(leftChildX, () => ZOOM_FACTOR, () => treeWidth, () => width)}
-              y1={transformY(midY, () => ZOOM_FACTOR)}
-              x2={transformX(rightChildX, () => ZOOM_FACTOR, () => treeWidth, () => width)}
-              y2={transformY(midY, () => ZOOM_FACTOR)}
+              x1={transformX(leftChildX)}
+              y1={transformY(midY)}
+              x2={transformX(rightChildX)}
+              y2={transformY(midY)}
               class="stroke-node stroke-line"
             />
 
@@ -126,10 +128,10 @@
             {#each children as child}
               {#if child}
                 <line
-                  x1={transformX(child.x, () => ZOOM_FACTOR, () => treeWidth, () => width)}
-                  y1={transformY(midY, () => ZOOM_FACTOR)}
-                  x2={transformX(child.x, () => ZOOM_FACTOR, () => treeWidth, () => width)}
-                  y2={transformY(child.y, () => ZOOM_FACTOR)}
+                  x1={transformX(child.x)}
+                  y1={transformY(midY)}
+                  x2={transformX(child.x)}
+                  y2={transformY(child.y)}
                   class="stroke-node stroke-line"
                 />
               {/if}
@@ -140,23 +142,18 @@
       {#each tree.people as [id, person]}
         {@const position = positions[id]}
         {#if position}
-          <g
-            transform="translate({transformX(position.x, () =>ZOOM_FACTOR, () => treeWidth, () => width)},{transformY(
-              position.y,
-              () => ZOOM_FACTOR
-            )})"
-          >
+          <g transform="translate({transformX(position.x)},{transformY(position.y)})">
             <rect
-              x={(-RECT_WIDTH * ZOOM_FACTOR) / 2}
-              y={(-RECT_HEIGHT * ZOOM_FACTOR) / 2}
+              x={-RECT_WIDTH * ZOOM_FACTOR / 2}
+              y={-RECT_HEIGHT  * ZOOM_FACTOR/ 2}
               width={RECT_WIDTH * ZOOM_FACTOR}
               height={RECT_HEIGHT * ZOOM_FACTOR}
               rx={RECT_RADIUS * ZOOM_FACTOR}
               class="fill-node"
             ></rect>
             <foreignObject
-              x={(-RECT_WIDTH * ZOOM_FACTOR) / 2}
-              y={(-RECT_HEIGHT * ZOOM_FACTOR) / 2}
+              x={-RECT_WIDTH * ZOOM_FACTOR / 2}
+              y={-RECT_HEIGHT * ZOOM_FACTOR / 2}
               width={RECT_WIDTH * ZOOM_FACTOR}
               height={RECT_HEIGHT * ZOOM_FACTOR}
             >
