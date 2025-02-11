@@ -23,7 +23,7 @@
     d3.select('#svg-root').call(d3.zoom().on('zoom', zoomed) as any);
 
     function zoomed(event: any) {
-      d3.select("#zoom-group").attr('transform', event.transform);
+      d3.select('#zoom-group').attr('transform', event.transform);
     }
   });
 
@@ -36,7 +36,9 @@
 
   let ZOOM_FACTOR = $derived(Math.min(1, treeWidth ? width / treeWidth : 1));
 
-  let xOffset = $derived((treeWidth !== undefined && treeWidth < width) ? (width - treeWidth) / 2 : 0)
+  let xOffset = $derived(
+    treeWidth !== undefined && treeWidth < width ? (width - treeWidth) / 2 : 0
+  );
 
   let transformX = (coord: number) => {
     let result = coord * ZOOM_FACTOR;
@@ -44,12 +46,10 @@
       result += (width - treeWidth) / 2;
     }
     return result;
-  }
+  };
 
   let transformY = (coord: number) => ZOOM_FACTOR * coord;
-
 </script>
-
 
 <svg id="svg-root" class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
   <g id="zoom-group">
@@ -145,16 +145,16 @@
         {#if position}
           <g transform="translate({ZOOM_FACTOR * position.x + xOffset},{ZOOM_FACTOR * position.y})">
             <rect
-              x={-RECT_WIDTH * ZOOM_FACTOR / 2}
-              y={-RECT_HEIGHT  * ZOOM_FACTOR/ 2}
+              x={(-RECT_WIDTH * ZOOM_FACTOR) / 2}
+              y={(-RECT_HEIGHT * ZOOM_FACTOR) / 2}
               width={RECT_WIDTH * ZOOM_FACTOR}
               height={RECT_HEIGHT * ZOOM_FACTOR}
               rx={RECT_RADIUS * ZOOM_FACTOR}
               class="fill-node"
             ></rect>
             <foreignObject
-              x={-RECT_WIDTH * ZOOM_FACTOR / 2}
-              y={-RECT_HEIGHT * ZOOM_FACTOR / 2}
+              x={(-RECT_WIDTH * ZOOM_FACTOR) / 2}
+              y={(-RECT_HEIGHT * ZOOM_FACTOR) / 2}
               width={RECT_WIDTH * ZOOM_FACTOR}
               height={RECT_HEIGHT * ZOOM_FACTOR}
             >

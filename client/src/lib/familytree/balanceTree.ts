@@ -40,7 +40,7 @@ export function balanceTree(
     left = Math.min(positions[person].x - BASE_WIDTH / 2, left);
   }
 
-    // To make sure the focused node is at center, we need to shift
+  // To make sure the focused node is at center, we need to shift
   // the nodes in the subtree and supertree
   adjustNodes(subtree, -left);
   adjustNodes(supertree, -supertreeX + subtreeX - left);
