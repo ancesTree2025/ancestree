@@ -34,7 +34,7 @@
   let height = $state(0);
   let width = $state(0);
 
-  let ZOOM_FACTOR = $derived(Math.min(1, treeWidth ? width / treeWidth : 1));
+  let ZOOM_FACTOR = $derived(Math.min(1, treeWidth ? (0.975 * width) / treeWidth : 1));
 </script>
 
 
