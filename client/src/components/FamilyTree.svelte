@@ -29,6 +29,7 @@
   const RECT_HEIGHT = 60;
   const RECT_WIDTH = 120;
   const RECT_RADIUS = 10;
+  const ZOOM_FACTOR = 1;
 
   let width = $state(0);
   let height = $state(0);
@@ -48,32 +49,32 @@
           {@const parentsX = (mother.x + father.x) / 2}
           {#if mother.y === father.y}
             <line
-              x1={mother.x}
-              y1={mother.y}
-              x2={father.x}
-              y2={father.y}
+              x1={mother.x * ZOOM_FACTOR}
+              y1={mother.y * ZOOM_FACTOR}
+              x2={father.x * ZOOM_FACTOR}
+              y2={father.y * ZOOM_FACTOR}
               class="stroke-node stroke-line"
             />
           {:else}
             <line
-              x1={mother.x}
-              y1={mother.y}
-              x2={parentsX}
-              y2={mother.y}
+              x1={mother.x * ZOOM_FACTOR}
+              y1={mother.y * ZOOM_FACTOR}
+              x2={parentsX * ZOOM_FACTOR}
+              y2={mother.y * ZOOM_FACTOR}
               class="stroke-node stroke-line"
             />
             <line
-              x1={parentsX}
-              y1={mother.y}
-              x2={parentsX}
-              y2={father.y}
+              x1={parentsX * ZOOM_FACTOR}
+              y1={mother.y * ZOOM_FACTOR}
+              x2={parentsX * ZOOM_FACTOR}
+              y2={father.y * ZOOM_FACTOR}
               class="stroke-node stroke-line"
             />
             <line
-              x1={father.x}
-              y1={father.y}
-              x2={parentsX}
-              y2={father.y}
+              x1={father.x * ZOOM_FACTOR}
+              y1={father.y * ZOOM_FACTOR}
+              x2={parentsX * ZOOM_FACTOR}
+              y2={father.y * ZOOM_FACTOR}
               class="stroke-node stroke-line"
             />
           {/if}
@@ -84,10 +85,10 @@
             {@const childrenY = Math.min(...children.map((child) => child?.y ?? Infinity))}
             {@const midY = (parentsY + childrenY) / 2}
             <line
-              x1={parentsX}
-              y1={parentsY}
-              x2={parentsX}
-              y2={midY}
+              x1={parentsX * ZOOM_FACTOR}
+              y1={parentsY * ZOOM_FACTOR}
+              x2={parentsX * ZOOM_FACTOR}
+              y2={midY * ZOOM_FACTOR}
               class="stroke-node stroke-line"
             />
 
@@ -101,10 +102,10 @@
               ...children.map((child) => child?.x ?? -Infinity)
             )}
             <line
-              x1={leftChildX}
-              y1={midY}
-              x2={rightChildX}
-              y2={midY}
+              x1={leftChildX * ZOOM_FACTOR}
+              y1={midY * ZOOM_FACTOR}
+              x2={rightChildX * ZOOM_FACTOR}
+              y2={midY * ZOOM_FACTOR}
               class="stroke-node stroke-line"
             />
 
@@ -112,10 +113,10 @@
             {#each children as child}
               {#if child}
                 <line
-                  x1={child.x}
-                  y1={midY}
-                  x2={child.x}
-                  y2={child.y}
+                  x1={child.x * ZOOM_FACTOR}
+                  y1={midY * ZOOM_FACTOR}
+                  x2={child.x * ZOOM_FACTOR}
+                  y2={child.y * ZOOM_FACTOR}
                   class="stroke-node stroke-line"
                 />
               {/if}
@@ -126,23 +127,24 @@
       {#each tree.people as [id, person]}
         {@const position = positions[id]}
         {#if position}
-          <g transform="translate({position.x},{position.y})">
+          <g transform="translate({position.x * ZOOM_FACTOR},{position.y * ZOOM_FACTOR})">
             <rect
-              x={-RECT_WIDTH / 2}
-              y={-RECT_HEIGHT / 2}
-              width={RECT_WIDTH}
-              height={RECT_HEIGHT}
-              rx={RECT_RADIUS}
+              x={-RECT_WIDTH * ZOOM_FACTOR / 2}
+              y={-RECT_HEIGHT  * ZOOM_FACTOR/ 2}
+              width={RECT_WIDTH * ZOOM_FACTOR}
+              height={RECT_HEIGHT * ZOOM_FACTOR}
+              rx={RECT_RADIUS * ZOOM_FACTOR}
               class="fill-node"
             ></rect>
             <foreignObject
-              x={-RECT_WIDTH / 2}
-              y={-RECT_HEIGHT / 2}
-              width={RECT_WIDTH}
-              height={RECT_HEIGHT}
+              x={-RECT_WIDTH * ZOOM_FACTOR / 2}
+              y={-RECT_HEIGHT * ZOOM_FACTOR / 2}
+              width={RECT_WIDTH * ZOOM_FACTOR}
+              height={RECT_HEIGHT * ZOOM_FACTOR}
             >
               <button
                 onclick={() => getPersonInfo(id, person.name)}
+                style="font-size: {16 * ZOOM_FACTOR}px;"
                 class="flex h-full w-full cursor-pointer items-center justify-center text-center"
               >
                 {person.name}
