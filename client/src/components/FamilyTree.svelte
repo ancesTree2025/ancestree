@@ -1,6 +1,7 @@
 <script lang="ts">
   import { balanceTree } from '$lib/familytree/balanceTree';
   import { type Marriages, type Positions, type Tree } from '$lib/familytree/models';
+  import * as d3 from 'd3';
 
   const {
     tree,
@@ -11,9 +12,17 @@
 
   $effect(() => {
     if (tree) {
-      [positions, visMarriages] = balanceTree(tree, [-500, 0]);
+      [positions, visMarriages] = balanceTree(tree, [500, 300]);
     } else {
       positions = {};
+    }
+  });
+
+  $effect(() => {
+    const svg = d3.select('#svg-root').call(d3.zoom().on('zoom', zoomed) as any);
+
+    function zoomed(event: any) {
+      d3.select("#zoom-group").attr('transform', event.transform);
     }
   });
 
@@ -25,8 +34,8 @@
   let height = $state(0);
 </script>
 
-<svg class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
-  <g style={`transform: translate(${width / 2}px, ${height / 2}px)`}>
+<svg id="svg-root" class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
+  <g id="zoom-group">
     {#if tree && visMarriages}
       {#each visMarriages as marriage}
         <!-- fetch Person for each parent, child -->
