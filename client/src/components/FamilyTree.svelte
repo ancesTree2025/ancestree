@@ -13,7 +13,7 @@
 
   $effect(() => {
     if (tree) {
-      const result = balanceTree(tree, [500, 300]);
+      const result = balanceTree(tree, 300);
       positions = result.positions;
       visMarriages = result.visMarriages;
       treeWidth = result.treeWidth;

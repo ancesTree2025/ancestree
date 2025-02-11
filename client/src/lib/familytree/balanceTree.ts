@@ -8,7 +8,7 @@ import type { Positions, PersonID, Tree, Marriages } from './models';
 
 export function balanceTree(
   tree: Tree,
-  center: [number, number],
+  centerY: number,
   BASE_WIDTH = 160,
   GENERATION_HEIGHT = 120
 ): {
@@ -24,11 +24,11 @@ export function balanceTree(
   // Accumulates as nodes are added to the right.
   let right = 0;
 
-  let y = center[1];
+  let y = centerY;
   const subtree = new Set<PersonID>();
   const subtreeX = placeSubtree(tree.focus, subtree);
 
-  y = center[1];
+  y = centerY;
   const supertree = new Set<PersonID>();
   const supertreeX = placeSupertree(tree.focus, supertree);
 
