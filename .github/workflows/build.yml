@@ -116,7 +116,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Build and Check Format
-        run: ./gradlew build
+        run: ./gradlew check
 
       - name: Stop Gradle Daemon
         run: ./gradlew --stop

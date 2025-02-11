@@ -23,21 +23,20 @@ class WikiLookupServiceTest {
     mockkObject(ComplexRequester)
     mockkObject(HttpClientProvider)
 
-    coEvery {BaseRequester.doWikipediaRequest(any(), any())} returns MockHttpResponse()
-    coEvery {BaseRequester.doWikidataRequest(any(), any())} returns MockHttpResponse()
-    coEvery {BaseRequester.doGoogleKnowledgeRequest(any())} returns MockHttpResponse()
-    coEvery {ComplexRequester.getLabelAndClaim(any())} returns MockHttpResponse()
-    coEvery {ComplexRequester.searchWikidataForQID(any())} returns MockHttpResponse()
-    coEvery {ComplexRequester.getAutocompleteNames(any())} returns MockHttpResponse()
+    coEvery { BaseRequester.doWikipediaRequest(any(), any()) } returns MockHttpResponse()
+    coEvery { BaseRequester.doWikidataRequest(any(), any()) } returns MockHttpResponse()
+    coEvery { BaseRequester.doGoogleKnowledgeRequest(any()) } returns MockHttpResponse()
+    coEvery { ComplexRequester.getLabelAndClaim(any()) } returns MockHttpResponse()
+    coEvery { ComplexRequester.searchWikidataForQID(any()) } returns MockHttpResponse()
+    coEvery { ComplexRequester.getAutocompleteNames(any()) } returns MockHttpResponse()
   }
 
   @Test
   fun `querying a person's name returns their QID, label and relations`() =
     runTest(timeout = timeout) {
-      coEvery {WikiRequestParser.parseWikidataIDLookup(any())} returns "Q317521"
-      coEvery {WikiRequestParser.parseWikidataEntities(any())} returns mapOf(
-        Pair("Q317521", Pair("Elon Musk", mapOf()))
-      )
+      coEvery { WikiRequestParser.parseWikidataIDLookup(any()) } returns "Q317521"
+      coEvery { WikiRequestParser.parseWikidataEntities(any()) } returns
+        mapOf(Pair("Q317521", Pair("Elon Musk", mapOf())))
 
       val response = WikiLookupService().query("Elon Musk")
       val person = response?.first
@@ -49,8 +48,10 @@ class WikiLookupServiceTest {
       assertEquals("Q317521", person.id)
       assertEquals("Elon Musk", person.name)
       // TODO: test rest of query response
-      
-      coVerify(inverse=true) { HttpClientProvider.httpClient } // unit tests should not be making requests
+
+      coVerify(inverse = true) {
+        HttpClientProvider.httpClient
+      } // unit tests should not be making requests
     }
 
   @AfterTest

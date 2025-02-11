@@ -16,12 +16,13 @@ import org.data.requests.ComplexRequester
 /** Service class for performing Wikipedia/Wikidata lookups. */
 class WikiLookupService : LookupService<String, Pair<Person, NamedRelation>> {
 
+  // TODO: this is outdated PLEASE CHANGE FUNCTION DESCRIPTIONS WHEN YOU CHANGE FUNCTIONS
   /**
    * The only exposed function, to be used for interaction with Wikipedia/Wikidata and for any sort
    * of querying.
    *
    * @param input The person's name.
-   * @returns A 3-tuple of QID, Label and Family Relations. // TODO: this is outdated PLEASE CHANGE FUNCTION DESCRIPTIONS WHEN YOU CHANGE FUNCTIONS
+   * @returns A 3-tuple of QID, Label and Family Relations.
    */
   override suspend fun query(input: String): Pair<Person, NamedRelation>? {
     val qid = searchForPersonsQID(input)
