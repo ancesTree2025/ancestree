@@ -2,9 +2,9 @@ package org.data.producers
 
 import kotlin.math.abs
 import org.data.models.Label
-import org.data.models.Relations
 import org.data.models.Person
 import org.data.models.QID
+import org.data.models.Relations
 import org.data.services.WikiLookupService
 import org.domain.models.Edge
 import org.domain.models.Graph
@@ -38,13 +38,15 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
 
   /**
    * An internal queue item used for a BFS-style traversal.
-   * TODO(Change this description! We use QID now!!!)
-   * @param  The query string (person's name) to be looked up. In the first iteration with the
-   *   root string, this will be what the user types into ancestree, but after that we can expect a
+   *
+   * @param The query string (person's name) to be looked up. In the first iteration with the root
+   *   string, this will be what the user types into ancestree, but after that we can expect a
    *   formal Wikidata label.
    * @param depth The current depth of this node relative to the root.
    * @param parentId The QID of the node that references this person.
    * @param type See the description for RelationType.
+   *
+   * TODO(Change this description! We use QID now!!!)
    */
   private data class QueueItem(
     var qid: QID,
@@ -87,8 +89,9 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     /* We initialise the service we will be using, and a queue with just the root information in it. */
     val wikiService = WikiLookupService()
 
-    val rootInfo = wikiService.query(listOf(root)).getOrElse(0) {error("Root person failed query.")}
-    val rootQid = rootInfo.first.qid
+    val rootInfo =
+      wikiService.query(listOf(root)).getOrElse(0) { error("Root person failed query.") }
+    val rootQid = rootInfo.first.id
 
     val queue = mutableListOf(QueueItem(rootQid, 0, parentId = null, RelationType.Root))
 
@@ -102,8 +105,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
 
       val queryResults: List<Pair<Person, Relations>> = wikiService.queryQIDS(namesToQuery)
 
-      val resultMap: Map<String, Pair<Person, Relations>> =
-        queryResults.associateBy { it.first.qid }
+      val resultMap: Map<String, Pair<Person, Relations>> = queryResults.associateBy { it.first.id }
 
       for (item in batchItems) {
 
@@ -116,39 +118,38 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
         if (person.gender != "Unknown") {
           genders.add(person.gender)
         }
-        if (!nodes.containsKey(person.qid)) {
-          nodes[person.qid] = Node(person, person.qid, item.depth)
+        if (!nodes.containsKey(person.id)) {
+          nodes[person.id] = Node(person, person.id, item.depth)
         }
 
         when (item.type) {
           RelationType.Parent -> {
-            edges.add(Edge(person.qid, item.parentId!!))
+            edges.add(Edge(person.id, item.parentId!!))
           }
           RelationType.Child -> {
-            edges.add(Edge(item.parentId!!, person.qid))
+            edges.add(Edge(item.parentId!!, person.id))
           }
           RelationType.Spouse -> {
-            addSpousalEdges(item.parentId!!, person.qid)
+            addSpousalEdges(item.parentId!!, person.id)
           }
-          RelationType.Root -> {
-          }
+          RelationType.Root -> {}
         }
 
         if (!visited.contains(item.qid)) {
 
           if (abs(item.depth - 1) <= MAX_DEPTH) {
             if (relation.Father.isNotBlank()) {
-              queue.add(QueueItem(relation.Father, item.depth - 1, person.qid, RelationType.Parent))
+              queue.add(QueueItem(relation.Father, item.depth - 1, person.id, RelationType.Parent))
             }
             if (relation.Mother.isNotBlank()) {
-              queue.add(QueueItem(relation.Mother, item.depth - 1, person.qid, RelationType.Parent))
+              queue.add(QueueItem(relation.Mother, item.depth - 1, person.id, RelationType.Parent))
             }
           }
 
           if (abs(item.depth) <= MAX_DEPTH) {
             for (spouse in relation.Spouses) {
               if (spouse.isNotBlank()) {
-                queue.add(QueueItem(spouse, item.depth, person.qid, RelationType.Spouse))
+                queue.add(QueueItem(spouse, item.depth, person.id, RelationType.Spouse))
               }
             }
           }
@@ -156,18 +157,16 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
           if (abs(item.depth + 1) <= MAX_DEPTH) {
             for (child in relation.Children) {
               if (child.isNotBlank()) {
-                queue.add(QueueItem(child, item.depth + 1, person.qid, RelationType.Child))
+                queue.add(QueueItem(child, item.depth + 1, person.id, RelationType.Child))
               }
             }
           }
           visited.add(item.qid)
         }
-
       }
 
       queue.removeAll { batchItems.contains(it) }
     }
-
 
     val qidsToReplace = mutableListOf<QID>()
     qidsToReplace.addAll(nodes.keys)
@@ -181,7 +180,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
       it.value.data.gender = labels[it.value.data.gender]!!
     }
 
-    val rootNode = nodes.values.find { it.data.qid == rootQid } ?: error("Root not found...")
+    val rootNode = nodes.values.find { it.data.id == rootQid } ?: error("Root not found...")
 
     return Graph(rootNode, nodes.values.toSet(), edges)
   }

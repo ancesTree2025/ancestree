@@ -11,7 +11,7 @@ object BaseRequester {
 
   /** Simple enum with a list of the URLs we will query frequently. */
   enum class WikiEndpoint(override val baseUrl: String) : Endpoint {
-    WIKIDATA("https://www.wikidata.org/w/api.php"),
+    WIKIDATA("https://www.wikidata.org/w/api.php")
   }
 
   enum class GoogleEndPoint(override val baseUrl: String) : Endpoint {

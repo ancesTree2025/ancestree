@@ -14,15 +14,15 @@ import org.data.parsers.WikiRequestParser
 import org.data.requests.ComplexRequester
 
 /** Service class for performing Wikipedia/Wikidata lookups. */
-class WikiLookupService: LookupService<List<String>, List<Pair<Person, Relations>>> {
+class WikiLookupService : LookupService<List<String>, List<Pair<Person, Relations>>> {
 
   /**
-   * Query function that takes in a number of names and returns pairs of their person objects
-   * and relations for family members.
+   * Query function that takes in a number of names and returns pairs of their person objects and
+   * relations for family members.
    *
    * @param input A list of names.
    * @returns A list of person-relation pairs.
-   * */
+   */
   override suspend fun query(input: List<String>): List<Pair<Person, Relations>> {
 
     val qids = mutableListOf<QID>()
@@ -39,7 +39,6 @@ class WikiLookupService: LookupService<List<String>, List<Pair<Person, Relations
           WikiCacheManager.putQID(it, qid)
           qids.add(qid)
         }
-
       } else {
         qids.add(WikiCacheManager.getQID(it)!!)
       }
@@ -53,7 +52,7 @@ class WikiLookupService: LookupService<List<String>, List<Pair<Person, Relations
    *
    * @param qids A list of QIDs.
    * @returns A list of person-relation pairs.
-   * */
+   */
   suspend fun queryQIDS(qids: List<QID>): List<Pair<Person, Relations>> {
 
     if (qids.isEmpty()) {
@@ -119,7 +118,6 @@ class WikiLookupService: LookupService<List<String>, List<Pair<Person, Relations
     val PoB = getPlaceName(infoMap["PoB"]!!.getOrNull(0))
     val PoD = getPlaceName(infoMap["PoD"]!!.getOrNull(0))
 
-
     if (WikiCacheManager.getLabel(qid) == null) {
       val labelResp = ComplexRequester.getLabelsOrClaims(listOf(qid))
       label = WikiRequestParser.parseWikidataLabels(labelResp)[qid]!!
@@ -147,7 +145,7 @@ class WikiLookupService: LookupService<List<String>, List<Pair<Person, Relations
    *
    * @param qids A list of qids.
    * @returns A map of QID to the respective label.
-   * */
+   */
   suspend fun getAllLabels(qids: List<QID>): Map<QID, Label> {
 
     val unseenQids = mutableListOf<Label>()
@@ -188,11 +186,12 @@ class WikiLookupService: LookupService<List<String>, List<Pair<Person, Relations
 
     val dateString = date!![0].substringBefore("T").removePrefix("+")
 
-    val fmtDate: String = try {
-      LocalDate.parse(dateString).format(DateTimeFormatter.ofPattern("d/M/yyyy"))
-    } catch (e: Throwable) {
-      dateString.takeWhile { (it != '-') }
-    }
+    val fmtDate: String =
+      try {
+        LocalDate.parse(dateString).format(DateTimeFormatter.ofPattern("d/M/yyyy"))
+      } catch (e: Throwable) {
+        dateString.takeWhile { (it != '-') }
+      }
 
     return "$place, $fmtDate."
   }

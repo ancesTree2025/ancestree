@@ -39,16 +39,15 @@ object WikiRequestParser {
     val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
     return result.entities.mapValues { (_, entityInfo) ->
-
-      val familyInfo: MutableMap<String, List<String>> = properties.entries
+      val familyInfo: MutableMap<String, List<String>> =
+        properties.entries
           .associate { (key, value) ->
             value to
               (entityInfo.claims[key]?.flatMap { claim ->
                 when (val dataValue = claim.mainsnak.datavalue?.value) {
                   is JsonObject -> {
                     when {
-                      dataValue.containsKey("id") ->
-                        listOf(dataValue["id"]!!.jsonPrimitive.content)
+                      dataValue.containsKey("id") -> listOf(dataValue["id"]!!.jsonPrimitive.content)
                       dataValue.containsKey("time") ->
                         listOf(dataValue["time"]!!.jsonPrimitive.content)
                       else -> emptyList()
@@ -67,9 +66,7 @@ object WikiRequestParser {
     }
   }
 
-  suspend fun parseWikidataLabels(
-    response: HttpResponse
-  ): Map<QID, Label> {
+  suspend fun parseWikidataLabels(response: HttpResponse): Map<QID, Label> {
     val json = Json { ignoreUnknownKeys = true }
 
     val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
