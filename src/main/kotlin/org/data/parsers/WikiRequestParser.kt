@@ -71,8 +71,6 @@ object WikiRequestParser {
 
     val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
-    return result.entities.mapValues { (_, entityInfo) ->
-      entityInfo.labels.en?.value ?: error("Label not found from entity query.")
-    }
+    return result.entities.mapValues { (_, entityInfo) -> entityInfo.labels.en?.value ?: "Unknown" }
   }
 }

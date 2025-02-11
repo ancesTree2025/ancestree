@@ -16,13 +16,15 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
   /** A companion object housing graph configuration details. */
   companion object {
     const val MAX_DEPTH = 2
+    const val MAX_WIDTH = 5
   }
 
   /** Various maps and sets to be used during graph generation. */
-  private val visited = mutableSetOf<QID>()
+  private val visited = mutableSetOf<Pair<QID, QID>>()
   private val nodes = mutableMapOf<QID, Node<Person>>()
   private val edges = mutableSetOf<Edge>()
   private val genders = mutableSetOf<QID>()
+  private val childToParents = mutableMapOf<String, MutableSet<String>>()
 
   /**
    * An enumeration which nodes will use to determine the relation between themselves and the person
@@ -51,7 +53,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
   private data class QueueItem(
     var qid: QID,
     val depth: Int,
-    val parentId: String?,
+    val parentId: String,
     val type: RelationType,
   )
 
@@ -93,10 +95,19 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
       wikiService.query(listOf(root)).getOrElse(0) { error("Root person failed query.") }
     val rootQid = rootInfo.first.id
 
-    val queue = mutableListOf(QueueItem(rootQid, 0, parentId = null, RelationType.Root))
+    val queue = mutableListOf(QueueItem(rootQid, 0, parentId = "", RelationType.Root))
+
+    var traversals = 0
 
     /* Now we start traversal... */
     while (queue.isNotEmpty()) {
+
+      println(traversals)
+
+      if (traversals == MAX_WIDTH) {
+        break
+      }
+      traversals++
 
       val batchItems = queue.filter { abs(it.depth) <= MAX_DEPTH }
       if (batchItems.isEmpty()) break
@@ -124,18 +135,20 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
 
         when (item.type) {
           RelationType.Parent -> {
-            edges.add(Edge(person.id, item.parentId!!))
+            edges.add(Edge(person.id, item.parentId))
+            childToParents.getOrPut(item.parentId) { mutableSetOf() }.add(person.id)
           }
           RelationType.Child -> {
-            edges.add(Edge(item.parentId!!, person.id))
+            edges.add(Edge(item.parentId, person.id))
+            childToParents.getOrPut(person.id) { mutableSetOf() }.add(item.parentId)
           }
           RelationType.Spouse -> {
-            addSpousalEdges(item.parentId!!, person.id)
+            addSpousalEdges(item.parentId, person.id)
           }
           RelationType.Root -> {}
         }
 
-        if (!visited.contains(item.qid)) {
+        if (!visited.contains(Pair(item.qid, item.parentId))) {
 
           if (abs(item.depth - 1) <= MAX_DEPTH) {
             if (relation.Father.isNotBlank()) {
@@ -161,16 +174,30 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
               }
             }
           }
-          visited.add(item.qid)
+          visited.add(Pair(item.qid, item.parentId))
         }
       }
 
       queue.removeAll { batchItems.contains(it) }
     }
 
+    for ((_, parentSet) in childToParents) {
+      val parents = parentSet.toList()
+      if (parents.size >= 2) {
+        for (i in parents.indices) {
+          for (j in i + 1 until parents.size) {
+            addSpousalEdges(parents[i], parents[j])
+          }
+        }
+      }
+    }
+
     val qidsToReplace = mutableListOf<QID>()
     qidsToReplace.addAll(nodes.keys)
     qidsToReplace.addAll(genders)
+
+    println(qidsToReplace)
+    println(qidsToReplace.size)
 
     val labels = wikiService.getAllLabels(qidsToReplace).toMutableMap()
     labels["Unknown"] = "Unknown"

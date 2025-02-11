@@ -163,8 +163,10 @@ class WikiLookupService : LookupService<List<String>, List<Pair<Person, Relation
       return finalLabels
     }
 
+    var c = 0
     val subQs = unseenQids.chunked(45)
     subQs.forEach {
+      println("--${c++} out of ${(unseenQids.size/45)}$")
       val claimsResp = ComplexRequester.getLabelsOrClaims(it)
       finalLabels.putAll(WikiRequestParser.parseWikidataLabels(claimsResp))
     }
