@@ -34,21 +34,11 @@
   let height = $state(0);
   let width = $state(0);
 
-  let ZOOM_FACTOR = $derived(Math.min(1, treeWidth ? width / treeWidth : 1));
+  const ZOOM_FACTOR = $derived(Math.min(1, treeWidth ? width / treeWidth : 1));
 
-  let xOffset = $derived(
+  const xOffset = $derived(
     treeWidth !== undefined && treeWidth < width ? (width - treeWidth) / 2 : 0
   );
-
-  let transformX = (coord: number) => {
-    let result = coord * ZOOM_FACTOR;
-    if (treeWidth !== undefined && treeWidth < width) {
-      result += (width - treeWidth) / 2;
-    }
-    return result;
-  };
-
-  let transformY = (coord: number) => ZOOM_FACTOR * coord;
 </script>
 
 <svg id="svg-root" class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
