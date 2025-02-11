@@ -28,11 +28,6 @@ export function balanceTree(
   const supertree = new Set<PersonID>();
   const supertreeX = placeSupertree(tree.focus, supertree);
 
-  // To make sure the focused node is at center, we need to shift
-  // the nodes in the subtree and supertree
-  adjustNodes(subtree, center[0] - subtreeX);
-  adjustNodes(supertree, center[0] - supertreeX);
-
   right = 0;
 
   for (const person of subtree) {
@@ -44,6 +39,11 @@ export function balanceTree(
   for (const person of subtree) {
     left = Math.min(positions[person].x - BASE_WIDTH / 2, left);
   }
+
+    // To make sure the focused node is at center, we need to shift
+  // the nodes in the subtree and supertree
+  adjustNodes(subtree, -left);
+  adjustNodes(supertree, -supertreeX + subtreeX - left);
 
   return [positions, visMarriages, right - left];
 
