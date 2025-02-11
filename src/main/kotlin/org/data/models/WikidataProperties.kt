@@ -1,6 +1,8 @@
 package org.data.models
 
+/** Object housing default property mappings used in query parsing. */
 object WikidataProperties {
+  // Family Relation Properties
   val propertyQIDMap =
     mapOf(
       "P21" to "Gender",
@@ -11,6 +13,7 @@ object WikidataProperties {
       "P3373" to "Sibling(s)",
     )
 
+  // Personal Info Properties
   val propertyQIDMapPersonal =
     mapOf(
       "P18" to "Wikimedia Image File",
