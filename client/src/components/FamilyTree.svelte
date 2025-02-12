@@ -48,6 +48,7 @@
 
 <svg id="svg-root" class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
   <g id="zoom-group">
+    <g transform="translate({xOffset}, 0) scale({zoomFactor})">
     {#if tree && visMarriages}
       {#each visMarriages as marriage}
         <!-- fetch Person for each parent, child -->
@@ -60,32 +61,32 @@
           {@const parentsX = (mother.x + father.x) / 2}
           {#if mother.y === father.y}
             <line
-              x1={zoomFactor * mother.x + xOffset}
-              y1={zoomFactor * mother.y}
-              x2={zoomFactor * father.x + xOffset}
-              y2={zoomFactor * father.y}
+              x1={mother.x}
+              y1={mother.y}
+              x2={father.x}
+              y2={father.y}
               class="stroke-node stroke-line"
             />
           {:else}
             <line
-              x1={zoomFactor * mother.x + xOffset}
-              y1={zoomFactor * mother.y}
-              x2={zoomFactor * parentsX + xOffset}
-              y2={zoomFactor * mother.y}
+              x1={mother.x}
+              y1={mother.y}
+              x2={parentsX}
+              y2={mother.y}
               class="stroke-node stroke-line"
             />
             <line
-              x1={zoomFactor * parentsX + xOffset}
-              y1={zoomFactor * mother.y}
-              x2={zoomFactor * parentsX + xOffset}
-              y2={zoomFactor * father.y}
+              x1={parentsX}
+              y1={mother.y}
+              x2={parentsX}
+              y2={father.y}
               class="stroke-node stroke-line"
             />
             <line
-              x1={zoomFactor * father.x + xOffset}
-              y1={zoomFactor * father.y}
-              x2={zoomFactor * parentsX + xOffset}
-              y2={zoomFactor * father.y}
+              x1={father.x}
+              y1={father.y}
+              x2={parentsX}
+              y2={father.y}
               class="stroke-node stroke-line"
             />
           {/if}
@@ -96,10 +97,10 @@
             {@const childrenY = Math.min(...children.map((child) => child?.y ?? Infinity))}
             {@const midY = (parentsY + childrenY) / 2 - (marriage[1] % 2 === 0 ? 0 : 10)}
             <line
-              x1={zoomFactor * parentsX + xOffset}
-              y1={zoomFactor * parentsY}
-              x2={zoomFactor * parentsX + xOffset}
-              y2={zoomFactor * midY}
+              x1={parentsX}
+              y1={parentsY}
+              x2={parentsX}
+              y2={midY}
               class="stroke-node stroke-line"
             />
 
@@ -113,10 +114,10 @@
               ...children.map((child) => child?.x ?? -Infinity)
             )}
             <line
-              x1={zoomFactor * leftChildX + xOffset}
-              y1={zoomFactor * midY}
-              x2={zoomFactor * rightChildX + xOffset}
-              y2={zoomFactor * midY}
+              x1={leftChildX}
+              y1={midY}
+              x2={rightChildX}
+              y2={midY}
               class="stroke-node stroke-line"
             />
 
@@ -124,10 +125,10 @@
             {#each children as child}
               {#if child}
                 <line
-                  x1={zoomFactor * child.x + xOffset}
-                  y1={zoomFactor * midY}
-                  x2={zoomFactor * child.x + xOffset}
-                  y2={zoomFactor * child.y}
+                  x1={child.x}
+                  y1={midY}
+                  x2={child.x}
+                  y2={child.y}
                   class="stroke-node stroke-line"
                 />
               {/if}
@@ -138,24 +139,24 @@
       {#each tree.people as [id, person]}
         {@const position = positions[id]}
         {#if position}
-          <g transform="translate({zoomFactor * position.x + xOffset},{zoomFactor * position.y})">
+          <g transform="translate({position.x},{position.y})">
             <rect
-              x={(-RECT_WIDTH * zoomFactor) / 2}
-              y={(-RECT_HEIGHT * zoomFactor) / 2}
-              width={RECT_WIDTH * zoomFactor}
-              height={RECT_HEIGHT * zoomFactor}
-              rx={RECT_RADIUS * zoomFactor}
+              x={(-RECT_WIDTH) / 2}
+              y={(-RECT_HEIGHT) / 2}
+              width={RECT_WIDTH}
+              height={RECT_HEIGHT}
+              rx={RECT_RADIUS}
               class="fill-node"
             ></rect>
             <foreignObject
-              x={(-RECT_WIDTH * zoomFactor) / 2}
-              y={(-RECT_HEIGHT * zoomFactor) / 2}
-              width={RECT_WIDTH * zoomFactor}
-              height={RECT_HEIGHT * zoomFactor}
+              x={(-RECT_WIDTH) / 2}
+              y={(-RECT_HEIGHT) / 2}
+              width={RECT_WIDTH}
+              height={RECT_HEIGHT}
             >
               <button
                 onclick={() => getPersonInfo(id, person.name)}
-                style="font-size: {16 * zoomFactor}px;"
+                style="font-size: 16px;"
                 class="flex h-full w-full cursor-pointer items-center justify-center text-center"
               >
                 {person.name}
@@ -165,5 +166,6 @@
         {/if}
       {/each}
     {/if}
+    </g>
   </g>
 </svg>
