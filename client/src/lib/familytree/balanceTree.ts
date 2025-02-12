@@ -8,14 +8,17 @@ import type { Positions, PersonID, Tree, Marriages, Marriage } from './models';
 
 export function balanceTree(
   tree: Tree,
-  centerY: number,
   BASE_WIDTH = 160,
   GENERATION_HEIGHT = 120
 ): {
   positions: Positions;
   visMarriages: [Marriage, number][];
   treeWidth: number;
+  treeHeight: number;
 } {
+  let minY = 0;
+  let maxY = 0;
+
   const positions: Positions = {};
 
   const visMarriages: [Marriage, number][] = [];
@@ -26,10 +29,10 @@ export function balanceTree(
 
   const subtree = new Set<PersonID>();
   const parent1 = findParents(tree.focus)[0];
-  const subtreeX = placeSubtree(parent1 ?? tree.focus, subtree, centerY - (parent1 ? GENERATION_HEIGHT : 0));
+  const subtreeX = placeSubtree(parent1 ?? tree.focus, subtree, parent1 ? -GENERATION_HEIGHT : 0);
 
   const supertree = new Set<PersonID>();
-  const supertreeX = placeSupertree(parent1 ?? tree.focus, supertree, centerY - (parent1 ? GENERATION_HEIGHT : 0));
+  const supertreeX = placeSupertree(parent1 ?? tree.focus, supertree, parent1 ? -GENERATION_HEIGHT : 0);
 
   right = 0;
 
@@ -51,7 +54,8 @@ export function balanceTree(
   return {
     positions,
     visMarriages,
-    treeWidth: right - left
+    treeWidth: right - left,
+    treeHeight: maxY - minY
   };
 
   function findParents(id: PersonID): PersonID[] {
@@ -79,6 +83,8 @@ export function balanceTree(
    * @returns The x position of the focused node
    */
   function placeSubtree(focused: PersonID, subtree: Set<PersonID>, y: number): number {
+    maxY = Math.max(y, maxY);
+
     subtree.add(focused);
 
     // finds any marriages for which this node is a parent
@@ -161,6 +167,8 @@ export function balanceTree(
    * @returns The x position of the focused node
    */
   function placeSupertree(person: PersonID, supertree: Set<PersonID>, y: number): number {
+    minY = Math.min(y, minY);
+
     // assuming someone has exactly two parents from one marriage, or no parent marriage
     const parentMarriage = tree.marriages.find((m) => m.children.includes(person));
 

@@ -2,6 +2,7 @@
   import { balanceTree } from '$lib/familytree/balanceTree';
   import { type Marriage, type Marriages, type Positions, type Tree } from '$lib/familytree/models';
   import * as d3 from 'd3';
+  import { onMount } from 'svelte';
 
   const {
     tree,
@@ -10,19 +11,21 @@
   let positions = $state<Positions>({});
   let visMarriages = $state<[Marriage, number][] | undefined>(tree?.marriages.map(m => [m, 0]));
   let treeWidth = $state<number>();
+  let treeHeight = $state<number>();
 
   $effect(() => {
     if (tree) {
-      const result = balanceTree(tree, 300);
+      const result = balanceTree(tree);
       positions = result.positions;
       visMarriages = result.visMarriages;
       treeWidth = result.treeWidth;
+      treeHeight = result.treeHeight;
     } else {
       positions = {};
     }
   });
 
-  $effect(() => {
+  onMount(() => {
     /* eslint-disable  @typescript-eslint/no-explicit-any */
     d3.select('#svg-root').call(d3.zoom().on('zoom', zoomed) as any);
 
@@ -44,11 +47,13 @@
   const xOffset = $derived(
     treeWidth !== undefined && treeWidth < width ? (width - treeWidth) / 2 : 0
   );
+
+  const yOffset = $derived(height / 2);
 </script>
 
 <svg id="svg-root" class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
   <g id="zoom-group">
-    <g transform="translate({xOffset}, 0) scale({zoomFactor})">
+    <g transform="translate({xOffset}, {yOffset}) scale({zoomFactor})">
     {#if tree && visMarriages}
       {#each visMarriages as marriage}
         <!-- fetch Person for each parent, child -->
