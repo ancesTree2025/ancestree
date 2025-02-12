@@ -1,6 +1,6 @@
 <script lang="ts">
   import { balanceTree } from '$lib/familytree/balanceTree';
-  import { type Marriages, type Positions, type Tree } from '$lib/familytree/models';
+  import { type Marriage, type Marriages, type Positions, type Tree } from '$lib/familytree/models';
   import * as d3 from 'd3';
 
   const {
@@ -8,7 +8,7 @@
     getPersonInfo
   }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } = $props();
   let positions = $state<Positions>({});
-  let visMarriages = $state<Marriages | undefined>(tree?.marriages);
+  let visMarriages = $state<[Marriage, number][] | undefined>(tree?.marriages.map(m => [m, 0]));
   let treeWidth = $state<number>();
 
   $effect(() => {
@@ -51,9 +51,9 @@
     {#if tree && visMarriages}
       {#each visMarriages as marriage}
         <!-- fetch Person for each parent, child -->
-        {@const mother = positions[marriage.parents[0]]}
-        {@const father = positions[marriage.parents[1]]}
-        {@const children = marriage.children.map((id) => positions[id])}
+        {@const mother = positions[marriage[0].parents[0]]}
+        {@const father = positions[marriage[0].parents[1]]}
+        {@const children = marriage[0].children.map((id) => positions[id])}
 
         {#if mother && father}
           <!-- Draw marriage lines -->
@@ -94,7 +94,7 @@
             <!-- Draw line between parents and children -->
             {@const parentsY = Math.max(mother.y, father.y)}
             {@const childrenY = Math.min(...children.map((child) => child?.y ?? Infinity))}
-            {@const midY = (parentsY + childrenY) / 2}
+            {@const midY = (parentsY + childrenY) / 2 - (marriage[1] % 2 === 0 ? 0 : 10)}
             <line
               x1={zoomFactor * parentsX + xOffset}
               y1={zoomFactor * parentsY}
