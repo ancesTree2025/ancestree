@@ -54,7 +54,7 @@ export function balanceTree(
   return {
     positions,
     visMarriages,
-    treeWidth: right - left,
+    treeWidth: right - left
   };
 
   function findParents(id: PersonID): PersonID[] {
