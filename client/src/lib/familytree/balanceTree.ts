@@ -22,15 +22,14 @@ export function balanceTree(
 
   // The x position of the current "right edge" of the graph
   // Accumulates as nodes are added to the right.
-  let left = 0;
   let right = 0;
 
   const subtree = new Set<PersonID>();
   const parent1 = findParents(tree.focus)[0];
-  placeSubtree(parent1 ?? tree.focus, subtree, centerY - (parent1 ? GENERATION_HEIGHT : 0));
+  const subtreeX = placeSubtree(parent1 ?? tree.focus, subtree, centerY - (parent1 ? GENERATION_HEIGHT : 0));
 
   const supertree = new Set<PersonID>();
-  placeSupertree(parent1 ?? tree.focus, supertree, centerY - (parent1 ? GENERATION_HEIGHT : 0));
+  const supertreeX = placeSupertree(parent1 ?? tree.focus, supertree, centerY - (parent1 ? GENERATION_HEIGHT : 0));
 
   right = 0;
 
@@ -69,7 +68,6 @@ export function balanceTree(
   // Set the position of a node if they have not already been given a position
   function addPerson(personId: PersonID, x: number, y: number) {
     if (positions[personId] !== undefined) return;
-    left = Math.min(left, x - BASE_WIDTH / 2);
     right = Math.max(right, x + BASE_WIDTH / 2);
     positions[personId] = { x, y };
   }
