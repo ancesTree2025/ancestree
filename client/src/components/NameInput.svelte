@@ -7,7 +7,7 @@
   import { scale } from 'svelte/transition';
   import { fetchNames } from '$lib';
 
-  let { nameInput = $bindable(), status }: { nameInput?: string; status: Status } = $props();
+  let { status, onSubmit }: { status: Status, onSubmit: (_: string) => void } = $props();
 
   let name = $state('');
 
@@ -59,17 +59,13 @@
   function selectName(selectedName: string) {
     searchResults = [];
     name = selectedName; // Replaces the typed name with the selected name
-    submitAction();
+    onSubmit(name);
   }
 
   function submitIfEnter(event: KeyboardEvent) {
     if (event.key === 'Enter') {
-      submitAction();
+      onSubmit(name);
     }
-  }
-
-  function submitAction() {
-    nameInput = name;
   }
 
   // common tailwind classes for status icons
