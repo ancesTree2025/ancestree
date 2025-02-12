@@ -1,11 +1,8 @@
 package org.data.models
 
-import kotlinx.serialization.json.JsonObject
-
+/** Simple type aliases for Wikidata returns. */
 typealias QID = String
 
 typealias Label = String
 
 typealias PropertyMapping = Map<String, List<String>>
-
-typealias Claim = JsonObject
