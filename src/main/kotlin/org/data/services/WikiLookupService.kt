@@ -168,7 +168,10 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     subQs.forEach {
       println("--${c++} out of ${(unseenQids.size/45)}$")
       val claimsResp = ComplexRequester.getLabelsOrClaims(it)
-      finalLabels.putAll(WikiRequestParser.parseWikidataLabels(claimsResp))
+      val qidToLabels = WikiRequestParser.parseWikidataLabels(claimsResp)
+
+      qidToLabels.forEach { (qid, label) -> WikiCacheManager.putLabel(qid, label) }
+      finalLabels.putAll(qidToLabels)
     }
 
     return finalLabels
