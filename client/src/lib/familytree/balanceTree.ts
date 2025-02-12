@@ -1,4 +1,4 @@
-import type { Positions, PersonID, Tree, Marriages, Marriage } from './models';
+import type { Positions, PersonID, Tree, Marriage } from './models';
 
 /* visMarraiges are the marriages used for the purpose of the tree
      visualisation. If Focus has Wife 1, Wife 2 and Wife 3 then they
@@ -14,11 +14,7 @@ export function balanceTree(
   positions: Positions;
   visMarriages: [Marriage, number][];
   treeWidth: number;
-  treeHeight: number;
 } {
-  let minY = 0;
-  let maxY = 0;
-
   const positions: Positions = {};
 
   const visMarriages: [Marriage, number][] = [];
@@ -32,7 +28,11 @@ export function balanceTree(
   const subtreeX = placeSubtree(parent1 ?? tree.focus, subtree, parent1 ? -GENERATION_HEIGHT : 0);
 
   const supertree = new Set<PersonID>();
-  const supertreeX = placeSupertree(parent1 ?? tree.focus, supertree, parent1 ? -GENERATION_HEIGHT : 0);
+  const supertreeX = placeSupertree(
+    parent1 ?? tree.focus,
+    supertree,
+    parent1 ? -GENERATION_HEIGHT : 0
+  );
 
   right = 0;
 
@@ -55,7 +55,6 @@ export function balanceTree(
     positions,
     visMarriages,
     treeWidth: right - left,
-    treeHeight: maxY - minY
   };
 
   function findParents(id: PersonID): PersonID[] {
@@ -83,8 +82,6 @@ export function balanceTree(
    * @returns The x position of the focused node
    */
   function placeSubtree(focused: PersonID, subtree: Set<PersonID>, y: number): number {
-    maxY = Math.max(y, maxY);
-
     subtree.add(focused);
 
     // finds any marriages for which this node is a parent
@@ -103,10 +100,13 @@ export function balanceTree(
       // assuming a marriage has only one spouse
       const spouse = marriage.parents.find((p) => p !== focused)!;
       if (i > 1) {
-        visMarriages.push([{
-          parents: [marriages[i - 1].parents.find((p) => p !== focused)!, spouse],
-          children: marriage.children
-        }, 0]);
+        visMarriages.push([
+          {
+            parents: [marriages[i - 1].parents.find((p) => p !== focused)!, spouse],
+            children: marriage.children
+          },
+          0
+        ]);
       } else {
         visMarriages.push([marriage, i]);
       }
@@ -167,8 +167,6 @@ export function balanceTree(
    * @returns The x position of the focused node
    */
   function placeSupertree(person: PersonID, supertree: Set<PersonID>, y: number): number {
-    minY = Math.min(y, minY);
-
     // assuming someone has exactly two parents from one marriage, or no parent marriage
     const parentMarriage = tree.marriages.find((m) => m.children.includes(person));
 
