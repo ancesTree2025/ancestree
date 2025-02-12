@@ -133,7 +133,7 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
           "Born" to formatDatePlaceInfo(PoB, infoMap["DoB"]),
           "Died" to formatDatePlaceInfo(PoD, infoMap["DoD"]),
         ),
-        ChatGPTDescriptionService.summarise(label),
+        "stub", // ChatGPTDescriptionService.summarise(allInfo[qid]!!.first),
         "stub",
       )
 

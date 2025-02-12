@@ -8,10 +8,14 @@ import type { Positions, PersonID, Tree, Marriages } from './models';
 
 export function balanceTree(
   tree: Tree,
-  center: [number, number],
+  centerY: number,
   BASE_WIDTH = 160,
   GENERATION_HEIGHT = 120
-): [Positions, Marriages] {
+): {
+  positions: Positions;
+  visMarriages: Marriages;
+  treeWidth: number;
+} {
   const positions: Positions = {};
 
   const visMarriages: Marriages = [];
@@ -20,20 +24,36 @@ export function balanceTree(
   // Accumulates as nodes are added to the right.
   let right = 0;
 
-  let y = center[1];
+  let y = centerY;
   const subtree = new Set<PersonID>();
   const subtreeX = placeSubtree(tree.focus, subtree);
 
-  y = center[1];
+  y = centerY;
   const supertree = new Set<PersonID>();
   const supertreeX = placeSupertree(tree.focus, supertree);
 
+  right = 0;
+
+  for (const person of subtree) {
+    right = Math.max(positions[person].x + BASE_WIDTH / 2, right);
+  }
+
+  let left = right;
+
+  for (const person of subtree) {
+    left = Math.min(positions[person].x - BASE_WIDTH / 2, left);
+  }
+
   // To make sure the focused node is at center, we need to shift
   // the nodes in the subtree and supertree
-  adjustNodes(subtree, center[0] - subtreeX);
-  adjustNodes(supertree, center[0] - supertreeX);
+  adjustNodes(subtree, -left);
+  adjustNodes(supertree, -supertreeX + subtreeX - left);
 
-  return [positions, visMarriages];
+  return {
+    positions,
+    visMarriages,
+    treeWidth: right - left
+  };
 
   // Shifts all nodes by a certain X
   function adjustNodes(set: Set<PersonID>, dx: number) {
