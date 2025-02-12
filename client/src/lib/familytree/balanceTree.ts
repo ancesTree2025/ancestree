@@ -8,10 +8,14 @@ import type { Positions, PersonID, Tree, Marriages } from './models';
 
 export function balanceTree(
   tree: Tree,
-  center: [number, number],
+  centerY: number,
   BASE_WIDTH = 160,
   GENERATION_HEIGHT = 120
-): [Positions, Marriages] {
+): {
+  positions: Positions;
+  visMarriages: Marriages;
+  treeWidth: number;
+} {
   const positions: Positions = {};
 
   const visMarriages: Marriages = [];
@@ -23,17 +27,33 @@ export function balanceTree(
 
   const subtree = new Set<PersonID>();
   const parent1 = findParents(tree.focus)[0];
-  placeSubtree(parent1 ?? tree.focus, subtree, center[1] - (parent1 ? GENERATION_HEIGHT : 0));
+  placeSubtree(parent1 ?? tree.focus, subtree, centerY - (parent1 ? GENERATION_HEIGHT : 0));
 
   const supertree = new Set<PersonID>();
-  placeSupertree(parent1 ?? tree.focus, supertree, center[1] - (parent1 ? GENERATION_HEIGHT : 0));
+  placeSupertree(parent1 ?? tree.focus, supertree, centerY - (parent1 ? GENERATION_HEIGHT : 0));
+
+  right = 0;
+
+  for (const person of subtree) {
+    right = Math.max(positions[person].x + BASE_WIDTH / 2, right);
+  }
+
+  let left = right;
+
+  for (const person of subtree) {
+    left = Math.min(positions[person].x - BASE_WIDTH / 2, left);
+  }
 
   // To make sure the focused node is at center, we need to shift
   // the nodes in the subtree and supertree
-  adjustNodes(subtree, center[0] - left);
-  adjustNodes(supertree, center[0] - left);
+  adjustNodes(subtree, -left);
+  adjustNodes(supertree, -supertreeX + subtreeX - left);
 
-  return [positions, visMarriages];
+  return {
+    positions,
+    visMarriages,
+    treeWidth: right - left
+  };
 
   function findParents(id: PersonID): PersonID[] {
     return tree.marriages.find((m) => m.children.includes(id))?.parents ?? [];
