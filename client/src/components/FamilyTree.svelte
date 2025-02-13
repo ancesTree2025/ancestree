@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { balanceTree } from '$lib/familytree/balanceTree';
-  import { type Marriages, type Positions, type Tree } from '$lib/familytree/types';
+  import { balanceTree } from '$lib';
+  import type { Marriages, Positions, Tree } from '$lib/types';
   import * as d3 from 'd3';
 
   const {
