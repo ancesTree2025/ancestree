@@ -1,4 +1,4 @@
-import type { Positions, PersonID, Tree, Marriages } from './models';
+import type { Positions, PersonID, Tree, Marriages } from './types';
 
 /* visMarraiges are the marriages used for the purpose of the tree
      visualisation. If Focus has Wife 1, Wife 2 and Wife 3 then they

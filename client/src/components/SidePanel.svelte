@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { PersonInfo } from '$lib/info/fetchInfo';
+  import type { PersonInfo } from '$lib/types';
   import IconClose from '~icons/tabler/x';
 
   const {

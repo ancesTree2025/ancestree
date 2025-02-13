@@ -1,15 +1,7 @@
 import { Result } from 'typescript-result';
-import { z } from 'zod';
 import exampleData from './exampleData.json';
-
-const personInfoSchema = z.object({
-  image: z.string(),
-  description: z.string(),
-  attributes: z.record(z.string()),
-  wikipedia_link: z.string()
-});
-
-export type PersonInfo = z.infer<typeof personInfoSchema>;
+import { personInfoSchema } from './schemas';
+import type { PersonInfo } from './types';
 
 export async function fetchInfo(
   qid: string,

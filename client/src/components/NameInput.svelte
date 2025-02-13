@@ -3,11 +3,15 @@
 <script lang="ts">
   import IconSearch from '~icons/tabler/search';
   import IconAlert from '~icons/tabler/alert-triangle-filled';
-  import type { Status } from '$lib/status';
+  import type { LoadingStatus } from '$lib/types';
   import { scale } from 'svelte/transition';
   import { fetchNames } from '$lib';
 
-  let { nameInput = $bindable(), status }: { nameInput?: string; status: Status } = $props();
+  interface Props {
+    nameInput?: string;
+    status: LoadingStatus;
+  }
+  let { nameInput = $bindable(), status }: Props = $props();
 
   let name = $state('');
 
@@ -25,7 +29,8 @@
    * Debouncing is done to prevent making too many requests.
    * The search request is made only after the user has stopped typing for 500ms.
    */
-  let timer: number | null = null;
+  // eslint-disable-next-line no-undef
+  let timer: Timer | null = null;
   $effect(() => {
     if (name) {
       searching = true;
