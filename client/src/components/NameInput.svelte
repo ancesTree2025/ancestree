@@ -17,6 +17,12 @@
    */
   let searching = $state(false);
   /**
+   * The query the user uses to search a person.
+   * This is a duplicate of the name state, but helps
+   * in preventing a re-trigger.
+   */
+  let searchQuery = $state('');
+  /**
    * A list of search results to show as autocomplete suggestions
    */
   let searchResults = $state<string[]>([]);
@@ -28,10 +34,9 @@
   // eslint-disable-next-line no-undef
   let timer: Timer | null = null;
   $effect(() => {
-    if (name) {
+    if (searchQuery) {
       searching = true;
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(searchByName, 500);
+      const timer = setTimeout(searchForNames, 500);
 
       // On cleanup, clear the timer and set searching to false
       return () => {
@@ -43,8 +48,8 @@
       searchResults = [];
     }
   });
-  async function searchByName() {
-    const result = await fetchNames(name);
+  async function searchForNames() {
+    const result = await fetchNames(searchQuery);
     try {
       searchResults = result.getOrThrow();
     } catch (_e) {
@@ -60,7 +65,14 @@
   function selectName(selectedName: string) {
     searchResults = [];
     name = selectedName; // Replaces the typed name with the selected name
+    searchQuery = '';
     onSubmit(name);
+  }
+
+  function onChange(event: Event) {
+    const { value } = event.target as HTMLInputElement;
+    name = value;
+    searchQuery = value;
   }
 
   function submitIfEnter(event: KeyboardEvent) {
@@ -76,12 +88,15 @@
 
 <div class="relative flex w-80 items-center gap-3 rounded-full bg-input pl-4">
   <IconSearch class="text-black opacity-50" />
-  <input
-    class="flex-1 bg-transparent py-2 outline-none"
-    bind:value={name}
-    placeholder="Enter a name..."
-    onkeydown={submitIfEnter}
-  />
+  <form onsubmit={() => onSubmit(name)}>
+    <input
+      class="flex-1 bg-transparent py-2 outline-none"
+      value={name}
+      oninput={onChange}
+      placeholder="Enter a name..."
+      onkeydown={submitIfEnter}
+    />
+  </form>
   {#if status.state === 'loading' || searching}
     <div class={`${ICON_CLASS}`} transition:scale={{ duration: 150 }}>
       <div class="loader h-5 w-5 bg-black p-1 opacity-50"></div>
