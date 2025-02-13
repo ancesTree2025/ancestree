@@ -69,7 +69,7 @@ jobs:
         run: bun test
 
   lint-frontend:
-    needs: build-frontend
+    needs: [build-frontend]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -99,7 +99,7 @@ jobs:
         run: bun run lint
 
   format-frontend:
-    needs: build-frontend
+    needs: [build-frontend]
     runs-on: ubuntu-latest
     defaults:
       run:
