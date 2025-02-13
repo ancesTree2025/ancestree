@@ -25,4 +25,4 @@ export type Position = {
   y: number;
 };
 
-export type Positions = { [id: PersonID]: Position };
+export type Positions = Record<PersonID, Position>;

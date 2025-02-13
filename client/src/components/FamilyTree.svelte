@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { balanceTree } from '$lib/familytree/balanceTree';
-  import { type Marriage, type Positions, type Tree } from '$lib/familytree/models';
   import * as d3 from 'd3';
+  import { balanceTree } from '$lib';
+  import type { Marriage, Positions, Tree } from '$lib/types';
   import { onMount } from 'svelte';
 
   const {
