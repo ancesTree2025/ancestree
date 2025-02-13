@@ -7,7 +7,7 @@
   import { scale } from 'svelte/transition';
   import { fetchNames } from '$lib';
 
-  let { status, onSubmit }: { status: Status, onSubmit: (_: string) => void } = $props();
+  const { status, onSubmit }: { status: Status; onSubmit: (_: string) => void } = $props();
 
   let name = $state('');
 
