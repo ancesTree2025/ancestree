@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 import { apiResponseToTree } from '../fetchTree';
-import { People } from '../types';
+import type { People } from '../types';
 
 function basicPersonData(id: string, depth: number) {
   return {
