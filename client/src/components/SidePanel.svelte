@@ -6,14 +6,9 @@
     name?: string;
     data?: PersonInfo;
     show: boolean;
-    onclose: () => void
+    onclose: () => void;
   }
-  const {
-    name,
-    data,
-    show,
-    onclose
-  }: Props = $props();
+  const { name, data, show, onclose }: Props = $props();
 </script>
 
 <div class={`${show ? 'w-96' : 'w-0'} shadow-lg transition-all duration-500`}>
