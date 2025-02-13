@@ -22,6 +22,11 @@
         if (fetched) {
           tree = fetched;
           status = { state: 'idle' };
+
+          const [qid, personName] = fetched.people.find((p => p[0] === fetched.focus));
+          if (qid && personName) {
+            getPersonInfo(qid, personName.name);
+          }
         } else if (error) {
           status = { state: 'error', error };
         }
@@ -59,7 +64,7 @@
       name={sidePanelName}
       show={showSidePanel}
       data={sidePanelData}
-      close={() => (showSidePanel = false)}
+      onclose={() => (showSidePanel = false)}
     />
   </div>
 </div>
