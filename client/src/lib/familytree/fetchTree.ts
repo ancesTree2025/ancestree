@@ -1,5 +1,5 @@
 import { Result } from 'typescript-result';
-import type { Marriages, People, PersonID, Tree } from './models';
+import type { Marriages, People, PersonID, Tree } from './types';
 import exampleData from './exampleData.json';
 import { z } from 'zod';
 

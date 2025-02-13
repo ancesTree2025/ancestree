@@ -1,19 +1,18 @@
 <script lang="ts">
-  import { fetchTree } from '$lib/familytree/fetchTree';
-  import type { Tree } from '$lib/familytree/models';
-  import type { Status } from '$lib/status';
   import FamilyTree from '../components/FamilyTree.svelte';
   import NameInput from '../components/NameInput.svelte';
-  // @ts-expect-error $app/stores is valid but not recognised
-  import { page } from '$app/stores';
   import SidePanel from '../components/SidePanel.svelte';
-  import { fetchInfo, type PersonInfo } from '$lib/info/fetchInfo';
+
+  import { fetchTree, fetchInfo } from '$lib';
+  import type { Tree, LoadingStatus, PersonInfo  } from '$lib/types';
+
+  import { page } from '$app/state';
 
   let name = $state<string | undefined>();
-  let status = $state<Status>({ state: 'idle' });
+  let status = $state<LoadingStatus>({ state: 'idle' });
 
   let tree = $state<Tree | undefined>();
-  const useFakeData = $page.url.searchParams.get('useFakeData');
+  const useFakeData = page.url.searchParams.get('useFakeData') === 'true';
 
   $effect(() => {
     if (name) {

@@ -3,11 +3,11 @@
 <script lang="ts">
   import IconSearch from '~icons/tabler/search';
   import IconAlert from '~icons/tabler/alert-triangle-filled';
-  import type { Status } from '$lib/status';
+  import type { Types } from '$lib/types';
   import { scale } from 'svelte/transition';
   import { fetchNames } from '$lib';
 
-  let { nameInput = $bindable(), status }: { nameInput?: string; status: Status } = $props();
+  let { nameInput = $bindable(), status }: { nameInput?: string; status: Types } = $props();
 
   let name = $state('');
 

@@ -1,6 +1,6 @@
-import { expect, test } from 'vitest';
-import { apiResponseToTree } from '../src/lib/familytree/fetchTree';
-import { People } from '../src/lib/familytree/models';
+import { expect, test } from 'bun:test';
+import { apiResponseToTree } from '../fetchTree';
+import { People } from '../types';
 
 const basicPersonData = (id: string, depth: number) => ({
   data: {
