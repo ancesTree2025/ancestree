@@ -159,8 +159,7 @@
               >
                 <button
                   onclick={() => getPersonInfo(id, person.name)}
-                  style="font-size: 16px;"
-                  class="flex h-full w-full cursor-pointer items-center justify-center text-center"
+                  class="flex h-full w-full cursor-pointer items-center justify-center text-center text-sm"
                 >
                   {person.name}
                 </button>
