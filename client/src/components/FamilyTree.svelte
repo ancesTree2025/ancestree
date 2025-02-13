@@ -143,14 +143,27 @@
           {@const position = positions[id]}
           {#if position}
             <g transform="translate({position.x},{position.y})">
-              <rect
+              {#if tree.people[0][0] === id}
+                <rect
+                  x={-RECT_WIDTH / 2}
+                  y={-RECT_HEIGHT / 2}
+                  width={RECT_WIDTH}
+                  height={RECT_HEIGHT}
+                  rx={RECT_RADIUS}
+                  fill="gold"
+                  stroke-width="3"
+                  stroke="black"
+                ></rect>
+              {:else}
+                <rect
                 x={-RECT_WIDTH / 2}
                 y={-RECT_HEIGHT / 2}
                 width={RECT_WIDTH}
                 height={RECT_HEIGHT}
                 rx={RECT_RADIUS}
                 class="fill-node"
-              ></rect>
+                ></rect>
+              {/if}
               <foreignObject
                 x={-RECT_WIDTH / 2}
                 y={-RECT_HEIGHT / 2}
