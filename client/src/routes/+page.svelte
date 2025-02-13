@@ -4,7 +4,7 @@
   import SidePanel from '../components/SidePanel.svelte';
 
   import { fetchTree, fetchInfo } from '$lib';
-  import type { Tree, LoadingStatus, PersonInfo  } from '$lib/types';
+  import type { Tree, LoadingStatus, PersonInfo } from '$lib/types';
 
   import { page } from '$app/state';
 

@@ -2,20 +2,22 @@ import { expect, test } from 'bun:test';
 import { apiResponseToTree } from '../fetchTree';
 import { People } from '../types';
 
-const basicPersonData = (id: string, depth: number) => ({
-  data: {
+function basicPersonData(id: string, depth: number) {
+  return {
+    data: {
+      id,
+      name: id,
+      gender: 'prefer not to say' as const
+    },
     id,
-    name: id,
-    gender: 'prefer not to say' as const
-  },
-  id,
-  depth
-});
+    depth
+  };
+}
 
 test('Handles two marriages with different children', () => {
   const resultingPeople: People = [];
 
-  for (const { id, depth } of [
+  for (const { id } of [
     { id: 'Wife 1', depth: 1 },
     { id: 'Child 1', depth: 2 },
     { id: 'Wife 2', depth: 1 },

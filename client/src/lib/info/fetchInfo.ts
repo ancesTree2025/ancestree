@@ -1,7 +1,7 @@
 import { Result } from 'typescript-result';
 import exampleData from './exampleData.json';
-import { personInfoSchema } from "./schemas";
-import type { PersonInfo } from "./types";
+import { personInfoSchema } from './schemas';
+import type { PersonInfo } from './types';
 
 export async function fetchInfo(
   qid: string,
