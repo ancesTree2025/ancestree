@@ -68,7 +68,7 @@ jobs:
       - name: Test
         run: bun test
 
-  lint-style-frontend:
+  lint-frontend:
     needs: build-frontend
     runs-on: ubuntu-latest
     defaults:
@@ -97,6 +97,33 @@ jobs:
 
       - name: Run Linter
         run: bun run lint
+
+  format-frontend:
+    needs: build-frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.1.43
+
+      - name: Cache bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./node_modules
+            ./bun.lockb
+          key: ${{ runner.os }}-bun-${{ hashFiles('./bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: Check Format
         run: bun run format:check
