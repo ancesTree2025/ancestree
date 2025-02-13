@@ -98,7 +98,7 @@ jobs:
       - name: Run Linter
         run: bun run lint
 
-  format-frontend:
+  check-format-frontend:
     needs: [build-frontend]
     runs-on: ubuntu-latest
     defaults:
