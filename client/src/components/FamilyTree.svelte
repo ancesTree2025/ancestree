@@ -150,9 +150,7 @@
                   width={RECT_WIDTH}
                   height={RECT_HEIGHT}
                   rx={RECT_RADIUS}
-                  fill="gold"
-                  stroke-width="3"
-                  stroke="black"
+                  class="fill-[#B08E55]"
                 ></rect>
               {:else}
                 <rect
@@ -170,12 +168,21 @@
                 width={RECT_WIDTH}
                 height={RECT_HEIGHT}
               >
-                <button
-                  onclick={() => getPersonInfo(id, person.name)}
-                  class="flex h-full w-full cursor-pointer items-center justify-center text-center text-sm"
-                >
-                  {person.name}
-                </button>
+                {#if tree.people[0][0] === id}
+                  <button
+                    onclick={() => getPersonInfo(id, person.name)}
+                    class="flex h-full w-full cursor-pointer items-center justify-center text-center text-sm text-white"
+                  >
+                    {person.name}
+                  </button>
+                {:else}
+                  <button
+                    onclick={() => getPersonInfo(id, person.name)}
+                    class="flex h-full w-full cursor-pointer items-center justify-center text-center text-sm"
+                  >
+                    {person.name}
+                  </button>
+                {/if}
               </foreignObject>
             </g>
           {/if}
