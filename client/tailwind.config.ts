@@ -14,6 +14,8 @@ export default {
       gray: '#f3f4f6',
       node: '#ddd',
       red: '#f44',
+      highlight: '#B08E55',
+      highlight_border: '#2D2D2D',
       transparent: 'transparent'
     },
     extend: {

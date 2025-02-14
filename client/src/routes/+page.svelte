@@ -14,6 +14,8 @@
   let tree = $state<Tree | undefined>();
   const useFakeData = page.url.searchParams.get('useFakeData') === 'true';
 
+  let familyTree: FamilyTree | null = null;
+
   $effect(() => {
     if (name) {
       status = { state: 'loading' };
@@ -41,6 +43,14 @@
       showSidePanel = true;
     }
   }
+
+  function closeSidePanel() {
+    if (familyTree) {
+      familyTree.closeSidePanel();
+    }
+
+    showSidePanel = false;
+  }
 </script>
 
 <div class="flex h-full flex-col overflow-x-hidden">
@@ -53,13 +63,13 @@
   </nav>
   <div class="flex flex-1">
     <div class="flex-1">
-      <FamilyTree {getPersonInfo} {tree} />
+      <FamilyTree bind:this={familyTree} {getPersonInfo} {tree} />
     </div>
     <SidePanel
       name={sidePanelName}
       show={showSidePanel}
       data={sidePanelData}
-      close={() => (showSidePanel = false)}
+      close={closeSidePanel}
     />
   </div>
 </div>
