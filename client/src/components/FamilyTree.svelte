@@ -159,7 +159,7 @@
                 width={RECT_WIDTH}
                 height={RECT_HEIGHT}
                 rx={RECT_RADIUS}
-                class="fill-node"
+                class="{tree.people[0][0] === id ? 'fill-[#B08E55]' : 'fill-node'}"
                 ></rect>
               {/if}
               <foreignObject
@@ -168,21 +168,12 @@
                 width={RECT_WIDTH}
                 height={RECT_HEIGHT}
               >
-                {#if tree.people[0][0] === id}
-                  <button
-                    onclick={() => getPersonInfo(id, person.name)}
-                    class="flex h-full w-full cursor-pointer items-center justify-center text-center text-sm text-white"
-                  >
-                    {person.name}
-                  </button>
-                {:else}
-                  <button
-                    onclick={() => getPersonInfo(id, person.name)}
-                    class="flex h-full w-full cursor-pointer items-center justify-center text-center text-sm"
-                  >
-                    {person.name}
-                  </button>
-                {/if}
+                <button
+                  onclick={() => getPersonInfo(id, person.name)}
+                  class="flex h-full w-full cursor-pointer items-center justify-center text-center text-sm {tree.people[0][0] === id ? 'text-white' : ''}"
+                >
+                  {person.name}
+                </button>
               </foreignObject>
             </g>
           {/if}
