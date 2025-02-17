@@ -192,7 +192,7 @@
                 {@const child = childAndID[0]}
                 {@const childID = childAndID[1]}
                 {#if child}
-                  {#if childID == selectedID}
+                  {#if childID === selectedID}
                     <line
                       x1={child.x}
                       y1={midY}
