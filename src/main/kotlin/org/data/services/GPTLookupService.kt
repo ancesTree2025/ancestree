@@ -9,7 +9,7 @@ import org.data.models.GPTResponse
 import org.data.models.Label
 import org.data.requests.HttpClientProvider
 
-object GPTLookupService: LookupService<Label, String> {
+object GPTLookupService : LookupService<Label, String> {
 
   private val dotenv = dotenv()
   private val apiKey = dotenv["OPENAI_KEY"]
@@ -28,7 +28,7 @@ object GPTLookupService: LookupService<Label, String> {
             put(
               "content",
               "Provide a simple summary of the given person in no more than 3 sentences. Talk about what they are" +
-                      "best known for and important facts about their life.",
+                "best known for and important facts about their life.",
             )
           }
           addJsonObject {

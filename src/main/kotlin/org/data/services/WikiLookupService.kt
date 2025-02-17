@@ -107,13 +107,13 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     val deathPlace = getPlaceName(infoMap["PoD"]!!.getOrNull(0))
 
     // TODO: is this needed?
-//    if (cacheManager.getLabel(qid) == null) {
-//      val labelResp = ComplexRequester.getLabelsOrClaims(listOf(qid))
-//      label = WikiRequestParser.parseWikidataLabels(labelResp)[qid]!!
-//      cacheManager.putLabel(qid, label)
-//    } else {
-//      label = cacheManager.getLabel(qid)!!
-//    }
+    //    if (cacheManager.getLabel(qid) == null) {
+    //      val labelResp = ComplexRequester.getLabelsOrClaims(listOf(qid))
+    //      label = WikiRequestParser.parseWikidataLabels(labelResp)[qid]!!
+    //      cacheManager.putLabel(qid, label)
+    //    } else {
+    //      label = cacheManager.getLabel(qid)!!
+    //    }
 
     val info =
       PersonalInfo(
