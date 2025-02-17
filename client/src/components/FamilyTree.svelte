@@ -174,6 +174,16 @@
                 {@const child = childAndID[0]}
                 {@const childID = childAndID[1]}
                 {#if child}
+                  {#if childID == selectedID}
+                    <line
+                      x1={child.x}
+                      y1={midY}
+                      x2={parentsX}
+                      y2={midY}
+                      class="stroke-highlight_border stroke-line"
+                    />
+                  {/if}
+                  
                   <line
                     x1={child.x}
                     y1={midY}
