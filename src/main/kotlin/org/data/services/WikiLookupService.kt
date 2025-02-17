@@ -35,19 +35,12 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     val qids = mutableListOf<QID>()
 
     input.forEach {
-      if (cache_manager.getQID(it).isNullOrEmpty()) {
+      val qid = cache_manager.getQID(it)
 
-        val qidResp = ComplexRequester.searchWikidataForQID(it)
-        val qid = WikiRequestParser.parseWikidataIDLookup(qidResp)
-
-        if (qid == null) {
-          println("QID not found: $it")
-        } else {
-          cache_manager.putQID(it, qid)
-          qids.add(qid)
-        }
+      if (qid == null) {
+        println("QID not found: $it")
       } else {
-        qids.add(cache_manager.getQID(it)!!)
+        qids.add(qid)
       }
     }
 

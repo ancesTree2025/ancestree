@@ -3,14 +3,23 @@ package org.data.caches
 import org.data.models.Label
 import org.data.models.PropertyMapping
 import org.data.models.QID
+import org.data.parsers.WikiRequestParser
+import org.data.requests.ComplexRequester
 
 object InMemWikiCacheManager : WikiCacheManager {
   private val labelToQIDCache = mutableMapOf<Label, QID>()
   private val qidToLabelCache = mutableMapOf<QID, Label>()
   private val qidToPropsCache = mutableMapOf<QID, PropertyMapping>()
 
-  override fun getQID(id: Label): QID? {
-    return labelToQIDCache[id]
+  override suspend fun getQID(id: Label): QID? {
+    return labelToQIDCache.getOrElse(id) {
+      // Make a query for id if not in cache
+      val qidResp = ComplexRequester.searchWikidataForQID(id)
+      val qid = WikiRequestParser.parseWikidataIDLookup(qidResp) ?: return null
+      // add id -> qid map to cache
+      putQID(id, qid)
+      qid
+    }
   }
 
   override fun putQID(id: Label, entity: QID) {

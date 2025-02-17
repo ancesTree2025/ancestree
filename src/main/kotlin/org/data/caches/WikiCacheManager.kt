@@ -13,7 +13,7 @@ interface WikiCacheManager {
    */
 
   /** Returns the QID for a given Label, or null if none is found */
-  fun getQID(id: Label): QID?
+  suspend fun getQID(id: Label): QID?
 
   fun putQID(id: Label, entity: QID)
 
