@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as d3 from 'd3';
-  import { balanceTree } from '$lib';
+  import { positionNodes } from '$lib';
   import type { Marriage, Positions, Tree } from '$lib/types';
   import { onMount } from 'svelte';
 
@@ -14,9 +14,8 @@
 
   $effect(() => {
     if (tree) {
-      const result = balanceTree(tree);
+      const result = positionNodes(tree);
       positions = result.positions;
-      visMarriages = result.visMarriages;
       treeWidth = result.treeWidth;
     } else {
       positions = {};

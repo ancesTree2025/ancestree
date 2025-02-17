@@ -1,36 +1,71 @@
 {
-  "focus": "F",
+  "focus": "A",
   "people": [
-    ["F", { "name": "Focus" }],
-    ["M", { "name": "Mum" }],
-    ["D", { "name": "Dad" }],
-    ["B", { "name": "Brother" }],
-    ["S", { "name": "Sister" }],
-    ["W1", { "name": "Wife 1" }],
-    ["W2", { "name": "Wife 2" }],
-    ["C1", { "name": "Child 1" }],
-    ["C2", { "name": "Child 2" }],
-    ["C3", { "name": "Child 3" }],
-    ["DiL", { "name": "Daughter in Law" }],
-    ["C4", { "name": "Child 4" }],
-    ["GC", { "name": "Grand Child" }]
+    ["A", { "name": "A" }],
+    ["B", { "name": "B" }],
+    ["C", { "name": "C" }],
+    ["D", { "name": "D" }],
+    ["E", { "name": "E" }],
+    ["F", { "name": "F" }],
+    ["G", { "name": "G" }],
+    ["H", { "name": "H" }],
+    ["I", { "name": "I" }],
+    ["J", { "name": "J" }],
+    ["K", { "name": "K" }],
+    ["L", { "name": "L" }],
+    ["M", { "name": "M" }],
+    ["N", { "name": "N" }],
+    ["O", { "name": "O" }],
+    ["P", { "name": "P" }],
+    ["Q", { "name": "Q" }],
+    ["R", { "name": "R" }],
+    ["S", { "name": "S" }],
+    ["T", { "name": "T" }],
+    ["U", { "name": "U" }],
+    ["V", { "name": "V" }],
+    ["W", { "name": "W" }],
+    ["X", { "name": "X" }]
   ],
   "marriages": [
     {
-      "parents": ["F", "W1"],
-      "children": ["C1"]
+      "parents": ["A", "B"],
+      "children": ["J", "L"]
     },
     {
-      "parents": ["F", "W2"],
-      "children": ["C2", "C3", "C4"]
+      "parents": ["J", "K"],
+      "children": ["M", "N"]
     },
     {
-      "parents": ["M", "D"],
-      "children": ["F", "B", "S"]
+      "parents": ["A", "C"],
+      "children": ["O"]
     },
     {
-      "parents": ["C3", "DiL"],
-      "children": ["GC"]
+      "parents": ["A", "D"],
+      "children": []
+    },
+    {
+      "parents": ["O", "P"],
+      "children": ["Q"]
+    },
+    {
+      "parents": ["Q", "W"],
+      "children": []
+    },
+    {
+      "parents": ["S", "T"],
+      "children": ["B", "R"]
+    },
+    {
+      "parents": ["H", "I"],
+      "children": ["A", "E", "G"]
+    },
+    {
+      "parents": ["U", "V"],
+      "children": ["F"]
+    },
+    {
+      "parents": ["E", "F"],
+      "children": ["W", "X"]
     }
   ]
 }
