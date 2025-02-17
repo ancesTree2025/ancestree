@@ -113,7 +113,7 @@
                 y1={mother.y}
                 x2={father.x}
                 y2={father.y}
-                class="{highlightSet.has(motherID) && highlightSet.has(fatherID) ? 'stroke-highlight_border':'stroke-node'} stroke-node stroke-line"
+                class="{highlightSet.has(motherID) && highlightSet.has(fatherID) ? 'stroke-highlight_border':'stroke-node'} stroke-line"
               />
             {:else}
               <line
@@ -166,7 +166,7 @@
                 y1={midY}
                 x2={rightChildX}
                 y2={midY}
-                class="{motherID === selectedID || fatherID === selectedID || marriage[0].children.includes(selectedID) ? 'stroke-highlight_border' : 'stroke-node'} stroke-node stroke-line"
+                class="{motherID === selectedID || fatherID === selectedID ? 'stroke-highlight_border' : 'stroke-node'} stroke-line"
               />
 
               <!-- Draw line from each child to children line -->
@@ -179,7 +179,7 @@
                     y1={midY}
                     x2={child.x}
                     y2={child.y}
-                    class="{motherID === selectedID || fatherID === selectedID || childID === selectedID ? 'stroke-highlight_border' : 'stroke-node'} stroke-node stroke-line"
+                    class="{motherID === selectedID || fatherID === selectedID || childID === selectedID ? 'stroke-highlight_border' : 'stroke-node'} stroke-line"
                   />
                 {/if}
               {/each}
