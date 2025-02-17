@@ -12,17 +12,17 @@ interface WikiCacheManager {
   QID -> PropertyMapping
    */
 
-  /** Returns the QID for a given Label, or null if none is found */
+  /** Returns the QID for a given Label, or null if none is found online. */
   suspend fun getQID(id: Label): QID?
 
   fun putQID(id: Label, entity: QID)
 
-  /** Returns the Label for a given QID, or null if none is found */
+  /** Returns the Label for a given QID, or null if none is found in cache. */
   fun getLabel(id: QID): Label?
 
   fun putLabel(id: QID, entity: Label)
 
-  /** Returns the PropertyMapping for a given QID, or null if none is found */
+  /** Returns the PropertyMapping for a given QID, or null if none is found in cache. */
   fun getProps(id: QID): PropertyMapping?
 
   fun putProps(id: QID, entity: PropertyMapping)
