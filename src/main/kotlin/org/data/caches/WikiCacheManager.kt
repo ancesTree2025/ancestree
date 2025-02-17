@@ -4,32 +4,26 @@ import org.data.models.Label
 import org.data.models.PropertyMapping
 import org.data.models.QID
 
-/** Simple cache manager for storing Wikidata claims and QIDs. */
-object WikiCacheManager {
-  /** Label to QID. Used to avoid querying Wikipedia unnecessarily. */
-  private val labelToQIDCache = mutableMapOf<Label, QID>()
+interface WikiCacheManager {
 
-  /** QID to Label. Used to avoid querying Wikidata unnecessarily. */
-  private val qidToLabelCache = mutableMapOf<QID, Label>()
+  /*
+  Label -> QID
+  QID -> Label
+  QID -> PropertyMapping
+   */
 
-  /** QID to Claim. Used to avoid querying Wikidata unnecessarily. */
-  private val qidToPropsCache = mutableMapOf<QID, PropertyMapping>()
+  /** Returns the QID for a given Label, or null if none is found */
+  fun getQID(id: Label): QID?
 
-  fun getQID(id: Label): QID? = labelToQIDCache[id]
+  fun putQID(id: Label, entity: QID)
 
-  fun putQID(id: Label, entity: QID) {
-    labelToQIDCache[id] = entity
-  }
+  /** Returns the Label for a given QID, or null if none is found */
+  fun getLabel(id: QID): Label?
 
-  fun getLabel(id: QID): Label? = qidToLabelCache[id]
+  fun putLabel(id: QID, entity: Label)
 
-  fun putLabel(id: QID, entity: Label) {
-    qidToLabelCache[id] = entity
-  }
+  /** Returns the PropertyMapping for a given QID, or null if none is found */
+  fun getProps(id: QID): PropertyMapping?
 
-  fun getProps(id: QID): PropertyMapping? = qidToPropsCache[id]
-
-  fun putProps(id: QID, entity: PropertyMapping) {
-    qidToPropsCache[id] = entity
-  }
+  fun putProps(id: QID, entity: PropertyMapping)
 }
