@@ -9,7 +9,6 @@
     getPersonInfo
   }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } = $props();
   let positions = $state<Positions>({});
-  let visMarriages = $state<[Marriage, number][] | undefined>(tree?.marriages.map((m) => [m, 0]));
   let treeWidth = $state<number>();
 
   $effect(() => {
@@ -51,12 +50,12 @@
 <svg id="svg-root" class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
   <g id="zoom-group">
     <g transform="translate({xOffset}, {yOffset}) scale({zoomFactor})">
-      {#if tree && visMarriages}
-        {#each visMarriages as marriage}
+      {#if tree}
+        {#each tree.marriages as marriage}
           <!-- fetch Person for each parent, child -->
-          {@const mother = positions[marriage[0].parents[0]]}
-          {@const father = positions[marriage[0].parents[1]]}
-          {@const children = marriage[0].children.map((id) => positions[id])}
+          {@const mother = positions[marriage.parents[0]]}
+          {@const father = positions[marriage.parents[1]]}
+          {@const children = marriage.children.map((id) => positions[id])}
 
           {#if mother && father}
             <!-- Draw marriage lines -->
@@ -97,7 +96,7 @@
               <!-- Draw line between parents and children -->
               {@const parentsY = Math.max(mother.y, father.y)}
               {@const childrenY = Math.min(...children.map((child) => child?.y ?? Infinity))}
-              {@const midY = (parentsY + childrenY) / 2 - (marriage[1] % 2 === 0 ? 0 : 10)}
+              {@const midY = (parentsY + childrenY) / 2}
               <line
                 x1={parentsX}
                 y1={parentsY}
