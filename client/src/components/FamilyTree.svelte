@@ -177,15 +177,24 @@
                 parentsX,
                 ...children.map((child) => child?.x ?? -Infinity)
               )}
-              <line
-                x1={leftChildX}
-                y1={midY}
-                x2={rightChildX}
-                y2={midY}
-                class="{motherID === selectedID || fatherID === selectedID
-                  ? 'stroke-highlight_border'
-                  : 'stroke-node'} stroke-line"
-              />
+
+              {#if motherID === selectedID || fatherID === selectedID}
+                <line
+                  x1={leftChildX}
+                  y1={midY}
+                  x2={rightChildX}
+                  y2={midY}
+                  class="stroke-highlight_border stroke-line"
+                />
+              {:else}
+                <line
+                  x1={leftChildX}
+                  y1={midY}
+                  x2={rightChildX}
+                  y2={midY}
+                  class="stroke-node stroke-line"
+                />
+              {/if}
 
               <!-- Draw line from each child to children line -->
               {#each zip(children, marriage[0].children) as childAndID}
