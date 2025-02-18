@@ -7,7 +7,11 @@
   import { scale } from 'svelte/transition';
   import { fetchNames } from '$lib';
 
-  const { status, onSubmit }: { status: Status; onSubmit: (_: string) => void } = $props();
+  interface Props {
+    status: LoadingStatus;
+    onSubmit?: (_: string) => void;
+  }
+  let { status, onSubmit }: Props = $props();
 
   let name = $state('');
 
@@ -86,7 +90,7 @@
   const HOVER_CLASS = 'scale-100 hover:scale-125 transition-transform duration-150';
 </script>
 
-<div class="relative flex w-80 items-center gap-3 rounded-full bg-input pl-4">
+<div class="bg-input relative flex w-80 items-center gap-3 rounded-full pl-4">
   <IconSearch class="text-black opacity-50" />
   <form onsubmit={() => onSubmit(name)}>
     <input
@@ -110,7 +114,7 @@
       <div
         class="absolute bottom-0 left-1/2 flex h-0 w-0 -translate-y-4 flex-col items-center opacity-0 transition-all peer-hover:translate-y-0 peer-hover:opacity-100"
       >
-        <p class="mt-2 text-nowrap rounded-xl bg-red px-8 py-1 text-center text-sm text-white">
+        <p class="bg-red mt-2 text-nowrap rounded-xl px-8 py-1 text-center text-sm text-white">
           {status.error}
         </p>
       </div>
@@ -121,7 +125,7 @@
       <div class="rounded-lg bg-white shadow-lg">
         {#each searchResults as result}
           <button
-            class="block w-full cursor-pointer p-2 text-left hover:bg-gray"
+            class="hover:bg-gray block w-full cursor-pointer p-2 text-left"
             onclick={() => selectName(result)}
           >
             {result}
