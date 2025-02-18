@@ -218,7 +218,7 @@
             {/if}
           {/if}
         {/each}
-        {#each tree.people as [id, person]}
+        {#each tree.people as [id, person, gender]}
           {@const position = positions[id]}
           {#if position}
             <g transform="translate({position.x},{position.y})">
@@ -230,7 +230,11 @@
                 rx={RECT_RADIUS}
                 class="{tree.people[0][0] === id
                   ? 'fill-highlight'
-                  : 'fill-node'} {highlightSet.has(id)
+                  : gender === 'male'
+                    ? 'fill-blue'
+                    : gender === 'female'
+                      ? 'fill-red'
+                      : 'fill-node'} {highlightSet.has(id)
                   ? 'stroke-highlight_border stroke-line'
                   : ''}"
               ></rect>
