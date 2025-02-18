@@ -1,7 +1,7 @@
 <script lang="ts">
   import * as d3 from 'd3';
   import { positionNodes } from '$lib';
-  import type { Marriage, Positions, Tree } from '$lib/types';
+  import type { Positions, Tree } from '$lib/types';
   import { onMount } from 'svelte';
 
   const {
