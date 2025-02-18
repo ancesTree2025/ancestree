@@ -3,7 +3,7 @@ import type { Marriages, People, PersonID, Tree } from './types';
 import exampleTree from '../data/exampleTree.json';
 import { z } from 'zod';
 
-const personIdSchema = z.string();
+export const personIdSchema = z.string();
 
 const personSchema = z.object({
   data: z.object({

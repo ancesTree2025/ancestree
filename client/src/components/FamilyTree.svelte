@@ -2,15 +2,17 @@
   import * as d3 from 'd3';
   import { balanceTree } from '$lib';
   import type { Marriage, Positions, Tree } from '$lib/types';
+  import IconSearch from '~icons/tabler/search';
   import { onMount } from 'svelte';
+  import { fetchRelationship, type Relationship } from '$lib/familytree/fetchRelationship';
 
-  const {
-    tree,
-    getPersonInfo
-  }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } = $props();
+  let { tree, getPersonInfo }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } =
+    $props();
   let positions = $state<Positions>({});
   let visMarriages = $state<[Marriage, number][] | undefined>(tree?.marriages.map((m) => [m, 0]));
   let treeWidth = $state<number>();
+  let searchName = $state<string>();
+  let relationship = $state<Relationship>();
 
   $effect(() => {
     if (tree) {
@@ -33,6 +35,35 @@
     }
   });
 
+  function submitIfEnter(event: KeyboardEvent) {
+    console.log(tree?.people);
+    if (event.key === 'Enter') {
+      console.log('Ente');
+      fetchRelationship(
+        tree?.focus!,
+        tree?.people.find((tup) => tup[1].name === searchName)![0]!,
+        true
+      ).then((result) => {
+        const newRelationship = result.getOrNull();
+        if (newRelationship != null) {
+          relationship = newRelationship;
+          tree = {
+            ...tree!,
+            marriages: tree!.marriages.filter((marriage) =>
+            newRelationship.chain.some(
+              (person) => marriage.parents.includes(person) || marriage.children.includes(person)
+            )
+          ).map(marriage => ({
+            parents: marriage.parents,
+            children: marriage.children.filter(p => newRelationship.chain.includes(p))
+          })),
+        };
+        console.log(tree)
+        }
+      });
+    }
+  }
+
   const RECT_HEIGHT = 60;
   const RECT_WIDTH = 120;
   const RECT_RADIUS = 10;
@@ -48,6 +79,16 @@
 
   const yOffset = $derived(height / 2);
 </script>
+
+<div class="bg-input relative flex w-80 items-center gap-3 rounded-full pl-4">
+  <IconSearch class="text-black opacity-50" />
+  <input
+    bind:value={searchName}
+    class="flex-1 bg-transparent py-2 outline-none"
+    placeholder="Enter a name..."
+    onkeydown={submitIfEnter}
+  />
+</div>
 
 <svg id="svg-root" class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
   <g id="zoom-group">
