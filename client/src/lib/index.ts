@@ -2,3 +2,4 @@
 export * from './search';
 export * from './familytree';
 export * from './info';
+export * from './utils'

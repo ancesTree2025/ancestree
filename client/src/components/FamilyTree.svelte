@@ -1,6 +1,7 @@
 <script lang="ts">
   import * as d3 from 'd3';
   import { balanceTree } from '$lib';
+  import { zip } from '$lib'
   import type { Marriage, Positions, Tree } from '$lib/types';
   import { onMount } from 'svelte';
   import { SvelteSet } from 'svelte/reactivity';
@@ -37,17 +38,6 @@
   const RECT_HEIGHT = 60;
   const RECT_WIDTH = 120;
   const RECT_RADIUS = 10;
-
-  function zip<S1, S2>(firstCollection: Array<S1>, lastCollection: Array<S2>): Array<[S1, S2]> {
-    const length = Math.min(firstCollection.length, lastCollection.length);
-    const zipped: Array<[S1, S2]> = [];
-
-    for (let index = 0; index < length; index++) {
-      zipped.push([firstCollection[index], lastCollection[index]]);
-    }
-
-    return zipped;
-  }
 
   let height = $state(0);
   let width = $state(0);
