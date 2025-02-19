@@ -102,7 +102,7 @@ export async function fetchTree(name: string, useFakeData: boolean): Promise<Res
     return Result.ok(exampleTree as Tree);
   }
 
-  const baseUrl = process.env.API_BASE_URL
+  const baseUrl = process.env.API_BASE_URL;
   const response = await Result.fromAsyncCatching(fetch(`${baseUrl}/${name}`)).mapError(
     () => 'Could not connect to server'
   );

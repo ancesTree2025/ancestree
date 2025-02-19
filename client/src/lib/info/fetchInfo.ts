@@ -10,7 +10,7 @@ export async function fetchInfo(
   if (useFakeData) {
     return Result.ok(exampleData);
   }
-  const baseUrl = process.env.API_BASE_URL
+  const baseUrl = process.env.API_BASE_URL;
   const response = await Result.fromAsyncCatching(
     fetch(`${baseUrl}/info?${new URLSearchParams({ qid })}`)
   ).mapError(() => 'Could not connect to server');

@@ -16,10 +16,10 @@ export async function fetchNames(
     return Result.ok(exampleNames);
   }
 
-  const baseUrl = process.env.API_BASE_URL
-  const response = Result.fromAsyncCatching(
-    fetch(`${baseUrl}/search/${searchQuery}`)
-  ).mapError(() => 'Failed to fetch names');
+  const baseUrl = process.env.API_BASE_URL;
+  const response = Result.fromAsyncCatching(fetch(`${baseUrl}/search/${searchQuery}`)).mapError(
+    () => 'Failed to fetch names'
+  );
 
   return response.mapCatching(
     async (res) => {

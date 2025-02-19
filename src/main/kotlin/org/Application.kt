@@ -15,9 +15,8 @@ fun main(args: Array<String>) {
 fun Application.module() {
   di { import(appModule) }
   install(CORS) {
-    val allowedHosts = with(System.getenv("ALLOWED_HOSTS") ?: "") {
-      this.split(",").map(String::trim)
-    }
+    val allowedHosts =
+      with(System.getenv("ALLOWED_HOSTS") ?: "") { this.split(",").map(String::trim) }
 
     allowedHosts.forEach { allowHost(it) }
   }
