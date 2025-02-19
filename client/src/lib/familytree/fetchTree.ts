@@ -34,7 +34,7 @@ export function apiResponseToTree(res: ApiResponse): Tree {
   const depths: Map<PersonID, number> = new Map();
 
   for (const person of res.nodes) {
-    people.push([person.id, { name: person.data.name }]);
+    people.push([person.id, { name: person.data.name }, person.data.gender]);
     depths.set(person.id, person.depth);
   }
 

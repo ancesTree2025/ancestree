@@ -24,7 +24,7 @@ test('Handles two marriages with different children', () => {
     { id: 'Child 2', depth: 2 },
     { id: 'Focus', depth: 1 }
   ]) {
-    resultingPeople.push([id, { name: id }]);
+    resultingPeople.push([id, { name: id }, '']);
   }
 
   const result = apiResponseToTree({
@@ -65,7 +65,9 @@ test('Handles two marriages with different children', () => {
   });
 
   expect(result.focus).toBe('Focus');
-  expect(new Map(result.people)).toStrictEqual(new Map(resultingPeople));
+  expect(new Map(result.people.map(([id, name, ..._rest]) => [id, name]))).toStrictEqual(
+    new Map(resultingPeople.map(([id, name, ..._rest]) => [id, name]))
+  );
   expect(new Set(result.marriages)).toStrictEqual(
     new Set([
       { parents: ['Focus', 'Wife 1'], children: ['Child 1'] },
