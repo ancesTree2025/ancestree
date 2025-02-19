@@ -5,7 +5,9 @@ export type Person = {
 };
 
 // Needs to be an array for deep reactivity to work
-export type People = [PersonID, Person][];
+export type People = [PersonID, Person, Gender][];
+
+export type Gender = string;
 
 export type Marriage = {
   parents: PersonID[];
