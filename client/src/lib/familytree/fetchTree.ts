@@ -101,7 +101,9 @@ export async function fetchTree(name: string, useFakeData: boolean): Promise<Res
   if (useFakeData) {
     return Result.ok(exampleTree as Tree);
   }
-  const response = await Result.fromAsyncCatching(fetch(`http://localhost:8080/${name}`)).mapError(
+
+  const baseUrl = process.env.API_BASE_URL
+  const response = await Result.fromAsyncCatching(fetch(`${baseUrl}/${name}`)).mapError(
     () => 'Could not connect to server'
   );
   if (response.getOrNull()?.status === 404) {

@@ -16,8 +16,9 @@ export async function fetchNames(
     return Result.ok(exampleNames);
   }
 
+  const baseUrl = process.env.API_BASE_URL
   const response = Result.fromAsyncCatching(
-    fetch(`http://localhost:8080/search/${searchQuery}`)
+    fetch(`${baseUrl}/search/${searchQuery}`)
   ).mapError(() => 'Failed to fetch names');
 
   return response.mapCatching(
