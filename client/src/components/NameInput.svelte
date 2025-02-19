@@ -9,7 +9,7 @@
 
   interface Props {
     status: LoadingStatus;
-    onSubmit?: (_: string) => void;
+    onSubmit: (_: string) => void;
   }
   const { status, onSubmit }: Props = $props();
 
@@ -35,8 +35,6 @@
    * Debouncing is done to prevent making too many requests.
    * The search request is made only after the user has stopped typing for 500ms.
    */
-  // eslint-disable-next-line no-undef
-  let timer: Timer | null = null;
   $effect(() => {
     if (searchQuery) {
       searching = true;
@@ -79,12 +77,6 @@
     searchQuery = value;
   }
 
-  function submitIfEnter(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-      onSubmit(name);
-    }
-  }
-
   // common tailwind classes for status icons
   const ICON_CLASS = 'absolute right-3 flex h-full w-5 items-center';
   const HOVER_CLASS = 'scale-100 hover:scale-125 transition-transform duration-150';
@@ -92,13 +84,12 @@
 
 <div class="relative flex w-80 items-center gap-3 rounded-full bg-input pl-4">
   <IconSearch class="text-black opacity-50" />
-  <form onsubmit={() => onSubmit(name)}>
+  <form onsubmit={() => selectName(name)}>
     <input
       class="flex-1 bg-transparent py-2 outline-none"
       value={name}
       oninput={onChange}
       placeholder="Enter a name..."
-      onkeydown={submitIfEnter}
     />
   </form>
   {#if status.state === 'loading' || searching}
