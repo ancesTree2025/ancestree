@@ -8,7 +8,7 @@
 
   import { page } from '$app/state';
 
-  let name = $state<string | undefined>();
+  const name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
 
   let tree = $state<Tree | undefined>();
@@ -33,7 +33,7 @@
         }
       });
     }
-  })
+  });
 
   async function onSubmit(name: string) {
     if (!name.length) return;
