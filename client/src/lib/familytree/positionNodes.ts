@@ -19,10 +19,11 @@ export function positionNodes(tree: Tree): {
   );
 
   const marriageGroups = getMarriageGroups(tree);
-  console.log(marriageGroups);
 
   const depths = assignDepths(tree, marriageGroups, personMarriages, personParents);
-  console.log(depths);
+
+  const sortedLevels = sortDepths(marriageGroups, depths, personMarriages, personParents);
+  console.log(sortedLevels);
 
   // TODO: finish this
   return { positions: {}, treeWidth: 0 };
@@ -33,11 +34,11 @@ export function positionNodes(tree: Tree): {
  *
  * @typedef {Object} GroupAssigments
  *
- * @property {Record<GroupID, PersonID[]>} groups - A mapping from group ID to the members of that group.
+ * @property {Map<GroupID, PersonID[]>} groups - A mapping from group ID to the members of that group.
  * @property {Record<PersonID, GroupID>} members - A mapping from person ID to the group they are in.
  */
 type GroupAssigments = {
-  groups: Record<GroupID, PersonID[]>;
+  groups: Map<GroupID, PersonID[]>;
   members: Record<PersonID, GroupID>;
 };
 type GroupID = PersonID;
@@ -49,12 +50,12 @@ type GroupID = PersonID;
  * @returns The marriage group assignments
  */
 function getMarriageGroups(tree: Tree): GroupAssigments {
-  const marriageGroups: Record<GroupID, PersonID[]> = {};
+  const marriageGroups: Map<GroupID, PersonID[]> = new Map();
   const memberOf: Record<PersonID, GroupID> = {};
 
   // initialise groups as singletons
   for (const [id] of tree.people) {
-    marriageGroups[id] = [id];
+    marriageGroups.set(id, [id]);
     memberOf[id] = id;
   }
 
@@ -64,12 +65,12 @@ function getMarriageGroups(tree: Tree): GroupAssigments {
     const groupId = memberOf[marriage.parents[0]];
     let newGroup: PersonID[] = [];
     for (const person of marriage.parents) {
-      const group = marriageGroups[memberOf[person]];
+      const group = marriageGroups.get(memberOf[person])!;
       newGroup = newGroup.concat(group);
-      delete marriageGroups[memberOf[person]];
+      marriageGroups.delete(memberOf[person]);
       memberOf[person] = groupId;
     }
-    marriageGroups[groupId] = newGroup;
+    marriageGroups.set(groupId, newGroup);
   }
 
   return {
@@ -94,18 +95,18 @@ function assignDepths(
   groups: GroupAssigments,
   personMarriages: Record<PersonID, Marriages>,
   personParents: Record<PersonID, Marriages>
-): Record<GroupID, number> {
-  const depths: Record<GroupID, number> = {};
-  const minDepths: Record<GroupID, number> = {};
-  const maxDepths: Record<GroupID, number> = {};
+): Map<GroupID, number> {
+  const depths: Map<GroupID, number> = new Map();
+  const minDepths: Map<GroupID, number> = new Map();
+  const maxDepths: Map<GroupID, number> = new Map();
 
   // by default no groups have depths
-  const unfound: Set<GroupID> = new Set(Object.keys(groups.groups));
+  const unfound: Set<GroupID> = new Set(groups.groups.keys());
 
   // give the focused node's group a min and max depth of zero
   const focusGroupId = groups.members[tree.focus];
-  maxDepths[focusGroupId] = 0;
-  minDepths[focusGroupId] = 0;
+  maxDepths.set(focusGroupId, 0);
+  minDepths.set(focusGroupId, 0);
 
   while (unfound.size > 0) {
     // find the group ID with the lowest minimum depth, or highest maximum depth
@@ -115,8 +116,8 @@ function assignDepths(
     let minimum = Infinity;
     let groupId: GroupID;
     for (const group of unfound) {
-      const maximumDepth = maxDepths[group] ?? -Infinity;
-      const minimumDepth = minDepths[group] ?? Infinity;
+      const maximumDepth = maxDepths.get(group) ?? -Infinity;
+      const minimumDepth = minDepths.get(group) ?? Infinity;
       const depth = Math.min(-maximumDepth, minimumDepth);
       if (depth < minimum) {
         minimum = depth;
@@ -126,11 +127,11 @@ function assignDepths(
     groupId = groupId!;
     unfound.delete(groupId);
 
-    const group = groups.groups[groupId];
+    const group = groups.groups.get(groupId)!;
 
     // assign smallest legal depth
-    const minDepth = minDepths[groupId] ?? -Infinity;
-    const maxDepth = maxDepths[groupId] ?? Infinity;
+    const minDepth = minDepths.get(groupId) ?? -Infinity;
+    const maxDepth = maxDepths.get(groupId) ?? Infinity;
     let depth = 0;
     if (minDepth > 0) {
       depth = minDepth;
@@ -138,7 +139,7 @@ function assignDepths(
       depth = maxDepth;
     }
 
-    depths[groupId] = depth;
+    depths.set(groupId, depth);
 
     for (const person of group) {
       // update the max depth of all the parents to be lower than this group's depth
@@ -149,7 +150,7 @@ function assignDepths(
           // don't bother updating groups whose depths have been found
           if (!unfound.has(groupId)) continue;
 
-          maxDepths[groupId] = Math.min(maxDepths[groupId] ?? Infinity, depth - 1);
+          maxDepths.set(groupId, Math.min(maxDepths.get(groupId) ?? Infinity, depth - 1));
         }
       }
       // update the min depth of all the children to be higher than this group's depth
@@ -160,11 +161,175 @@ function assignDepths(
           // don't bother updating groups whose depths have been found
           if (!unfound.has(groupId)) continue;
 
-          minDepths[groupId] = Math.max(minDepths[groupId] ?? -Infinity, depth + 1);
+          minDepths.set(groupId, Math.max(minDepths.get(groupId) ?? -Infinity, depth + 1));
         }
       }
     }
   }
 
   return depths;
+}
+
+function sortDepths(
+  groups: GroupAssigments,
+  depths: Map<GroupID, number>,
+  personMarriages: Record<PersonID, Marriages>,
+  personParents: Record<PersonID, Marriages>
+): Map<number, GroupID[]> {
+  const depthNumbers: number[] = Array.from(new Set(depths.values())).sort((a, b) => b - a);
+  const outputDepths: Map<number, GroupID[]> = new Map();
+
+  let lastAssignment: GroupID[] | null = null;
+  for (const depth of depthNumbers) {
+    const distances = new Map<GroupID, Map<GroupID, number>>();
+    const marriageGroups = depths
+      .entries()
+      .toArray()
+      .filter(([, d]) => d === depth)
+      .map(([id]) => id);
+
+    // If children of A come before children of B, then A should come before B
+    // This finds the average position of the group of each child of the nodes in each group,
+    // and then sorts the average positions of each group to produce a list of contraints,
+    // i.e. what nodes need to come before which, in this depth
+    const constraints: [GroupID, GroupID][] = [];
+    if (lastAssignment !== null) {
+      const positions: Map<GroupID, number> = new Map();
+
+      const positionTotal: Map<GroupID, number> = new Map();
+      const positionCount: Map<GroupID, number> = new Map();
+      for (const groupId of marriageGroups) {
+        const group = groups.groups.get(groupId)!;
+        for (const person of group) {
+          for (const marriage of personMarriages[person]) {
+            for (const child of marriage.children) {
+              const childGroupId = groups.members[child];
+              const position = lastAssignment.indexOf(childGroupId);
+              positionTotal.set(groupId, (positionTotal.get(groupId) ?? 0) + position);
+              positionCount.set(groupId, (positionCount.get(groupId) ?? 0) + 1);
+            }
+          }
+        }
+      }
+
+      for (const [groupId, count] of positionCount.entries()) {
+        const total = positionTotal.get(groupId) ?? 0;
+        const average = total / count;
+        positions.set(groupId, average);
+      }
+
+      const sortedPositions: GroupID[] = Array.from(positions.entries())
+        .sort((a, b) => a[1] - b[1])
+        .map(([a]) => a);
+
+      for (let i = 0; i < sortedPositions.length - 1; i++) {
+        constraints.push([sortedPositions[i], sortedPositions[i + 1]]);
+      }
+    }
+
+    for (const fromGroup of marriageGroups) {
+      const from = groups.groups.get(fromGroup)![0];
+      const map = new Map<GroupID, number>();
+      // TODO: number of function calls can be halved
+      for (const toGroup of marriageGroups) {
+        const to = groups.groups.get(toGroup)![0];
+        map.set(toGroup, distanceBetween(from, to, personMarriages, personParents));
+      }
+      distances.set(fromGroup, map);
+    }
+
+    let minimum = Infinity;
+    let minimumPermutation: GroupID[] = [];
+
+    const permutations = permute(marriageGroups);
+    for (const permutation of permutations) {
+      for (const [a, b] of constraints) {
+        if (permutation.indexOf(a) > permutation.indexOf(b)) {
+          continue;
+        }
+      }
+
+      let total = 0;
+      for (let x = 0; x < permutation.length - 1; x++) {
+        for (let y = x + 1; y < permutation.length; y++) {
+          const d = distances.get(permutation[x])!.get(permutation[y])!;
+          total += d * (y - x);
+        }
+      }
+      if (total < minimum) {
+        minimum = total;
+        minimumPermutation = permutation;
+      }
+    }
+
+    outputDepths.set(depth, minimumPermutation);
+
+    lastAssignment = minimumPermutation;
+  }
+
+  return outputDepths;
+}
+
+function permute<T>(xs: T[]): T[][] {
+  if (xs.length === 0) return [[]];
+  const result: T[][] = [];
+  for (let i = 0; i < xs.length; i++) {
+    const rest = xs.slice(0, i).concat(xs.slice(i + 1));
+    const restPermutations = permute(rest);
+    for (const perm of restPermutations) {
+      result.push([xs[i], ...perm]);
+    }
+  }
+  return result;
+}
+
+function distanceBetween(
+  from: PersonID,
+  to: PersonID,
+  personMarriages: Record<PersonID, Marriages>,
+  personParents: Record<PersonID, Marriages>
+): number {
+  const queue = [from];
+
+  const distances = new Map<PersonID, number>();
+  distances.set(from, 0);
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    const d = distances.get(current)!;
+    if (current === to) {
+      return 1 / d;
+    }
+
+    for (const marriage of personMarriages[current]) {
+      for (const spouse of marriage.parents) {
+        if (!distances.has(spouse)) {
+          distances.set(spouse, d);
+          queue.push(spouse);
+        }
+      }
+      for (const child of marriage.children) {
+        if (!distances.has(child)) {
+          distances.set(child, d + 1);
+          queue.push(child);
+        }
+      }
+    }
+    for (const marriage of personParents[current]) {
+      for (const parent of marriage.parents) {
+        if (!distances.has(parent)) {
+          distances.set(parent, d + 1);
+          queue.push(parent);
+        }
+      }
+      for (const sibling of marriage.children) {
+        if (!distances.has(sibling)) {
+          distances.set(sibling, d + 1);
+          queue.push(sibling);
+        }
+      }
+    }
+  }
+
+  return 0;
 }

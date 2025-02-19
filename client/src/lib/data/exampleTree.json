@@ -48,10 +48,6 @@
       "children": ["Q"]
     },
     {
-      "parents": ["Q", "W"],
-      "children": []
-    },
-    {
       "parents": ["S", "T"],
       "children": ["B", "R"]
     },
