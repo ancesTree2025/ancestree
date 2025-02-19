@@ -1,7 +1,7 @@
 <script lang="ts">
   import * as d3 from 'd3';
   import { balanceTree } from '$lib';
-  import { zip } from '$lib'
+  import { zip } from '../lib/utils'
   import type { Marriage, Positions, Tree } from '$lib/types';
   import { onMount } from 'svelte';
   import { SvelteSet } from 'svelte/reactivity';
