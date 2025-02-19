@@ -1,9 +1,11 @@
 <script lang="ts">
   import * as d3 from 'd3';
   import { positionNodes } from '$lib';
-  import type { MarriageDistances, MarriageHeights, Positions, Tree } from '$lib/types';
+  import type { MarriageDistances, MarriageHeights, Marriage, Positions, Tree } from '$lib/types';
   import { onMount } from 'svelte';
   import FamilyTreeLines from './FamilyTreeLines.svelte';
+  import { zip } from '$lib/utils';
+  import { SvelteSet } from 'svelte/reactivity';
 
   const {
     tree,
@@ -44,6 +46,36 @@
 
   let height = $state(0);
   let width = $state(0);
+  let selectedID = $state('');
+  const highlightSet = new SvelteSet<string>();
+
+  function handleClick(id: string, name: string) {
+    selectedID = id; // Update selected person ID
+    getPersonInfo(id, name); // Fetch person info
+
+    highlightSet.clear();
+    highlightSet.add(id);
+
+    if (!tree) return;
+
+    tree.marriages.forEach((marriage) => {
+      if (marriage.children.includes(id)) {
+        highlightSet.add(marriage.parents[0]);
+        highlightSet.add(marriage.parents[1]);
+      }
+
+      if (marriage.parents.includes(id)) {
+        marriage.children.forEach((child) => highlightSet.add(child));
+      }
+    });
+  }
+
+  function closeSidePanel() {
+    highlightSet.clear();
+    selectedID = '';
+  }
+
+  export { closeSidePanel };
 
   const zoomFactor = $derived(Math.min(1, treeWidth ? width / treeWidth : 1));
 
@@ -65,9 +97,11 @@
             height={marriageHeights[i] ?? 0}
             distance={marriageDistances[i] ?? 1}
             offset={marriageOffsets[i] ?? 0}
+            {highlightSet}
+            {selectedID}
           />
         {/each}
-        {#each tree.people as [id, person]}
+        {#each tree.people as [id, person, gender]}
           {@const position = positions[id]}
           {#if position}
             <g transform="translate({position.x},{position.y})">
@@ -77,7 +111,15 @@
                 width={RECT_WIDTH}
                 height={RECT_HEIGHT}
                 rx={RECT_RADIUS}
-                class="fill-node"
+                class="{tree.people[0][0] === id
+                  ? 'fill-highlight'
+                  : gender === 'male'
+                    ? 'fill-blue'
+                    : gender === 'female'
+                      ? 'fill-red'
+                      : 'fill-node'} {highlightSet.has(id)
+                  ? 'stroke-highlight_border stroke-line'
+                  : ''}"
               ></rect>
               <foreignObject
                 x={-RECT_WIDTH / 2}
@@ -86,8 +128,11 @@
                 height={RECT_HEIGHT}
               >
                 <button
-                  onclick={() => getPersonInfo(id, person.name)}
-                  class="flex h-full w-full cursor-pointer items-center justify-center text-center text-sm"
+                  onclick={() => handleClick(id, person.name)}
+                  class="flex h-full w-full cursor-pointer items-center justify-center text-center text-sm {tree
+                    .people[0][0] === id
+                    ? 'text-white'
+                    : ''}"
                 >
                   {person.name}
                 </button>
