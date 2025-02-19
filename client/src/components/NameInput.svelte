@@ -8,10 +8,10 @@
   import { fetchNames } from '$lib';
 
   interface Props {
-    nameInput?: string;
     status: LoadingStatus;
+    onSubmit: (_: string) => void;
   }
-  let { nameInput = $bindable(), status }: Props = $props();
+  const { status, onSubmit }: Props = $props();
 
   let name = $state('');
 
@@ -21,6 +21,12 @@
    */
   let searching = $state(false);
   /**
+   * The query the user uses to search a person.
+   * This is a duplicate of the name state, but helps
+   * in preventing a re-trigger.
+   */
+  let searchQuery = $state('');
+  /**
    * A list of search results to show as autocomplete suggestions
    */
   let searchResults = $state<string[]>([]);
@@ -29,13 +35,10 @@
    * Debouncing is done to prevent making too many requests.
    * The search request is made only after the user has stopped typing for 500ms.
    */
-  // eslint-disable-next-line no-undef
-  let timer: Timer | null = null;
   $effect(() => {
-    if (name) {
+    if (searchQuery) {
       searching = true;
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(searchByName, 500);
+      const timer = setTimeout(searchForNames, 500);
 
       // On cleanup, clear the timer and set searching to false
       return () => {
@@ -47,8 +50,8 @@
       searchResults = [];
     }
   });
-  async function searchByName() {
-    const result = await fetchNames(name);
+  async function searchForNames() {
+    const result = await fetchNames(searchQuery);
     try {
       searchResults = result.getOrThrow();
     } catch (_e) {
@@ -64,17 +67,14 @@
   function selectName(selectedName: string) {
     searchResults = [];
     name = selectedName; // Replaces the typed name with the selected name
-    submitAction();
+    searchQuery = '';
+    onSubmit(name);
   }
 
-  function submitIfEnter(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-      submitAction();
-    }
-  }
-
-  function submitAction() {
-    nameInput = name;
+  function onChange(event: Event) {
+    const { value } = event.target as HTMLInputElement;
+    name = value;
+    searchQuery = value;
   }
 
   // common tailwind classes for status icons
@@ -84,12 +84,14 @@
 
 <div class="relative flex w-80 items-center gap-3 rounded-full bg-input pl-4">
   <IconSearch class="text-black opacity-50" />
-  <input
-    class="flex-1 bg-transparent py-2 outline-none"
-    bind:value={name}
-    placeholder="Enter a name..."
-    onkeydown={submitIfEnter}
-  />
+  <form onsubmit={() => selectName(name)}>
+    <input
+      class="flex-1 bg-transparent py-2 outline-none"
+      value={name}
+      oninput={onChange}
+      placeholder="Enter a name..."
+    />
+  </form>
   {#if status.state === 'loading' || searching}
     <div class={`${ICON_CLASS}`} transition:scale={{ duration: 150 }}>
       <div class="loader h-5 w-5 bg-black p-1 opacity-50"></div>
