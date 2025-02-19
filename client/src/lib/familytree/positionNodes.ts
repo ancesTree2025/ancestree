@@ -226,6 +226,7 @@ function sortDepths(
           for (const marriage of personMarriages[person]) {
             for (const child of marriage.children) {
               const position = lastAssignment.indexOf(child);
+              if (position === -1) continue;
               positionTotal.set(groupId, (positionTotal.get(groupId) ?? 0) + position);
               positionCount.set(groupId, (positionCount.get(groupId) ?? 0) + 1);
               peoplePositionTotal.set(person, (peoplePositionTotal.get(person) ?? 0) + position);
