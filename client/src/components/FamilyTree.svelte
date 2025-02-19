@@ -46,19 +46,29 @@
         tree?.people.find((tup) => tup[1].name === searchName)![0]!,
         true
       ).then((result) => {
+        // if parents includes person filter children to qid
+        // if children include person keep both parents if one matches qid, else remove marriage
         const newRelationship = result.getOrNull();
         if (newRelationship != null) {
           relationship = newRelationship;
           tree = {
             ...tree!,
-            marriages: tree!.marriages.filter((marriage) =>
-            newRelationship.chain.some(
-              (person) => marriage.parents.includes(person) || marriage.children.includes(person)
-            )
-          ).map(marriage => ({
-            parents: marriage.parents,
-            children: marriage.children.filter(p => newRelationship.chain.includes(p))
-          })),
+            marriages: tree!.marriages.flatMap(marriage => {
+            if (newRelationship.chain.some((person) => marriage.parents.includes(person))) {
+              const filteredChildren = marriage.children.filter(p => newRelationship.chain.includes(p))
+              return filteredChildren.length === 0 ? [] : [{
+                parents: marriage.parents,
+                children: marriage.children.filter(p => newRelationship.chain.includes(p))
+              }]
+            } else if (newRelationship.chain.some((person) => marriage.children.includes(person))) {
+              const filteredParents = marriage.parents.filter(p => newRelationship.chain.includes(p))
+              return filteredParents.length === 0 ? [] : [{
+                children: marriage.parents.filter(p => newRelationship.chain.includes(p)),
+                parents: filteredParents
+              }]
+            }
+            return [];
+          }),
         };
         console.log(tree)
         }

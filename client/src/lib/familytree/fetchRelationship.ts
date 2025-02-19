@@ -18,14 +18,12 @@ export async function fetchRelationship(
 ): Promise<Result<Relationship, string>> {
   console.log(from, to)
   if (useFakeData) {
-    if (from === "F" && to === "C3") {
-      console.log('ok')
+    if (from === "F" && to === "GC") {
       return Result.ok({
         ...exampleRelationship,
         chain: [from].concat(exampleRelationship.chain).concat([to])
       });
     }
-    console.log('err')
     return Result.error("Only have sample data for qid1=D&qid2=C3");
   }
   const response = await Result.fromAsyncCatching(
