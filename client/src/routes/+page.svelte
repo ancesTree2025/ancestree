@@ -73,7 +73,7 @@
       name={sidePanelName}
       show={showSidePanel}
       data={sidePanelData}
-      close={closeSidePanel}
+      onclose={closeSidePanel}
     />
   </div>
 </div>
