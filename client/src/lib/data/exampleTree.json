@@ -24,7 +24,8 @@
     ["U", { "name": "U" }],
     ["V", { "name": "V" }],
     ["W", { "name": "W" }],
-    ["X", { "name": "X" }]
+    ["X", { "name": "X" }],
+    ["Y", { "name": "Y" }]
   ],
   "marriages": [
     {
@@ -62,6 +63,10 @@
     {
       "parents": ["E", "F"],
       "children": ["W", "X"]
+    },
+    {
+      "parents": ["Q", "W"],
+      "children": ["Y"]
     }
   ]
 }
