@@ -24,6 +24,10 @@
         if (fetched) {
           tree = fetched;
           status = { state: 'idle' };
+
+          // Opening the side panel with the focus on search complete
+          const [qid, personName] = fetched.people.find((p) => p[0] === fetched.focus)!;
+          if (qid && personName) getPersonInfo(qid, personName.name);
         } else if (error) {
           status = { state: 'error', error };
         }
