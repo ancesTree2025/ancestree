@@ -1,7 +1,6 @@
 package org.domain.models
 
 import kotlinx.serialization.Serializable
-import org.data.models.Person
 
 @Serializable
 data class Graph<T>(
@@ -15,8 +14,4 @@ data class Graph<T>(
   fun isEmpty(): Boolean {
     return root == null
   }
-}
-
-fun emptyGraph(): Graph<Person> {
-  return Graph(null, emptySet(), emptySet())
 }
