@@ -40,7 +40,6 @@
   function submitIfEnter(event: KeyboardEvent) {
     console.log(tree?.people);
     if (event.key === 'Enter') {
-      console.log('Ente');
       fetchRelationship(
         tree?.focus!,
         tree?.people.find((tup) => tup[1].name === searchName)![0]!,
@@ -121,16 +120,6 @@
 
   const yOffset = $derived(height / 2);
 </script>
-
-<div class="bg-input relative flex w-80 items-center gap-3 rounded-full pl-4">
-  <IconSearch class="text-black opacity-50" />
-  <input
-    bind:value={searchName}
-    class="flex-1 bg-transparent py-2 outline-none"
-    placeholder="Enter a name..."
-    onkeydown={submitIfEnter}
-  />
-</div>
 
 <svg id="svg-root" class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
   <g id="zoom-group">
