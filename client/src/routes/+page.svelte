@@ -134,7 +134,7 @@
   }
 </script>
 
-<div class="flex h-full flex-[4] basis-0 basis-4 flex-col overflow-x-hidden">
+<div class="flex h-full flex-col overflow-x-hidden">
   <nav class="flex items-center gap-12 px-8 py-4 shadow-lg">
     <h1 class="w-48 text-lg">Ancestree</h1>
     <div class="flex flex-1 justify-center">
