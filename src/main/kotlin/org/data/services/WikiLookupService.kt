@@ -26,6 +26,8 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
 
     val graphs = WikiCacheManager.getGraphs(origin)
 
+    println("All related graphs: $graphs")
+
     if (graphs.isNullOrEmpty()) {
       return RelationLinks("Unrelated", listOf())
     } else {
@@ -34,42 +36,51 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
         val relNode = (graph.nodes.find { it.data.id == dest })
 
         if (relNode != null) {
-          val visited = mutableSetOf<QID>()
+
+          println("Relevant graph: $graph")
+
+          val visited = mutableSetOf(origin)
           val candidates = mutableListOf(listOf(origin))
 
           while (true) {
+
+            println("Candidates: $candidates")
+
             val links = candidates.removeFirst()
             val c = links.last()
 
+            println("Extracted head of first element: $c")
+
+            println("Graph edges: ${graph.edges}")
+
             for (edge in graph.edges) {
+              println("Edge: $edge")
               val a = edge.node1
               val b = edge.node2
 
               val to =
-                if (c == a) {
-                  b
-                } else if (c == b) {
-                  a
-                } else {
-                  continue
+                when (c) {
+                  a -> b
+                  b -> a
+                  else -> origin
                 }
 
-              if (to in visited) {
-                continue
+              if (to !in visited) {
+                println("Unvisited connection: $to")
+
+                val newLinks = mutableListOf<QID>()
+                newLinks.addAll(links)
+                newLinks.add(to)
+
+                if (to == dest) {
+                  val nameRepresentation = constructLinks(newLinks, graph)
+                  newLinks.removeFirst()
+                  return RelationLinks(nameRepresentation, newLinks)
+                }
+
+                candidates.add(newLinks)
+                visited.add(to)
               }
-
-              val newLinks = mutableListOf<QID>()
-              newLinks.addAll(links)
-              newLinks.add(to)
-
-              if (to == dest) {
-                val nameRepresentation = constructLinks(newLinks, graph)
-                newLinks.removeFirst()
-                return RelationLinks(nameRepresentation, newLinks)
-              }
-
-              candidates.add(newLinks)
-              visited.add(to)
             }
           }
         }
@@ -89,28 +100,28 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
       val next = g.nodes.find { it.id == qids[i] }!!
 
       if (prev.depth == next.depth) {
-        if (next.data.gender == "Female") {
-          sb.append("wife's ")
+        if (next.data.gender == "female") {
+          sb.append("Wife's ")
         } else {
-          sb.append("husband's ")
+          sb.append("Husband's ")
         }
       } else if (prev.depth > next.depth) {
-        if (next.data.gender == "Female") {
-          sb.append("mother's ")
+        if (next.data.gender == "female") {
+          sb.append("Mother's ")
         } else {
-          sb.append("father's ")
+          sb.append("Father's ")
         }
       } else {
-        if (next.data.gender == "Female") {
-          sb.append("daughter's ")
+        if (next.data.gender == "female") {
+          sb.append("Daughter's ")
         } else {
-          sb.append("son's ")
+          sb.append("Son's ")
         }
       }
       i++
     }
 
-    return sb.toString().dropLast(2)
+    return sb.toString().dropLast(3)
   }
 
   /**

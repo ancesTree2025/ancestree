@@ -1,3 +1,5 @@
 package org.data.models
 
-data class RelationLinks(val relation: String, val links: List<String>)
+import kotlinx.serialization.Serializable
+
+@Serializable data class RelationLinks(val relation: String, val links: List<String>)
