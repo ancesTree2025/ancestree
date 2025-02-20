@@ -77,5 +77,4 @@ fun Application.configureRouting() {
       call.respond(linkInfo)
     }
   }
-
 }

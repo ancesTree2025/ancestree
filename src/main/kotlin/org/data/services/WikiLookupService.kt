@@ -30,9 +30,7 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
       return RelationLinks("Unrelated", listOf())
     } else {
 
-
       graphs.forEach { graph ->
-
         val relNode = (graph.nodes.find { it.data.id == dest })
 
         if (relNode != null) {
@@ -47,13 +45,14 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
               val a = edge.node1
               val b = edge.node2
 
-              val to = if (c == a) {
-                b
-              } else if (c == b) {
-                a
-              } else {
-                continue
-              }
+              val to =
+                if (c == a) {
+                  b
+                } else if (c == b) {
+                  a
+                } else {
+                  continue
+                }
 
               if (to in visited) {
                 continue
@@ -71,29 +70,48 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
 
               candidates.add(newLinks)
               visited.add(to)
-
             }
           }
-
-
         }
-
       }
-
     }
 
     return RelationLinks("Unrelated", listOf())
-
   }
 
-  fun constructLinks(qids: List<QID>, g: Graph<Person>): String {
+  private fun constructLinks(qids: List<QID>, g: Graph<Person>): String {
 
+    val sb = StringBuilder()
 
+    var i = 1
+    while (i < qids.size) {
+      val prev = g.nodes.find { it.id == qids[i - 1] }!!
+      val next = g.nodes.find { it.id == qids[i] }!!
 
+      if (prev.depth == next.depth) {
+        if (next.data.gender == "Female") {
+          sb.append("wife's ")
+        } else {
+          sb.append("husband's ")
+        }
+      } else if (prev.depth > next.depth) {
+        if (next.data.gender == "Female") {
+          sb.append("mother's ")
+        } else {
+          sb.append("father's ")
+        }
+      } else {
+        if (next.data.gender == "Female") {
+          sb.append("daughter's ")
+        } else {
+          sb.append("son's ")
+        }
+      }
+      i++
+    }
 
-
+    return sb.toString().dropLast(2)
   }
-
 
   /**
    * Query function that takes in a number of names and returns pairs of their person objects and

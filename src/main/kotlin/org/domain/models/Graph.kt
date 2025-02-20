@@ -1,7 +1,6 @@
 package org.domain.models
 
 import kotlinx.serialization.Serializable
-import org.data.models.Person
 
 @Serializable
 data class Graph<T>(

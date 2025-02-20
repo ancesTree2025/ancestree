@@ -1,6 +1,7 @@
 package org.data.producers
 
 import kotlin.math.abs
+import org.data.caches.WikiCacheManager.putGraphs
 import org.data.models.Label
 import org.data.models.Person
 import org.data.models.QID
@@ -10,7 +11,6 @@ import org.domain.models.Edge
 import org.domain.models.Graph
 import org.domain.models.Node
 import org.domain.producers.GraphProducer
-import org.data.caches.WikiCacheManager.putGraphs
 
 class FamilyGraphProducer : GraphProducer<Label, Person> {
 
@@ -211,7 +211,6 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     labels["Unknown"] = "Unknown"
 
     nodes.map {
-
       it.value.data.name = labels[it.key]!!
       it.value.data.gender = labels[it.value.data.gender]!!
     }
@@ -220,9 +219,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
 
     val final = Graph(rootNode, nodes.values.toSet(), edges)
 
-    nodes.map {
-      putGraphs(it.key, final)
-    }
+    nodes.map { putGraphs(it.key, final) }
 
     return final
   }
