@@ -3,6 +3,8 @@
   import NameInput from '../components/NameInput.svelte';
   import SidePanel from '../components/SidePanel.svelte';
 
+  import IconUserSearch from '~icons/tabler/user-search';
+
   import { fetchTree, fetchInfo } from '$lib';
   import type { Tree, LoadingStatus, PersonInfo } from '$lib/types';
 
@@ -128,7 +130,8 @@
     />
   </div>
   <div class="pb-60 flex justify-center">
-    <div class="bg-input relative flex w-60 items-center self-start gap-3 pl-4 rounded-xl ">
+    <div class="bg-input relative flex w-60 items-center self-start gap-3 pl-4 rounded-full">
+      <IconUserSearch class="flex-none text-black opacity-50" />
       <input
         bind:value={treeSearchName}
         class="flex-1 bg-transparent py-2 outline-none"

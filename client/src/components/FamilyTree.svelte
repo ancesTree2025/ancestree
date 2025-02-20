@@ -3,18 +3,14 @@
   import { balanceTree } from '$lib';
   import { zip } from '$lib/utils';
   import type { Marriage, Positions, Tree } from '$lib/types';
-  import IconSearch from '~icons/tabler/search';
   import { onMount } from 'svelte';
   import { SvelteSet } from 'svelte/reactivity';
-  import { fetchRelationship, type Relationship } from '$lib/familytree/fetchRelationship';
 
   let { tree, getPersonInfo }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } =
     $props();
   let positions = $state<Positions>({});
   let visMarriages = $state<[Marriage, number][] | undefined>(tree?.marriages.map((m) => [m, 0]));
   let treeWidth = $state<number>();
-  let searchName = $state<string>();
-  let relationship = $state<Relationship>();
 
   $effect(() => {
     if (tree) {
