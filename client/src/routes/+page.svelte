@@ -7,9 +7,11 @@
   import type { Tree, LoadingStatus, PersonInfo } from '$lib/types';
 
   import { page } from '$app/state';
+  import { fetchRelationship } from '$lib/familytree/fetchRelationship';
 
   const name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
+  let treeSearchName = $state<string>('');
 
   let tree = $state<Tree | undefined>();
   const useFakeData = page.url.searchParams.get('useFakeData') === 'true';
@@ -46,6 +48,41 @@
       status = { state: 'idle' };
     } else if (error) {
       status = { state: 'error', error };
+    }
+  }
+
+  function searchWithinTree(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      fetchRelationship(
+        tree?.focus!,
+        tree?.people.find((tup) => tup[1].name === treeSearchName)![0]!,
+        true
+      ).then((result) => {
+        // if parents includes person filter children to qid
+        // if children include person keep both parents if one matches qid, else remove marriage
+        const newRelationship = result.getOrNull();
+        if (newRelationship != null) {
+          tree = {
+            ...tree!,
+            marriages: tree!.marriages.flatMap(marriage => {
+            if (newRelationship.chain.some((person) => marriage.parents.includes(person))) {
+              const filteredChildren = marriage.children.filter(p => newRelationship.chain.includes(p))
+              return filteredChildren.length === 0 ? [] : [{
+                parents: marriage.parents,
+                children: marriage.children.filter(p => newRelationship.chain.includes(p))
+              }]
+            } else if (newRelationship.chain.some((person) => marriage.children.includes(person))) {
+              const filteredParents = marriage.parents.filter(p => newRelationship.chain.includes(p))
+              return filteredParents.length === 0 ? [] : [{
+                children: marriage.parents.filter(p => newRelationship.chain.includes(p)),
+                parents: filteredParents
+              }]
+            }
+            return [];
+          }),
+        };
+        }
+      });
     }
   }
 
@@ -93,8 +130,10 @@
   <div class="pb-60 flex justify-center">
     <div class="bg-input relative flex w-60 items-center self-start gap-3 pl-4 rounded-xl ">
       <input
+        bind:value={treeSearchName}
         class="flex-1 bg-transparent py-2 outline-none"
         placeholder="Search in tree..."
+        onkeydown={searchWithinTree}
       />
     </div>
   </div>
