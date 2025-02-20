@@ -54,12 +54,18 @@
     }
   }
 
+  let searchValue = $state<string>();
+  let hideCompletion = $state(false);
+
   function onChange(e: Event) {
+    hideCompletion = false;
     const value = (e.target as HTMLInputElement).value;
     searchCompletion = tree?.people.map((p) => p[1].name).filter((name) => name.includes(value)) ?? [];
   }
 
-  function searchWithinTree(result: String) {
+  function searchWithinTree(result: string) {
+    searchValue = result;
+    hideCompletion = true;
     fetchRelationship(
       tree?.focus!,
       tree?.people.find((tup) => tup[1].name === result)![0]!,
@@ -151,11 +157,12 @@
     <div class="bg-input relative flex w-60 items-center gap-3 self-start rounded-full pl-4">
       <IconUserSearch class="flex-none text-black opacity-50" />
       <input
+        bind:value={searchValue}
         class="flex-1 bg-transparent py-2 outline-none"
         placeholder="Search in tree..."
-        onchange={onChange}
+        oninput={onChange}
       />
-      {#if searchCompletion.length}
+      {#if searchCompletion.length && !hideCompletion}
         <div class="absolute left-0 right-0 top-full mx-5">
           <div class="rounded-lg bg-white shadow-lg">
             {#each searchCompletion as result}
