@@ -16,7 +16,3 @@ data class Graph<T>(
     return root == null
   }
 }
-
-fun emptyGraph(): Graph<Person> {
-  return Graph(null, emptySet(), emptySet())
-}

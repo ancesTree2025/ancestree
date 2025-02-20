@@ -10,6 +10,7 @@ import org.domain.models.Edge
 import org.domain.models.Graph
 import org.domain.models.Node
 import org.domain.producers.GraphProducer
+import org.data.caches.WikiCacheManager.putGraphs
 
 class FamilyGraphProducer : GraphProducer<Label, Person> {
 
@@ -210,12 +211,19 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     labels["Unknown"] = "Unknown"
 
     nodes.map {
+
       it.value.data.name = labels[it.key]!!
       it.value.data.gender = labels[it.value.data.gender]!!
     }
 
     val rootNode = nodes.values.find { it.data.id == rootQid } ?: error("Root not found...")
 
-    return Graph(rootNode, nodes.values.toSet(), edges)
+    val final = Graph(rootNode, nodes.values.toSet(), edges)
+
+    nodes.map {
+      putGraphs(it.key, final)
+    }
+
+    return final
   }
 }

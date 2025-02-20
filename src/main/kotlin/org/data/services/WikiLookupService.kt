@@ -21,6 +21,34 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     const val CHUNK_SIZE = 45
   }
 
+  suspend fun getRelation(orig: QID, dest: QID): RelationLinks {
+
+    val graphs = WikiCacheManager.getGraphs(orig)
+
+    if (graphs.isNullOrEmpty()) {
+      return RelationLinks("Unrelated", listOf())
+    } else {
+
+
+      graphs.forEach { graph ->
+
+        val relNode = (graph.nodes.find { it.data.id == dest })
+
+        if (relNode != null) {
+
+
+
+
+
+        }
+
+      }
+
+    }
+
+  }
+
+
   /**
    * Query function that takes in a number of names and returns pairs of their person objects and
    * relations for family members.
