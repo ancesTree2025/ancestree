@@ -12,6 +12,7 @@ import org.data.models.WikidataProperties.propertyQIDMapPersonal
 import org.data.parsers.GoogleKnowledgeRequestParser
 import org.data.parsers.WikiRequestParser
 import org.data.requests.ComplexRequester
+import org.domain.models.Graph
 
 /** Service class for performing Wikipedia/Wikidata lookups. */
 class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
@@ -63,8 +64,9 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
               newLinks.add(to)
 
               if (to == dest) {
+                val nameRepresentation = constructLinks(newLinks, graph)
                 newLinks.removeFirst()
-                return RelationLinks("", newLinks)
+                return RelationLinks(nameRepresentation, newLinks)
               }
 
               candidates.add(newLinks)
@@ -81,6 +83,14 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     }
 
     return RelationLinks("Unrelated", listOf())
+
+  }
+
+  fun constructLinks(qids: List<QID>, g: Graph<Person>): String {
+
+
+
+
 
   }
 
