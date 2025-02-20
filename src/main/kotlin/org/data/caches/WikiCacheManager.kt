@@ -1,8 +1,10 @@
 package org.data.caches
 
 import org.data.models.Label
+import org.data.models.Person
 import org.data.models.PropertyMapping
 import org.data.models.QID
+import org.domain.models.Graph
 
 /** Simple cache manager for storing Wikidata claims and QIDs. */
 object WikiCacheManager {
@@ -14,6 +16,9 @@ object WikiCacheManager {
 
   /** QID to Claim. Used to avoid querying Wikidata unnecessarily. */
   private val qidToPropsCache = mutableMapOf<QID, PropertyMapping>()
+
+  /** QID to a list of graphs. Used to determine relation links. */
+  private val qidToGraphsCache = mutableMapOf<QID, MutableList<Graph<Person>>>()
 
   fun getQID(id: Label): QID? = labelToQIDCache[id]
 
@@ -31,5 +36,15 @@ object WikiCacheManager {
 
   fun putProps(id: QID, entity: PropertyMapping) {
     qidToPropsCache[id] = entity
+  }
+
+  fun getGraphs(id: QID): List<Graph<Person>>? = qidToGraphsCache[id]
+
+  fun putGraphs(id: QID, entity: Graph<Person>) {
+    if (qidToGraphsCache[id].isNullOrEmpty()) {
+      qidToGraphsCache[id] = mutableListOf(entity)
+    } else {
+      qidToGraphsCache[id]!!.add(entity)
+    }
   }
 }

@@ -57,17 +57,24 @@ fun Application.configureRouting() {
   }
 
   routing {
-    get("/info") {
-      val qid =
-        call.request.queryParameters["qid"]
+    get("/relation") {
+      val orig =
+        call.request.queryParameters["orig"]
           ?: return@get call.respond(
             HttpStatusCode.BadRequest,
-            "qid is required. Nothing was passed",
+            "Origin node is required. Nothing was passed",
+          )
+
+      val dest =
+        call.request.queryParameters["dest"]
+          ?: return@get call.respond(
+            HttpStatusCode.BadRequest,
+            "Dest is required. Nothing was passed",
           )
 
       val wikiLookupService = WikiLookupService()
-      val personInfo = wikiLookupService.getDetailedInfo(qid)
-      call.respond(personInfo!!)
+      val linkInfo = wikiLookupService.getRelation(orig, dest)
+      call.respond(linkInfo)
     }
   }
 }
