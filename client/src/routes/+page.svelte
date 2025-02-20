@@ -60,7 +60,8 @@
   function onChange(e: Event) {
     hideCompletion = false;
     const value = (e.target as HTMLInputElement).value;
-    searchCompletion = tree?.people.map((p) => p[1].name).filter((name) => name.includes(value)) ?? [];
+    searchCompletion =
+      tree?.people.map((p) => p[1].name).filter((name) => name.includes(value)) ?? [];
   }
 
   function searchWithinTree(result: string) {
@@ -90,9 +91,7 @@
                       children: marriage.children.filter((p) => newRelationship.chain.includes(p))
                     }
                   ];
-            } else if (
-              newRelationship.chain.some((person) => marriage.children.includes(person))
-            ) {
+            } else if (newRelationship.chain.some((person) => marriage.children.includes(person))) {
               const filteredParents = marriage.parents.filter((p) =>
                 newRelationship.chain.includes(p)
               );
@@ -155,7 +154,7 @@
   </div>
   {#if tree}
     <div class="flex justify-center pb-60">
-      <div class="bg-input relative flex w-60 items-center gap-3 self-start rounded-full pl-4">
+      <div class="relative flex w-60 items-center gap-3 self-start rounded-full bg-input pl-4">
         <IconUserSearch class="flex-none text-black opacity-50" />
         <input
           bind:value={searchValue}
@@ -168,7 +167,7 @@
             <div class="rounded-lg bg-white shadow-lg">
               {#each searchCompletion as result}
                 <button
-                  class="hover:bg-gray block w-full cursor-pointer p-2 text-left"
+                  class="block w-full cursor-pointer p-2 text-left hover:bg-gray"
                   onclick={() => searchWithinTree(result)}
                 >
                   {result}

@@ -16,15 +16,15 @@ export async function fetchRelationship(
   to: PersonID,
   useFakeData: boolean
 ): Promise<Result<Relationship, string>> {
-  console.log(from, to)
+  console.log(from, to);
   if (useFakeData) {
-    if (from === "F" && to === "GC") {
+    if (from === 'F' && to === 'GC') {
       return Result.ok({
         ...exampleRelationship,
         chain: [from].concat(exampleRelationship.chain).concat([to])
       });
     }
-    return Result.error("Only have sample data for qid1=D&qid2=C3");
+    return Result.error('Only have sample data for qid1=D&qid2=C3');
   }
   const response = await Result.fromAsyncCatching(
     fetch(`http://localhost:8080/relationship?qid1=${from}&qid2=${to}`)
