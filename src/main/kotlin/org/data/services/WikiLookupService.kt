@@ -21,9 +21,9 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     const val CHUNK_SIZE = 45
   }
 
-  suspend fun getRelation(orig: QID, dest: QID): RelationLinks {
+  suspend fun getRelation(origin: QID, dest: QID): RelationLinks {
 
-    val graphs = WikiCacheManager.getGraphs(orig)
+    val graphs = WikiCacheManager.getGraphs(origin)
 
     if (graphs.isNullOrEmpty()) {
       return RelationLinks("Unrelated", listOf())
@@ -35,9 +35,43 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
         val relNode = (graph.nodes.find { it.data.id == dest })
 
         if (relNode != null) {
+          val visited = mutableSetOf<QID>()
+          val candidates = mutableListOf(listOf(origin))
 
+          while (true) {
+            val links = candidates.removeFirst()
+            val c = links.last()
 
+            for (edge in graph.edges) {
+              val a = edge.node1
+              val b = edge.node2
 
+              val to = if (c == a) {
+                b
+              } else if (c == b) {
+                a
+              } else {
+                continue
+              }
+
+              if (to in visited) {
+                continue
+              }
+
+              val newLinks = mutableListOf<QID>()
+              newLinks.addAll(links)
+              newLinks.add(to)
+
+              if (to == dest) {
+                newLinks.removeFirst()
+                return RelationLinks("", newLinks)
+              }
+
+              candidates.add(newLinks)
+              visited.add(to)
+
+            }
+          }
 
 
         }
@@ -45,6 +79,8 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
       }
 
     }
+
+    return RelationLinks("Unrelated", listOf())
 
   }
 
