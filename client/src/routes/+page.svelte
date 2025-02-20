@@ -68,8 +68,8 @@
     searchValue = result;
     hideCompletion = true;
     fetchRelationship(
-      tree?.focus!,
-      tree?.people.find((tup) => tup[1].name === result)![0]!,
+      tree!.focus,
+      tree!.people.find((tup) => tup[1].name === result)![0]!,
       true
     ).then((result) => {
       // if parents includes person filter children to qid
