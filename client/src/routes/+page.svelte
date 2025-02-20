@@ -13,7 +13,6 @@
 
   const name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
-  let treeSearchName = $state<string>('');
 
   let tree = $state<Tree | undefined>();
   const useFakeData = page.url.searchParams.get('useFakeData') === 'true';
@@ -39,6 +38,8 @@
     }
   });
 
+  let searchCompletion = $state<string[]>([]);
+
   async function onSubmit(name: string) {
     if (!name.length) return;
 
@@ -53,39 +54,56 @@
     }
   }
 
-  function searchWithinTree(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-      fetchRelationship(
-        tree?.focus!,
-        tree?.people.find((tup) => tup[1].name === treeSearchName)![0]!,
-        true
-      ).then((result) => {
-        // if parents includes person filter children to qid
-        // if children include person keep both parents if one matches qid, else remove marriage
-        const newRelationship = result.getOrNull();
-        if (newRelationship != null) {
-          tree = {
-            ...tree!,
-            marriages: tree!.marriages.flatMap(marriage => {
+  function onChange(e: Event) {
+    const value = (e.target as HTMLInputElement).value;
+    searchCompletion = tree?.people.map((p) => p[1].name).filter((name) => name.includes(value)) ?? [];
+  }
+
+  function searchWithinTree(result: String) {
+    fetchRelationship(
+      tree?.focus!,
+      tree?.people.find((tup) => tup[1].name === result)![0]!,
+      true
+    ).then((result) => {
+      // if parents includes person filter children to qid
+      // if children include person keep both parents if one matches qid, else remove marriage
+      const newRelationship = result.getOrNull();
+      if (newRelationship != null) {
+        tree = {
+          ...tree!,
+          marriages: tree!.marriages.flatMap((marriage) => {
             if (newRelationship.chain.some((person) => marriage.parents.includes(person))) {
-              const filteredChildren = marriage.children.filter(p => newRelationship.chain.includes(p))
-              return filteredChildren.length === 0 ? [] : [{
-                parents: marriage.parents,
-                children: marriage.children.filter(p => newRelationship.chain.includes(p))
-              }]
-            } else if (newRelationship.chain.some((person) => marriage.children.includes(person))) {
-              const filteredParents = marriage.parents.filter(p => newRelationship.chain.includes(p))
-              return filteredParents.length === 0 ? [] : [{
-                children: marriage.parents.filter(p => newRelationship.chain.includes(p)),
-                parents: filteredParents
-              }]
+              const filteredChildren = marriage.children.filter((p) =>
+                newRelationship.chain.includes(p)
+              );
+              return filteredChildren.length === 0
+                ? []
+                : [
+                    {
+                      parents: marriage.parents,
+                      children: marriage.children.filter((p) => newRelationship.chain.includes(p))
+                    }
+                  ];
+            } else if (
+              newRelationship.chain.some((person) => marriage.children.includes(person))
+            ) {
+              const filteredParents = marriage.parents.filter((p) =>
+                newRelationship.chain.includes(p)
+              );
+              return filteredParents.length === 0
+                ? []
+                : [
+                    {
+                      children: marriage.parents.filter((p) => newRelationship.chain.includes(p)),
+                      parents: filteredParents
+                    }
+                  ];
             }
             return [];
-          }),
+          })
         };
-        }
-      });
-    }
+      }
+    });
   }
 
   let showSidePanel = $state(false);
@@ -110,7 +128,7 @@
   }
 </script>
 
-<div class="flex h-full flex-[4] basis-0 flex-col basis-4 overflow-x-hidden">
+<div class="flex h-full flex-[4] basis-0 basis-4 flex-col overflow-x-hidden">
   <nav class="flex items-center gap-12 px-8 py-4 shadow-lg">
     <h1 class="w-48 text-lg">Ancestree</h1>
     <div class="flex flex-1 justify-center">
@@ -123,21 +141,34 @@
       <FamilyTree bind:this={familyTree} {getPersonInfo} {tree} />
     </div>
     <SidePanel
-    name={sidePanelName}
-    show={showSidePanel}
-    data={sidePanelData}
-    onclose={closeSidePanel}
+      name={sidePanelName}
+      show={showSidePanel}
+      data={sidePanelData}
+      onclose={closeSidePanel}
     />
   </div>
-  <div class="pb-60 flex justify-center">
-    <div class="bg-input relative flex w-60 items-center self-start gap-3 pl-4 rounded-full">
+  <div class="flex justify-center pb-60">
+    <div class="bg-input relative flex w-60 items-center gap-3 self-start rounded-full pl-4">
       <IconUserSearch class="flex-none text-black opacity-50" />
       <input
-        bind:value={treeSearchName}
         class="flex-1 bg-transparent py-2 outline-none"
         placeholder="Search in tree..."
-        onkeydown={searchWithinTree}
+        onchange={onChange}
       />
+      {#if searchCompletion.length}
+        <div class="absolute left-0 right-0 top-full mx-5">
+          <div class="rounded-lg bg-white shadow-lg">
+            {#each searchCompletion as result}
+              <button
+                class="hover:bg-gray block w-full cursor-pointer p-2 text-left"
+                onclick={() => searchWithinTree(result)}
+              >
+                {result}
+              </button>
+            {/each}
+          </div>
+        </div>
+      {/if}
     </div>
   </div>
 </div>
