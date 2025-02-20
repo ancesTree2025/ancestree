@@ -1,6 +1,6 @@
 import { Result } from 'typescript-result';
 import type { Marriages, People, PersonID, Tree } from './types';
-import exampleTree from '../data/exampleTree.json';
+import exampleTree from '../stubs/exampleTree.json';
 import { z } from 'zod';
 
 const personIdSchema = z.string();
@@ -97,18 +97,17 @@ export function apiResponseToTree(res: ApiResponse): Tree {
   };
 }
 
-export async function fetchTree(name: string, useFakeData: boolean): Promise<Result<Tree, string>> {
-  if (useFakeData) {
-    return Result.ok(exampleTree as Tree);
-  }
-  const response = await Result.fromAsyncCatching(fetch(`http://localhost:8080/${name}`)).mapError(
+export async function transformResToTree(
+  response: Promise<Response>
+): Promise<Result<Tree, string>> {
+  const responseResult = await Result.fromAsyncCatching(response).mapError(
     () => 'Could not connect to server'
   );
-  if (response.getOrNull()?.status === 404) {
+  if (responseResult.getOrNull()?.status === 404) {
     return Result.error('Person not found');
   }
-  const parsed = response.mapCatching(
-    async (response) => (await response.json()) as ApiResponse,
+  const parsed = responseResult.mapCatching(
+    async (res) => (await res.json()) as ApiResponse,
     () => 'Could not parse server response'
   );
   return parsed.mapCatching(

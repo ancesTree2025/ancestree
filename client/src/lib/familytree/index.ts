@@ -1,2 +1,2 @@
-export { fetchTree } from './fetchTree';
+export { transformResToTree } from './fetchTree';
 export * from './balanceTree';

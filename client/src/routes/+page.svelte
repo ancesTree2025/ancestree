@@ -1,52 +1,23 @@
 <script lang="ts">
+  import type { PageData } from './$types';
+  import { goto } from '$app/navigation';
   import FamilyTree from '../components/FamilyTree.svelte';
   import NameInput from '../components/NameInput.svelte';
   import SidePanel from '../components/SidePanel.svelte';
 
-  import { fetchTree, fetchInfo } from '$lib';
-  import type { Tree, LoadingStatus, PersonInfo } from '$lib/types';
+  import { fetchInfo } from '$lib';
+  import type { LoadingStatus, PersonInfo } from '$lib/types';
 
-  import { page } from '$app/state';
-
-  const name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
-
-  let tree = $state<Tree | undefined>();
-  const useFakeData = page.url.searchParams.get('useFakeData') === 'true';
 
   let familyTree: FamilyTree | null = null;
 
-  $effect(() => {
-    if (name) {
-      status = { state: 'loading' };
-      fetchTree(name, useFakeData).then((result) => {
-        const [fetched, error] = result.toTuple();
-        if (fetched) {
-          tree = fetched;
-          status = { state: 'idle' };
-
-          // Opening the side panel with the focus on search complete
-          const [qid, personName] = fetched.people.find((p) => p[0] === fetched.focus)!;
-          if (qid && personName) getPersonInfo(qid, personName.name);
-        } else if (error) {
-          status = { state: 'error', error };
-        }
-      });
-    }
-  });
+  const { data }: { data: PageData } = $props();
 
   async function onSubmit(name: string) {
     if (!name.length) return;
 
-    status = { state: 'loading' };
-    const result = await fetchTree(name, useFakeData);
-    const [fetched, error] = result.toTuple();
-    if (fetched) {
-      tree = fetched;
-      status = { state: 'idle' };
-    } else if (error) {
-      status = { state: 'error', error };
-    }
+    goto(`/?useFakeData=${data.useFakeData}&q=${name}`);
   }
 
   let showSidePanel = $state(false);
@@ -54,7 +25,7 @@
   let sidePanelData = $state<PersonInfo | undefined>(undefined);
 
   async function getPersonInfo(qid: string, name: string) {
-    const [fetched] = (await fetchInfo(qid, useFakeData)).toTuple();
+    const [fetched] = (await fetchInfo(qid, data.useFakeData)).toTuple();
     if (fetched) {
       sidePanelData = fetched;
       sidePanelName = name;
@@ -81,7 +52,7 @@
   </nav>
   <div class="flex flex-1">
     <div class="flex-1">
-      <FamilyTree bind:this={familyTree} {getPersonInfo} {tree} />
+      <FamilyTree bind:this={familyTree} {getPersonInfo} tree={data.tree} />
     </div>
     <SidePanel
       name={sidePanelName}

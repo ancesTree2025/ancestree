@@ -6,10 +6,12 @@
   import { onMount } from 'svelte';
   import { SvelteSet } from 'svelte/reactivity';
 
-  const {
-    tree,
-    getPersonInfo
-  }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } = $props();
+  interface Props {
+    tree: Tree | null;
+    getPersonInfo: (qid: string, name: string) => void;
+  }
+
+  const { tree, getPersonInfo }: Props = $props();
   let positions = $state<Positions>({});
   let visMarriages = $state<[Marriage, number][] | undefined>(tree?.marriages.map((m) => [m, 0]));
   let treeWidth = $state<number>();
