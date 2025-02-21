@@ -25,8 +25,13 @@ export function positionNodes(tree: Tree): {
   const sortedLevels = sortDepths(marriageGroups, depths, personMarriages, personParents);
   console.log(sortedLevels);
 
+  const arrangedLevels = arrangeNodes(sortedLevels, marriageGroups, personMarriages, personParents);
+  console.log(arrangedLevels);
+
+  const positions = calculatePositions(arrangedLevels);
+
   // TODO: finish this
-  return { positions: {}, treeWidth: 0 };
+  return positions;
 }
 
 /**
@@ -37,7 +42,7 @@ export function positionNodes(tree: Tree): {
  * @property {Map<GroupID, PersonID[]>} groups - A mapping from group ID to the members of that group.
  * @property {Record<PersonID, GroupID>} members - A mapping from person ID to the group they are in.
  */
-type GroupAssigments = {
+type GroupAssignments = {
   groups: Map<GroupID, PersonID[]>;
   members: Record<PersonID, GroupID>;
 };
@@ -49,7 +54,7 @@ type GroupID = number;
  * @param tree - The family tree
  * @returns The marriage group assignments
  */
-function getMarriageGroups(tree: Tree): GroupAssigments {
+function getMarriageGroups(tree: Tree): GroupAssignments {
   const marriageGroups: Map<GroupID, PersonID[]> = new Map();
   const memberOf: Record<PersonID, GroupID> = {};
 
@@ -94,7 +99,7 @@ function getMarriageGroups(tree: Tree): GroupAssigments {
  */
 function assignDepths(
   tree: Tree,
-  groups: GroupAssigments,
+  groups: GroupAssignments,
   personMarriages: Record<PersonID, Marriages>,
   personParents: Record<PersonID, Marriages>
 ): Map<GroupID, number> {
@@ -182,7 +187,7 @@ function assignDepths(
  * @returns A map from depth to sorted list of person IDs.
  */
 function sortDepths(
-  groups: GroupAssigments,
+  groups: GroupAssignments,
   depths: Map<GroupID, number>,
   personMarriages: Record<PersonID, Marriages>,
   personParents: Record<PersonID, Marriages>
@@ -412,4 +417,86 @@ function weightBetween(
   }
 
   return 0;
+}
+
+function arrangeNodes(
+  depths: Map<number, PersonID[]>,
+  groups: GroupAssignments,
+  personMarriages: Record<PersonID, Marriages>,
+  personParents: Record<PersonID, Marriages>
+): Map<number, Map<PersonID, number>> {
+  const [baseDepth, base] = [...depths.entries()].reduce((a, b) =>
+    a[1].length > b[1].length ? a : b
+  );
+
+  const arrangements: Map<number, Map<PersonID, number>> = new Map();
+  const baseArrangement = new Map<PersonID, number>();
+  for (let i = 0; i < base.length; i++) {
+    baseArrangement.set(base[i], i * 2);
+  }
+  arrangements.set(baseDepth, baseArrangement);
+
+  let depth = baseDepth - 1;
+  for (;;) {
+    const nodes = depths.get(depth);
+    if (nodes === undefined) break;
+    const groupIds = new Set(nodes.map((id) => groups.members[id]));
+    const groupLeft: Map<GroupID, number> = new Map();
+    const groupRight: Map<GroupID, number> = new Map();
+
+    for (const groupId of groupIds) {
+      const group = groups.groups.get(groupId)!;
+      let childrenLeft = Infinity;
+      let childrenRight = -Infinity;
+      for (const node of group) {
+        const children = personMarriages[node].flatMap((m) => m.children);
+        for (const child of children) {
+          const pos = arrangements.get(depth + 1)?.get(child);
+          if (pos === undefined) continue;
+          childrenLeft = Math.min(childrenLeft, pos);
+          childrenRight = Math.max(childrenRight, pos);
+        }
+      }
+      const mid = (childrenLeft + childrenRight) / 2;
+      const left = Math.floor(mid - group.length / 2);
+      const right = Math.floor(mid + group.length / 2);
+      groupLeft.set(groupId, left);
+      groupRight.set(groupId, right);
+    }
+
+    for (const groupId of groupIds) {
+      const left = groupLeft.get(groupId)!;
+      const right = groupRight.get(groupId)!;
+      const nodes = groups.groups.get(groupId)!;
+      for (const node of nodes) {
+      }
+    }
+
+    depth--;
+  }
+
+  return arrangements;
+}
+
+const NODE_WIDTH = 80;
+const NODE_HEIGHT = 100;
+
+function calculatePositions(levels: Map<number, Map<PersonID, number>>): {
+  positions: Positions;
+  treeWidth: number;
+} {
+  let minX = Infinity;
+  let maxX = -Infinity;
+  const positions: Positions = {};
+
+  for (const [depth, arrangement] of levels) {
+    for (const [person, x] of arrangement) {
+      const actualX = x * NODE_WIDTH;
+      minX = Math.min(minX, actualX);
+      maxX = Math.max(maxX, actualX);
+      positions[person] = { x: actualX, y: depth * NODE_HEIGHT };
+    }
+  }
+
+  return { positions, treeWidth: maxX - minX };
 }
