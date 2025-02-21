@@ -1,4 +1,4 @@
 {
-  "RelationDescription": "grandfather",
-  "chain": ["C3", "GC"]
+  "relation": "grandfather",
+  "links": ["C3", "GC"]
 }
