@@ -13,9 +13,9 @@ export default {
       input: '#eee',
       gray: '#f3f4f6',
       node: '#ddd',
-      red: '#ffada9',
+      red: '#f44',
       blue: '#b5e2ff',
-      highlight: '#e8bf8b',
+      highlight: '#B08E55',
       highlight_border: '#2D2D2D',
       transparent: 'transparent'
     },
