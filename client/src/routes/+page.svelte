@@ -67,7 +67,7 @@
   function searchWithinTree(result: string) {
     searchValue = result;
     hideCompletion = true;
-    console.log('search')
+    console.log('search');
     fetchRelationship(
       tree!.focus,
       tree!.people.find((tup) => tup[1].name === result)![0]!,

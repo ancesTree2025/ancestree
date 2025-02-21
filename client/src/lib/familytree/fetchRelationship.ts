@@ -41,7 +41,7 @@ export async function fetchRelationship(
       return Result.ok({
         ...relationship,
         links: [from].concat(relationship.links)
-      })
+      });
     },
     () => 'Server data in wrong format'
   );
