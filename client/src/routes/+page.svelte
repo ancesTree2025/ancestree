@@ -14,6 +14,7 @@
   let status = $state<LoadingStatus>({ state: 'idle' });
 
   let tree = $state<Tree | undefined>();
+  let filteredTree = $state<Tree | undefined>();
   const useFakeData = page.url.searchParams.get('useFakeData') === 'true';
 
   let familyTree: FamilyTree | null = $state(null);
@@ -44,6 +45,7 @@
     const result = await fetchTree(name, useFakeData);
     const [fetched, error] = result.toTuple();
     if (fetched) {
+      filteredTree = undefined;
       tree = fetched;
       status = { state: 'idle' };
     } else if (error) {
@@ -59,7 +61,7 @@
     ).then((result) => {
       const newRelationship = result.getOrNull();
       if (newRelationship != null) {
-        tree = {
+        filteredTree = {
           ...tree!,
           marriages: tree!.marriages.flatMap((marriage) => {
             if (newRelationship.links.some((person) => marriage.parents.includes(person))) {
@@ -127,7 +129,7 @@
   </nav>
   <div class="flex flex-1">
     <div class="flex-1">
-      <FamilyTree bind:this={familyTree} {getPersonInfo} {tree} />
+      <FamilyTree bind:this={familyTree} {getPersonInfo} tree={filteredTree ?? tree} />
     </div>
     <SidePanel
       name={sidePanelName}
@@ -138,7 +140,13 @@
   </div>
   {#if tree}
     <div class="flex justify-center pb-60">
-      <TreeSearchInput names={tree.people.map((p) => p[1].name)} onSubmit={searchWithinTree} />
+      <TreeSearchInput
+        names={tree.people.map((p) => p[1].name)}
+        onSubmit={searchWithinTree}
+        clearSearch={() => {
+          filteredTree = undefined;
+        }}
+      />
     </div>
   {/if}
 </div>

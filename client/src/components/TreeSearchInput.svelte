@@ -1,15 +1,20 @@
 <script lang="ts">
   import IconUserSearch from '~icons/tabler/user-search';
 
-  const { onSubmit, names }: { onSubmit: (result: string) => void; names: string[] } = $props();
+  const {
+    onSubmit,
+    clearSearch,
+    names
+  }: { onSubmit: (result: string) => void; clearSearch: () => void; names: string[] } = $props();
 
   let searchValue = $state<string>('');
   let searchCompletion = $state<string[]>([]);
   let hideCompletion = $state(false);
 
-  function onChange(e: Event) {
+  function onChange() {
     hideCompletion = false;
-    searchCompletion = names.filter((name) => name.includes(searchValue));
+    searchCompletion = searchValue === '' ? [] : names.filter((name) => name.includes(searchValue));
+    clearSearch();
   }
 
   function onSearchSubmit(result: string) {
