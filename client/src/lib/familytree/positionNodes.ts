@@ -436,6 +436,7 @@ function arrangeNodes(
   }
   arrangements.set(baseDepth, baseArrangement);
 
+  // handle positions of parent layer
   let depth = baseDepth - 1;
   for (;;) {
     const nodes = depths.get(depth);
@@ -464,14 +465,19 @@ function arrangeNodes(
       groupRight.set(groupId, right);
     }
 
-    for (const groupId of groupIds) {
+    const groupCounts = new Map<GroupID, number>();
+    const arrangement = new Map<PersonID, number>();
+
+    for (const node of nodes) {
+      const groupId = groups.members[node];
       const left = groupLeft.get(groupId)!;
-      const right = groupRight.get(groupId)!;
-      const nodes = groups.groups.get(groupId)!;
-      for (const node of nodes) {
-      }
+      const count = groupCounts.get(groupId) ?? 0;
+      const pos = left + count * 2;
+      groupCounts.set(groupId, count + 1);
+      arrangement.set(node, pos);
     }
 
+    arrangements.set(depth, arrangement);
     depth--;
   }
 
