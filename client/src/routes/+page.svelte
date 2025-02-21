@@ -7,14 +7,17 @@
   import type { Tree, LoadingStatus, PersonInfo } from '$lib/types';
 
   import { page } from '$app/state';
+  import { fetchRelationship } from '$lib/familytree/fetchRelationship';
+  import TreeSearchInput from '../components/TreeSearchInput.svelte';
 
   const name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
 
   let tree = $state<Tree | undefined>();
+  let filteredTree = $state<Tree | undefined>();
   const useFakeData = page.url.searchParams.get('useFakeData') === 'true';
 
-  let familyTree: FamilyTree | null = null;
+  let familyTree: FamilyTree | null = $state(null);
 
   $effect(() => {
     if (name) {
@@ -43,11 +46,56 @@
     const result = await fetchTree(name, useFakeData);
     const [fetched, error] = result.toTuple();
     if (fetched) {
+      filteredTree = undefined;
       tree = fetched;
       status = { state: 'idle' };
     } else if (error) {
       status = { state: 'error', error };
     }
+  }
+
+  function searchWithinTree(result: string) {
+    fetchRelationship(
+      tree!.focus,
+      tree!.people.find((tup) => tup[1].name === result)![0]!,
+      useFakeData
+    ).then((result) => {
+      const newRelationship = result.getOrNull();
+      if (newRelationship != null) {
+        filteredTree = {
+          ...tree!,
+          marriages: tree!.marriages.flatMap((marriage) => {
+            if (newRelationship.links.some((person) => marriage.parents.includes(person))) {
+              const filteredChildren = marriage.children.filter((p) =>
+                newRelationship.links.includes(p)
+              );
+              return filteredChildren.length === 0 &&
+                marriage.parents.some((p) => !newRelationship.links.includes(p))
+                ? []
+                : [
+                    {
+                      parents: marriage.parents,
+                      children: filteredChildren
+                    }
+                  ];
+            } else if (newRelationship.links.some((person) => marriage.children.includes(person))) {
+              const filteredParents = marriage.parents.filter((p) =>
+                newRelationship.links.includes(p)
+              );
+              return filteredParents.length === 0
+                ? []
+                : [
+                    {
+                      parents: filteredParents,
+                      children: marriage.children.filter((p) => newRelationship.links.includes(p))
+                    }
+                  ];
+            }
+            return [];
+          })
+        };
+      }
+    });
   }
 
   let showSidePanel = $state(false);
@@ -82,7 +130,7 @@
   </nav>
   <div class="flex flex-1">
     <div class="flex-1">
-      <FamilyTree bind:this={familyTree} {getPersonInfo} {tree} />
+      <FamilyTree bind:this={familyTree} {getPersonInfo} tree={filteredTree ?? tree} />
     </div>
     <SidePanel
       name={sidePanelName}
@@ -91,4 +139,15 @@
       onclose={closeSidePanel}
     />
   </div>
+  {#if tree}
+    <div class="flex justify-center pb-60">
+      <TreeSearchInput
+        names={tree.people.map((p) => p[1].name)}
+        onSubmit={searchWithinTree}
+        clearSearch={() => {
+          filteredTree = undefined;
+        }}
+      />
+    </div>
+  {/if}
 </div>
