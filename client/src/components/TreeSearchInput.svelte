@@ -19,28 +19,26 @@
   }
 </script>
 
-<div class="flex justify-center pb-60">
-  <div class="bg-input relative flex w-60 items-center gap-3 self-start rounded-full pl-4">
-    <IconUserSearch class="flex-none text-black opacity-50" />
-    <input
-      bind:value={searchValue}
-      class="flex-1 bg-transparent py-2 outline-none"
-      placeholder="Search in tree..."
-      oninput={onChange}
-    />
-    {#if searchCompletion.length && !hideCompletion}
-      <div class="absolute left-0 right-0 top-full mx-5">
-        <div class="rounded-lg bg-white shadow-lg">
-          {#each searchCompletion as result}
-            <button
-              class="hover:bg-gray block w-full cursor-pointer p-2 text-left"
-              onclick={() => onSearchSubmit(result)}
-            >
-              {result}
-            </button>
-          {/each}
-        </div>
+<div class="bg-input relative flex w-60 items-center gap-3 self-start rounded-full pl-4">
+  <IconUserSearch class="flex-none text-black opacity-50" />
+  <input
+    bind:value={searchValue}
+    class="flex-1 bg-transparent py-2 outline-none"
+    placeholder="Search in tree..."
+    oninput={onChange}
+  />
+  {#if searchCompletion.length && !hideCompletion}
+    <div class="absolute left-0 right-0 top-full mx-5">
+      <div class="rounded-lg bg-white shadow-lg">
+        {#each searchCompletion as result}
+          <button
+            class="hover:bg-gray block w-full cursor-pointer p-2 text-left"
+            onclick={() => onSearchSubmit(result)}
+          >
+            {result}
+          </button>
+        {/each}
       </div>
-    {/if}
-  </div>
+    </div>
+  {/if}
 </div>

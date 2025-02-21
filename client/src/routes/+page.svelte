@@ -57,8 +57,6 @@
       tree!.people.find((tup) => tup[1].name === result)![0]!,
       useFakeData
     ).then((result) => {
-      // if parents includes person filter children to qid
-      // if children include person keep both parents if one matches qid, else remove marriage
       const newRelationship = result.getOrNull();
       if (newRelationship != null) {
         tree = {
@@ -68,12 +66,13 @@
               const filteredChildren = marriage.children.filter((p) =>
                 newRelationship.links.includes(p)
               );
-              return filteredChildren.length === 0
+              return filteredChildren.length === 0 &&
+                marriage.parents.some((p) => !newRelationship.links.includes(p))
                 ? []
                 : [
                     {
                       parents: marriage.parents,
-                      children: marriage.children.filter((p) => newRelationship.links.includes(p))
+                      children: filteredChildren
                     }
                   ];
             } else if (newRelationship.links.some((person) => marriage.children.includes(person))) {
@@ -84,8 +83,8 @@
                 ? []
                 : [
                     {
-                      children: marriage.parents.filter((p) => newRelationship.links.includes(p)),
-                      parents: filteredParents
+                      parents: filteredParents,
+                      children: marriage.children.filter((p) => newRelationship.links.includes(p))
                     }
                   ];
             }
@@ -138,9 +137,8 @@
     />
   </div>
   {#if tree}
-    <TreeSearchInput
-      names={tree.people.map(p => p[1].name)}
-      onSubmit={searchWithinTree}
-    />
+    <div class="flex justify-center pb-60">
+      <TreeSearchInput names={tree.people.map((p) => p[1].name)} onSubmit={searchWithinTree} />
+    </div>
   {/if}
 </div>
