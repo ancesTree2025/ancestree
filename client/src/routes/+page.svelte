@@ -3,13 +3,12 @@
   import NameInput from '../components/NameInput.svelte';
   import SidePanel from '../components/SidePanel.svelte';
 
-  import IconUserSearch from '~icons/tabler/user-search';
-
   import { fetchTree, fetchInfo } from '$lib';
   import type { Tree, LoadingStatus, PersonInfo } from '$lib/types';
 
   import { page } from '$app/state';
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
+  import TreeSearchInput from '../components/TreeSearchInput.svelte';
 
   const name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
@@ -38,8 +37,6 @@
     }
   });
 
-  let searchCompletion = $state<string[]>([]);
-
   async function onSubmit(name: string) {
     if (!name.length) return;
 
@@ -54,24 +51,11 @@
     }
   }
 
-  let searchValue = $state<string>();
-  let hideCompletion = $state(false);
-
-  function onChange(e: Event) {
-    hideCompletion = false;
-    const value = (e.target as HTMLInputElement).value;
-    searchCompletion =
-      tree?.people.map((p) => p[1].name).filter((name) => name.includes(value)) ?? [];
-  }
-
   function searchWithinTree(result: string) {
-    searchValue = result;
-    hideCompletion = true;
-    console.log('search');
     fetchRelationship(
       tree!.focus,
       tree!.people.find((tup) => tup[1].name === result)![0]!,
-      false
+      useFakeData
     ).then((result) => {
       // if parents includes person filter children to qid
       // if children include person keep both parents if one matches qid, else remove marriage
@@ -154,30 +138,9 @@
     />
   </div>
   {#if tree}
-    <div class="flex justify-center pb-60">
-      <div class="relative flex w-60 items-center gap-3 self-start rounded-full bg-input pl-4">
-        <IconUserSearch class="flex-none text-black opacity-50" />
-        <input
-          bind:value={searchValue}
-          class="flex-1 bg-transparent py-2 outline-none"
-          placeholder="Search in tree..."
-          oninput={onChange}
-        />
-        {#if searchCompletion.length && !hideCompletion}
-          <div class="absolute left-0 right-0 top-full mx-5">
-            <div class="rounded-lg bg-white shadow-lg">
-              {#each searchCompletion as result}
-                <button
-                  class="block w-full cursor-pointer p-2 text-left hover:bg-gray"
-                  onclick={() => searchWithinTree(result)}
-                >
-                  {result}
-                </button>
-              {/each}
-            </div>
-          </div>
-        {/if}
-      </div>
-    </div>
+    <TreeSearchInput
+      names={tree.people.map(p => p[1].name)}
+      onSubmit={searchWithinTree}
+    />
   {/if}
 </div>
