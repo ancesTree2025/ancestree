@@ -67,10 +67,11 @@
   function searchWithinTree(result: string) {
     searchValue = result;
     hideCompletion = true;
+    console.log('search')
     fetchRelationship(
       tree!.focus,
       tree!.people.find((tup) => tup[1].name === result)![0]!,
-      true
+      false
     ).then((result) => {
       // if parents includes person filter children to qid
       // if children include person keep both parents if one matches qid, else remove marriage
@@ -79,27 +80,27 @@
         tree = {
           ...tree!,
           marriages: tree!.marriages.flatMap((marriage) => {
-            if (newRelationship.chain.some((person) => marriage.parents.includes(person))) {
+            if (newRelationship.links.some((person) => marriage.parents.includes(person))) {
               const filteredChildren = marriage.children.filter((p) =>
-                newRelationship.chain.includes(p)
+                newRelationship.links.includes(p)
               );
               return filteredChildren.length === 0
                 ? []
                 : [
                     {
                       parents: marriage.parents,
-                      children: marriage.children.filter((p) => newRelationship.chain.includes(p))
+                      children: marriage.children.filter((p) => newRelationship.links.includes(p))
                     }
                   ];
-            } else if (newRelationship.chain.some((person) => marriage.children.includes(person))) {
+            } else if (newRelationship.links.some((person) => marriage.children.includes(person))) {
               const filteredParents = marriage.parents.filter((p) =>
-                newRelationship.chain.includes(p)
+                newRelationship.links.includes(p)
               );
               return filteredParents.length === 0
                 ? []
                 : [
                     {
-                      children: marriage.parents.filter((p) => newRelationship.chain.includes(p)),
+                      children: marriage.parents.filter((p) => newRelationship.links.includes(p)),
                       parents: filteredParents
                     }
                   ];

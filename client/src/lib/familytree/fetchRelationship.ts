@@ -5,8 +5,8 @@ import { Result } from 'typescript-result';
 import type { PersonID } from './types';
 
 const relationshipSchema = z.object({
-  RelationDescription: z.string(),
-  chain: z.array(personIdSchema)
+  relation: z.string(),
+  links: z.array(personIdSchema)
 });
 
 export type Relationship = z.infer<typeof relationshipSchema>;
@@ -16,18 +16,17 @@ export async function fetchRelationship(
   to: PersonID,
   useFakeData: boolean
 ): Promise<Result<Relationship, string>> {
-  console.log(from, to);
   if (useFakeData) {
     if (from === 'F' && to === 'GC') {
       return Result.ok({
         ...exampleRelationship,
-        chain: [from].concat(exampleRelationship.chain).concat([to])
+        links: [from].concat(exampleRelationship.links)
       });
     }
     return Result.error('Only have sample data for qid1=D&qid2=C3');
   }
   const response = await Result.fromAsyncCatching(
-    fetch(`http://localhost:8080/relationship?qid1=${from}&qid2=${to}`)
+    fetch(`http://localhost:8080/relation?orig=${from}&dest=${to}`)
   ).mapError(() => 'Could not connect to server');
   if (response.getOrNull()?.status === 404) {
     return Result.error('Person not found');
@@ -37,7 +36,13 @@ export async function fetchRelationship(
     () => 'Could not parse server response'
   );
   return parsed.mapCatching(
-    (json) => relationshipSchema.parse(json),
+    (json) => {
+      const relationship = relationshipSchema.parse(json);
+      return Result.ok({
+        ...relationship,
+        links: [from].concat(relationship.links)
+      })
+    },
     () => 'Server data in wrong format'
   );
 }
