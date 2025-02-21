@@ -24,7 +24,7 @@
   }
 </script>
 
-<div class="bg-input relative flex w-60 items-center gap-3 self-start rounded-full pl-4">
+<div class="relative flex w-60 items-center gap-3 self-start rounded-full bg-input pl-4">
   <IconUserSearch class="flex-none text-black opacity-50" />
   <input
     bind:value={searchValue}
@@ -37,7 +37,7 @@
       <div class="rounded-lg bg-white shadow-lg">
         {#each searchCompletion as result}
           <button
-            class="hover:bg-gray block w-full cursor-pointer p-2 text-left"
+            class="block w-full cursor-pointer p-2 text-left hover:bg-gray"
             onclick={() => onSearchSubmit(result)}
           >
             {result}
