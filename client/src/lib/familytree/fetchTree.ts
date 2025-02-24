@@ -2,6 +2,7 @@ import { Result } from 'typescript-result';
 import type { Marriages, People, PersonID, Tree } from './types';
 import exampleTree from '../data/exampleTree.json';
 import { z } from 'zod';
+import { env } from '$env/dynamic/public';
 
 const personIdSchema = z.string();
 
@@ -102,8 +103,7 @@ export async function fetchTree(name: string, useFakeData: boolean): Promise<Res
     return Result.ok(exampleTree as Tree);
   }
 
-  const baseUrl = process.env.API_BASE_URL;
-  const response = await Result.fromAsyncCatching(fetch(`${baseUrl}/${name}`)).mapError(
+  const response = await Result.fromAsyncCatching(fetch(`${env.PUBLIC_API_BASE_URL}/${name}`)).mapError(
     () => 'Could not connect to server'
   );
   if (response.getOrNull()?.status === 404) {

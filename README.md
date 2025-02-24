@@ -7,6 +7,18 @@ https://ancestree-2025.atlassian.net/wiki/spaces/SCRUM/overview?homepageId=66037
 Install [Bun](https://bun.sh) and execute `bun install` in the `client` directory to install all the frontend
 dependencies.
 
+## Environment Variables
+
+The frontend requires one main environment variable, `PUBLIC_API_BASE_URL` as documented in [.env.example](./client/.env.example).
+This normally should be set to `http://localhost:8080` when copying over to `.env.local`.
+
+The backend requires 3 main environment variables. With IntelliJ installed, edit the run configuration and add the following
+environmnet variables.
+
+| Environment Variable | Local Value                              | Reason                                    |
+|:--------------------:|:-----------------------------------------|:------------------------------------------|
+|    ALLOWED_HOSTS     | localhost:5173,127.0.0.1:5173,[::1]:5173 | Allow CORS configuration from those URLs. |
+
 ## Project management
 
 ### Commits

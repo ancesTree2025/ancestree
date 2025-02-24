@@ -1,5 +1,6 @@
 import { Result } from 'typescript-result';
 import { z } from 'zod';
+import { env } from '$env/dynamic/public';
 
 const exampleNames = ['Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank'];
 
@@ -16,8 +17,7 @@ export async function fetchNames(
     return Result.ok(exampleNames);
   }
 
-  const baseUrl = process.env.API_BASE_URL;
-  const response = Result.fromAsyncCatching(fetch(`${baseUrl}/search/${searchQuery}`)).mapError(
+  const response = Result.fromAsyncCatching(fetch(`${env.PUBLIC_API_BASE_URL}/search/${searchQuery}`)).mapError(
     () => 'Failed to fetch names'
   );
 
