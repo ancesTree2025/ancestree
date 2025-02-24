@@ -67,11 +67,14 @@ function getMarriageGroups(tree: Tree): { groups: GroupAssignments; highestGroup
   }
 
   // for each marriage, merge the groups of the parents
-  // TODO: optimise the order of merging (multiple spouses may be put on all one side)
   for (const marriage of tree.marriages) {
-    const groupId = memberOf[marriage.parents[0]];
+    const parents = marriage.parents.filter(
+      (p) => tree.people.filter(([id]) => id === p).length > 0
+    );
+    if (parents.length === 0) continue;
+    const groupId = memberOf[parents[0]];
     let newGroup: PersonID[] = [];
-    for (const person of marriage.parents) {
+    for (const person of parents) {
       const group = marriageGroups.get(memberOf[person])!;
       newGroup = newGroup.concat(group);
       marriageGroups.delete(memberOf[person]);
@@ -125,7 +128,7 @@ function assignDepths(
     // is assigned a depth of 1 before the child, meaning the child's depth would
     // be illegal
     let minimum = Infinity;
-    let groupId: GroupID;
+    let groupId: GroupID | null = null;
     for (const group of unfound) {
       const maximumDepth = maxDepths.get(group) ?? -Infinity;
       const minimumDepth = minDepths.get(group) ?? Infinity;
@@ -135,7 +138,7 @@ function assignDepths(
         groupId = group;
       }
     }
-    groupId = groupId!;
+    if (groupId == null) break;
     unfound.delete(groupId);
 
     const group = groups.groups.get(groupId)!;
