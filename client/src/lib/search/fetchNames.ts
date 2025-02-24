@@ -17,9 +17,9 @@ export async function fetchNames(
     return Result.ok(exampleNames);
   }
 
-  const response = Result.fromAsyncCatching(fetch(`${env.PUBLIC_API_BASE_URL}/search/${searchQuery}`)).mapError(
-    () => 'Failed to fetch names'
-  );
+  const response = Result.fromAsyncCatching(
+    fetch(`${env.PUBLIC_API_BASE_URL}/search/${searchQuery}`)
+  ).mapError(() => 'Failed to fetch names');
 
   return response.mapCatching(
     async (res) => {
