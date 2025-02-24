@@ -29,10 +29,8 @@ export function positionNodes(tree: Tree): {
   );
 
   const sortedLevels = sortDepths(groups, depths, personMarriages, personParents);
-  console.log(sortedLevels);
 
   const arrangedLevels = arrangeNodes(sortedLevels, groups, personMarriages, nextHighestGroup);
-  console.log(arrangedLevels);
 
   const positions = calculatePositions(arrangedLevels);
 
@@ -540,6 +538,7 @@ function arrangeNodes(
       assignment.set(node, pos);
     }
 
+    shuntOverlapping(nodes, assignment);
     assignments.set(depth, assignment);
     depth--;
   }
@@ -633,11 +632,47 @@ function arrangeNodes(
       parentGroupIds.add(groups.members[node]);
     }
 
+    shuntOverlapping(nodes, arrangement);
     assignments.set(depth, arrangement);
     depth++;
   }
 
   return assignments;
+}
+
+function shuntOverlapping(level: PersonID[], assignments: Map<PersonID, number>) {
+  let avg = 0;
+  for (const person of level) {
+    avg += assignments.get(person)!;
+  }
+  avg /= level.length;
+
+  let iters = 1000;
+  let happy = false;
+  while (!happy) {
+    iters--;
+    if (iters === 0) return;
+    console.log(Object.fromEntries([...assignments.entries()]));
+    happy = true;
+    for (let i = 0; i < level.length - 1; i++) {
+      const index = i % 2 === 0 ? i / 2 : level.length - 2 - (i - 1) / 2;
+      const person1 = level[index];
+      const pos1 = assignments.get(person1)!;
+
+      const person2 = level[index + 1];
+      const pos2 = assignments.get(person2)!;
+      if (pos2 - pos1 < 2) {
+        happy = false;
+        const us = (pos1 + pos2) / 2;
+        if (us <= avg) {
+          assignments.set(person1, pos1 - 1);
+        }
+        if (us >= avg) {
+          assignments.set(person2, pos2 + 1);
+        }
+      }
+    }
+  }
 }
 
 const NODE_WIDTH = 80;

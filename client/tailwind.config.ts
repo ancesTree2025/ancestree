@@ -18,7 +18,8 @@ export default {
     },
     extend: {
       strokeWidth: {
-        line: '3'
+        line: '4',
+        'line-border': '12'
       }
     }
   },

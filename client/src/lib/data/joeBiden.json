@@ -1,0 +1,373 @@
+{
+  "focus": "Q6279",
+  "people": [
+    [
+      "Q6279",
+      {
+        "name": "Joe Biden"
+      }
+    ],
+    [
+      "Q20177093",
+      {
+        "name": "Joseph Robinette Biden Sr."
+      }
+    ],
+    [
+      "Q96318245",
+      {
+        "name": "Jean Biden"
+      }
+    ],
+    [
+      "Q19285477",
+      {
+        "name": "Neilia Hunter"
+      }
+    ],
+    [
+      "Q235349",
+      {
+        "name": "Jill Biden"
+      }
+    ],
+    [
+      "Q813332",
+      {
+        "name": "Beau Biden"
+      }
+    ],
+    [
+      "Q98854696",
+      {
+        "name": "Amy Biden"
+      }
+    ],
+    [
+      "Q5944264",
+      {
+        "name": "Hunter Biden"
+      }
+    ],
+    [
+      "Q97588420",
+      {
+        "name": "Ashley Biden"
+      }
+    ],
+    [
+      "Q100276774",
+      {
+        "name": "Joseph Harry Biden"
+      }
+    ],
+    [
+      "Q101142281",
+      {
+        "name": "Mary Elizabeth Robinette"
+      }
+    ],
+    [
+      "Q98854090",
+      {
+        "name": "Valerie Biden Owens"
+      }
+    ],
+    [
+      "Q100741820",
+      {
+        "name": "James Biden"
+      }
+    ],
+    [
+      "Q100741824",
+      {
+        "name": "Francis Biden"
+      }
+    ],
+    [
+      "Q96318257",
+      {
+        "name": "Ambrose Joseph Finnegan"
+      }
+    ],
+    [
+      "Q96318259",
+      {
+        "name": "Geraldine C. Blewitt"
+      }
+    ],
+    [
+      "Q110716051",
+      {
+        "name": "Donald Carl Jacobs"
+      }
+    ],
+    [
+      "Q110716054",
+      {
+        "name": "Bonny Jean Godfrey"
+      }
+    ],
+    [
+      "Q100502650",
+      {
+        "name": "Bill Stevenson"
+      }
+    ],
+    [
+      "Q100598212",
+      {
+        "name": "Hallie Olivere Biden"
+      }
+    ],
+    [
+      "Q100605198",
+      {
+        "name": "Natalie Biden"
+      }
+    ],
+    [
+      "Q100605200",
+      {
+        "name": "Robert Biden II"
+      }
+    ],
+    [
+      "Q100598223",
+      {
+        "name": "Kathleen Biden"
+      }
+    ],
+    [
+      "Q100598230",
+      {
+        "name": "Melissa Cohen"
+      }
+    ],
+    [
+      "Q100605104",
+      {
+        "name": "Finnegan Biden"
+      }
+    ],
+    [
+      "Q100605123",
+      {
+        "name": "Maisy Biden"
+      }
+    ],
+    [
+      "Q100605126",
+      {
+        "name": "Naomi Biden"
+      }
+    ],
+    [
+      "Q102866463",
+      {
+        "name": "Beau Biden Jr."
+      }
+    ],
+    [
+      "Q102868699",
+      {
+        "name": "Navy Joan Roberts"
+      }
+    ],
+    [
+      "Q100331973",
+      {
+        "name": "Howard Krein"
+      }
+    ],
+    [
+      "Q101246438",
+      {
+        "name": "George T. Biden"
+      }
+    ],
+    [
+      "Q101460582",
+      {
+        "name": "Mary Emily Biden"
+      }
+    ],
+    [
+      "Q101460601",
+      {
+        "name": "George Hamilton Robinette"
+      }
+    ],
+    [
+      "Q101460612",
+      {
+        "name": "Mary A Robinette"
+      }
+    ],
+    [
+      "Q101719190",
+      {
+        "name": "John T. Owens"
+      }
+    ],
+    [
+      "Q101720379",
+      {
+        "name": "Cuffe Biden Owens"
+      }
+    ],
+    [
+      "Q101720590",
+      {
+        "name": "Missy Owens"
+      }
+    ],
+    [
+      "Q101720636",
+      {
+        "name": "Casey Castello"
+      }
+    ],
+    [
+      "Q101145631",
+      {
+        "name": "Sara Jones Biden"
+      }
+    ],
+    [
+      "Q101145582",
+      {
+        "name": "Caroline Biden"
+      }
+    ],
+    [
+      "Q101145653",
+      {
+        "name": "Nicholas Biden"
+      }
+    ],
+    [
+      "Q101145663",
+      {
+        "name": "James Biden, Jr."
+      }
+    ],
+    [
+      "Q101146411",
+      {
+        "name": "Janine Jaquet"
+      }
+    ],
+    [
+      "Q101146259",
+      {
+        "name": "Alana Jaquet Biden"
+      }
+    ],
+    [
+      "Q101460629",
+      {
+        "name": "James Finnegan"
+      }
+    ],
+    [
+      "Q101460641",
+      {
+        "name": "Catherine Finnegan"
+      }
+    ],
+    [
+      "Q63351579",
+      {
+        "name": "Edward Francis Blewitt"
+      }
+    ],
+    [
+      "Q101142524",
+      {
+        "name": "Mary Ellen Stanton"
+      }
+    ],
+    [
+      "Q110716059",
+      {
+        "name": "Harold Godfrey"
+      }
+    ]
+  ],
+  "marriages": [
+    {
+      "parents": ["Q6279", "Q19285477"],
+      "children": ["Q813332", "Q98854696", "Q5944264"]
+    },
+    {
+      "parents": ["Q6279", "Q235349"],
+      "children": ["Q97588420"]
+    },
+    {
+      "parents": ["Q20177093", "Q96318245"],
+      "children": ["Q6279", "Q98854090", "Q100741820", "Q100741824"]
+    },
+    {
+      "parents": ["Q235349", "Q100502650"],
+      "children": []
+    },
+    {
+      "parents": ["Q813332", "Q100598212"],
+      "children": ["Q100605198", "Q100605200"]
+    },
+    {
+      "parents": ["Q5944264", "Q100598223"],
+      "children": ["Q100605104", "Q100605123", "Q100605126"]
+    },
+    {
+      "parents": ["Q5944264", "Q100598230"],
+      "children": ["Q102866463"]
+    },
+    {
+      "parents": ["Q97588420", "Q100331973"],
+      "children": []
+    },
+    {
+      "parents": ["Q100276774", "Q101142281"],
+      "children": ["Q20177093"]
+    },
+    {
+      "parents": ["Q98854090", "Q101719190"],
+      "children": []
+    },
+    {
+      "parents": ["Q100741820", "Q101145631"],
+      "children": []
+    },
+    {
+      "parents": ["Q100741824", "Q101146411"],
+      "children": []
+    },
+    {
+      "parents": ["Q96318257", "Q96318259"],
+      "children": ["Q96318245"]
+    },
+    {
+      "parents": ["Q110716051", "Q110716054"],
+      "children": ["Q235349"]
+    },
+    {
+      "parents": ["Q101246438", "Q101460582"],
+      "children": ["Q100276774"]
+    },
+    {
+      "parents": ["Q101460601", "Q101460612"],
+      "children": ["Q101142281"]
+    },
+    {
+      "parents": ["Q101460629", "Q101460641"],
+      "children": ["Q96318257"]
+    },
+    {
+      "parents": ["Q63351579", "Q101142524"],
+      "children": ["Q96318259"]
+    }
+  ]
+}

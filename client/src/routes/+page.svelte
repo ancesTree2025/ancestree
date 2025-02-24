@@ -21,6 +21,7 @@
         const [fetched, error] = result.toTuple();
         if (fetched) {
           tree = fetched;
+          console.log(fetched);
           status = { state: 'idle' };
         } else if (error) {
           status = { state: 'error', error };

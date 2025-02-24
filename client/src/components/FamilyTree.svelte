@@ -3,6 +3,7 @@
   import { positionNodes } from '$lib';
   import type { Positions, Tree } from '$lib/types';
   import { onMount } from 'svelte';
+  import FamilyTreeLines from './FamilyTreeLines.svelte';
 
   const {
     tree,
@@ -52,90 +53,7 @@
     <g transform="translate({xOffset}, {yOffset}) scale({zoomFactor})">
       {#if tree}
         {#each tree.marriages as marriage}
-          <!-- fetch Person for each parent, child -->
-          {@const mother = positions[marriage.parents[0]]}
-          {@const father = positions[marriage.parents[1]]}
-          {@const children = marriage.children.map((id) => positions[id])}
-
-          {#if mother && father}
-            <!-- Draw marriage lines -->
-            {@const parentsX = (mother.x + father.x) / 2}
-            {#if mother.y === father.y}
-              <line
-                x1={mother.x}
-                y1={mother.y}
-                x2={father.x}
-                y2={father.y}
-                class="stroke-node stroke-line"
-              />
-            {:else}
-              <line
-                x1={mother.x}
-                y1={mother.y}
-                x2={parentsX}
-                y2={mother.y}
-                class="stroke-node stroke-line"
-              />
-              <line
-                x1={parentsX}
-                y1={mother.y}
-                x2={parentsX}
-                y2={father.y}
-                class="stroke-node stroke-line"
-              />
-              <line
-                x1={father.x}
-                y1={father.y}
-                x2={parentsX}
-                y2={father.y}
-                class="stroke-node stroke-line"
-              />
-            {/if}
-
-            {#if children.length > 0}
-              <!-- Draw line between parents and children -->
-              {@const parentsY = Math.max(mother.y, father.y)}
-              {@const childrenY = Math.min(...children.map((child) => child?.y ?? Infinity))}
-              {@const midY = (parentsY + childrenY) / 2}
-              <line
-                x1={parentsX}
-                y1={parentsY}
-                x2={parentsX}
-                y2={midY}
-                class="stroke-node stroke-line"
-              />
-
-              <!-- Draw children line -->
-              {@const leftChildX = Math.min(
-                parentsX,
-                ...children.map((child) => child?.x ?? Infinity)
-              )}
-              {@const rightChildX = Math.max(
-                parentsX,
-                ...children.map((child) => child?.x ?? -Infinity)
-              )}
-              <line
-                x1={leftChildX}
-                y1={midY}
-                x2={rightChildX}
-                y2={midY}
-                class="stroke-node stroke-line"
-              />
-
-              <!-- Draw line from each child to children line -->
-              {#each children as child}
-                {#if child}
-                  <line
-                    x1={child.x}
-                    y1={midY}
-                    x2={child.x}
-                    y2={child.y}
-                    class="stroke-node stroke-line"
-                  />
-                {/if}
-              {/each}
-            {/if}
-          {/if}
+          <FamilyTreeLines {marriage} {positions} />
         {/each}
         {#each tree.people as [id, person]}
           {@const position = positions[id]}
