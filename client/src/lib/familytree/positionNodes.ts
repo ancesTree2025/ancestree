@@ -19,18 +19,23 @@ export function positionNodes(tree: Tree): {
   );
 
   const { groups, highestGroup } = getMarriageGroups(tree);
-  console.log(groups);
 
-  const depths = assignDepths(tree, groups, personMarriages, personParents, highestGroup);
+  const { depths, highestGroup: nextHighestGroup } = assignDepths(
+    tree,
+    groups,
+    personMarriages,
+    personParents,
+    highestGroup
+  );
 
   const sortedLevels = sortDepths(groups, depths, personMarriages, personParents);
+  console.log(sortedLevels);
 
-  const arrangedLevels = arrangeNodes(sortedLevels, groups, personMarriages, personParents);
+  const arrangedLevels = arrangeNodes(sortedLevels, groups, personMarriages, nextHighestGroup);
   console.log(arrangedLevels);
 
   const positions = calculatePositions(arrangedLevels);
 
-  // TODO: finish this
   return positions;
 }
 
@@ -109,7 +114,7 @@ function assignDepths(
   personMarriages: Record<PersonID, Marriages>,
   personParents: Record<PersonID, Marriages>,
   highestGroup: number
-): Map<GroupID, number> {
+): { depths: Map<GroupID, number>; highestGroup: number } {
   const depths: Map<GroupID, number> = new Map();
   const minDepths: Map<GroupID, number> = new Map();
   const maxDepths: Map<GroupID, number> = new Map();
@@ -181,7 +186,6 @@ function assignDepths(
     }
   }
 
-  let groupNumber = highestGroup;
   // find any people who have a parent > 1 depth away and make a fake group for them
   const groupIds = groups.groups.keys();
   for (const groupId of groupIds) {
@@ -192,7 +196,7 @@ function assignDepths(
       const parents = personParents[person].flatMap((m) => m.parents);
       const parentDepth = depths.get(groups.members[parents[0]])!;
       for (let d = parentDepth + 1; d < depth; d++) {
-        const fakeGroupId = groupNumber++;
+        const fakeGroupId = highestGroup++;
         groups.groups.set(fakeGroupId, [person]);
         groups.members[person] = fakeGroupId;
         depths.set(fakeGroupId, d);
@@ -200,7 +204,7 @@ function assignDepths(
     }
   }
 
-  return depths;
+  return { depths, highestGroup };
 }
 
 /**
@@ -476,7 +480,7 @@ function arrangeNodes(
   depths: Map<number, PersonID[]>,
   groups: GroupAssignments,
   personMarriages: Record<PersonID, Marriages>,
-  personParents: Record<PersonID, Marriages>
+  highestGroup: number
 ): Map<number, Map<PersonID, number>> {
   const [baseDepth, base] = [...depths.entries()].reduce((a, b) =>
     a[1].length > b[1].length ? a : b
@@ -539,9 +543,6 @@ function arrangeNodes(
     assignments.set(depth, assignment);
     depth--;
   }
-
-  // TODO: CHANGE, THIS IS ARBITRARY
-  let highestGroup = 1000;
 
   const handled = new Set<PersonID>();
   const handledIds = new Set<GroupID>();
