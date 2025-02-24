@@ -1,6 +1,14 @@
-import { expect, test } from 'bun:test';
+import { expect, test } from 'vitest';
 import { apiResponseToTree } from '../fetchTree';
 import type { People } from '../types';
+
+// mock.module('$env/dynamic/public', () => {
+//   return {
+//     env: {
+//       PUBLIC_API_BASE_URL: ''
+//     }
+//   }
+// })
 
 function basicPersonData(id: string, depth: number) {
   return {
