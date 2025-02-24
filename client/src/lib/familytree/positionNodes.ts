@@ -18,14 +18,14 @@ export function positionNodes(tree: Tree): {
     tree.people.map(([id]) => [id, tree.marriages.filter((m) => m.children.includes(id))])
   );
 
-  const marriageGroups = getMarriageGroups(tree);
+  const { groups, highestGroup } = getMarriageGroups(tree);
+  console.log(groups);
 
-  const depths = assignDepths(tree, marriageGroups, personMarriages, personParents);
+  const depths = assignDepths(tree, groups, personMarriages, personParents, highestGroup);
 
-  const sortedLevels = sortDepths(marriageGroups, depths, personMarriages, personParents);
-  console.log(sortedLevels);
+  const sortedLevels = sortDepths(groups, depths, personMarriages, personParents);
 
-  const arrangedLevels = arrangeNodes(sortedLevels, marriageGroups, personMarriages, personParents);
+  const arrangedLevels = arrangeNodes(sortedLevels, groups, personMarriages, personParents);
   console.log(arrangedLevels);
 
   const positions = calculatePositions(arrangedLevels);
@@ -54,7 +54,7 @@ type GroupID = number;
  * @param tree - The family tree
  * @returns The marriage group assignments
  */
-function getMarriageGroups(tree: Tree): GroupAssignments {
+function getMarriageGroups(tree: Tree): { groups: GroupAssignments; highestGroup: number } {
   const marriageGroups: Map<GroupID, PersonID[]> = new Map();
   const memberOf: Record<PersonID, GroupID> = {};
 
@@ -81,8 +81,11 @@ function getMarriageGroups(tree: Tree): GroupAssignments {
   }
 
   return {
-    groups: marriageGroups,
-    members: memberOf
+    groups: {
+      groups: marriageGroups,
+      members: memberOf
+    },
+    highestGroup: i
   };
 }
 
@@ -101,7 +104,8 @@ function assignDepths(
   tree: Tree,
   groups: GroupAssignments,
   personMarriages: Record<PersonID, Marriages>,
-  personParents: Record<PersonID, Marriages>
+  personParents: Record<PersonID, Marriages>,
+  highestGroup: number
 ): Map<GroupID, number> {
   const depths: Map<GroupID, number> = new Map();
   const minDepths: Map<GroupID, number> = new Map();
@@ -170,6 +174,25 @@ function assignDepths(
 
           minDepths.set(groupId, Math.max(minDepths.get(groupId) ?? -Infinity, depth + 1));
         }
+      }
+    }
+  }
+
+  let groupNumber = highestGroup;
+  // find any people who have a parent > 1 depth away and make a fake group for them
+  const groupIds = groups.groups.keys();
+  for (const groupId of groupIds) {
+    const group = groups.groups.get(groupId)!;
+    const depth = depths.get(groupId)!;
+    for (const person of group) {
+      // parents should all be on same depth
+      const parents = personParents[person].flatMap((m) => m.parents);
+      const parentDepth = depths.get(groups.members[parents[0]])!;
+      for (let d = parentDepth + 1; d < depth; d++) {
+        const fakeGroupId = groupNumber++;
+        groups.groups.set(fakeGroupId, [person]);
+        groups.members[person] = fakeGroupId;
+        depths.set(fakeGroupId, d);
       }
     }
   }
@@ -347,7 +370,20 @@ function sortByWeights<T>(
   return minimumPermutation;
 }
 
+function factorial(n: number): number {
+  let result = 1;
+  for (let i = 2; i <= n; i++) {
+    result *= i;
+  }
+  return result;
+}
+
+const MAX_PERMUTATIONS = 100000;
+
 function permutations<T>(xs: T[]): T[][] {
+  if (factorial(xs.length) > MAX_PERMUTATIONS) {
+    return generateRandomPermutations(xs, MAX_PERMUTATIONS);
+  }
   if (xs.length === 0) return [[]];
   const result: T[][] = [];
   for (let i = 0; i < xs.length; i++) {
@@ -359,6 +395,20 @@ function permutations<T>(xs: T[]): T[][] {
   }
   return result;
 }
+
+function generateRandomPermutations<T>(elements: T[], count: number): T[][] {
+  const permutations: T[][] = [];
+  for (let i = 0; i < count; i++) {
+    const shuffled = [...elements];
+    for (let j = 0; j < elements.length; j++) {
+      const k = Math.floor(Math.random() * elements.length);
+      [shuffled[j], shuffled[k]] = [shuffled[k], shuffled[j]];
+    }
+    permutations.push(shuffled);
+  }
+  return permutations;
+}
+
 /**
  * Finds some arbitrary weight between two nodes, by the strength of their relationship
  *
@@ -429,12 +479,12 @@ function arrangeNodes(
     a[1].length > b[1].length ? a : b
   );
 
-  const arrangements: Map<number, Map<PersonID, number>> = new Map();
-  const baseArrangement = new Map<PersonID, number>();
+  const assignments: Map<number, Map<PersonID, number>> = new Map();
+  const baseAssignment = new Map<PersonID, number>();
   for (let i = 0; i < base.length; i++) {
-    baseArrangement.set(base[i], i * 2);
+    baseAssignment.set(base[i], i * 2);
   }
-  arrangements.set(baseDepth, baseArrangement);
+  assignments.set(baseDepth, baseAssignment);
 
   // handle positions of parent layer
   let depth = baseDepth - 1;
@@ -442,9 +492,12 @@ function arrangeNodes(
     const nodes = depths.get(depth);
     if (nodes === undefined) break;
     const groupIds = new Set(nodes.map((id) => groups.members[id]));
+
     const groupLeft: Map<GroupID, number> = new Map();
     const groupRight: Map<GroupID, number> = new Map();
 
+    // for each parent group, find average position of children in layer below,
+    // and find left + right bounds of each parent group
     for (const groupId of groupIds) {
       const group = groups.groups.get(groupId)!;
       let childrenLeft = Infinity;
@@ -452,21 +505,24 @@ function arrangeNodes(
       for (const node of group) {
         const children = personMarriages[node].flatMap((m) => m.children);
         for (const child of children) {
-          const pos = arrangements.get(depth + 1)?.get(child);
+          const pos = assignments.get(depth + 1)?.get(child);
           if (pos === undefined) continue;
           childrenLeft = Math.min(childrenLeft, pos);
           childrenRight = Math.max(childrenRight, pos);
         }
       }
       const mid = (childrenLeft + childrenRight) / 2;
-      const left = Math.floor(mid - group.length / 2);
-      const right = Math.floor(mid + group.length / 2);
+      const left = Math.floor(mid - (group.length - 1));
+      const right = Math.floor(mid + (group.length - 1));
       groupLeft.set(groupId, left);
       groupRight.set(groupId, right);
     }
 
+    // TODO: prevent overlap of groups
+
+    // allocate positions to each node by group position
     const groupCounts = new Map<GroupID, number>();
-    const arrangement = new Map<PersonID, number>();
+    const assignment = new Map<PersonID, number>();
 
     for (const node of nodes) {
       const groupId = groups.members[node];
@@ -474,14 +530,110 @@ function arrangeNodes(
       const count = groupCounts.get(groupId) ?? 0;
       const pos = left + count * 2;
       groupCounts.set(groupId, count + 1);
-      arrangement.set(node, pos);
+      assignment.set(node, pos);
     }
 
-    arrangements.set(depth, arrangement);
+    assignments.set(depth, assignment);
     depth--;
   }
 
-  return arrangements;
+  // TODO: CHANGE, THIS IS ARBITRARY
+  let highestGroup = 1000;
+
+  const handled = new Set<PersonID>();
+  const handledIds = new Set<GroupID>();
+  const parentGroupIds = new Set(base.map((id) => groups.members[id]));
+
+  // handles positions of child layer
+  depth = baseDepth + 1;
+  for (;;) {
+    const nodes = depths.get(depth);
+    if (nodes === undefined) break;
+
+    const childrenGroupLeft: Map<GroupID, number> = new Map();
+    const childrenGroupRight: Map<GroupID, number> = new Map();
+    const childrenGroups: Map<GroupID, PersonID[]> = new Map();
+    const childrenMember: Map<PersonID, GroupID> = new Map();
+
+    // for each parent group, find average position of parents in layer above,
+    // and find left + right bounds of children of each parent group
+    for (const parentGroupId of parentGroupIds) {
+      if (handledIds.has(parentGroupId)) continue;
+      const parentGroup = groups.groups.get(parentGroupId)!;
+      let parentsLeft = Infinity;
+      let parentsRight = -Infinity;
+      for (const parent of parentGroup) {
+        const pos = assignments.get(depth - 1)?.get(parent);
+        if (pos === undefined) continue;
+        parentsLeft = Math.min(parentsLeft, pos);
+        parentsRight = Math.max(parentsRight, pos);
+      }
+
+      // We identify a "children group" as the set of children (and their spouses)
+      // of a certain parent group and refer to them by parent marriage group ID
+      const childrenGroup = [
+        ...new Set(
+          parentGroup.flatMap((id) =>
+            personMarriages[id]
+              .flatMap((m) => m.children)
+              .flatMap((c) => groups.groups.get(groups.members[c])!)
+          )
+        )
+      ].filter((id) => {
+        // if a node is more than 1 depth away from its parent, and we have already
+        // assigned its position, do not include in this children group
+        if (handled.has(id)) {
+          const groupId = highestGroup++;
+          childrenMember.set(id, groupId);
+          childrenGroups.set(groupId, [id]);
+
+          const pos = assignments.get(depth - 1)!.get(id)!;
+          childrenGroupLeft.set(groupId, pos);
+          childrenGroupRight.set(groupId, pos);
+          return false;
+        }
+        return true;
+      });
+
+      childrenGroup.forEach((id) => childrenMember.set(id, parentGroupId));
+      childrenGroups.set(parentGroupId, childrenGroup);
+
+      const mid = (parentsLeft + parentsRight) / 2;
+      const left = Math.floor(mid - (childrenGroup.length - 1));
+      const right = Math.floor(mid + (childrenGroup.length - 1));
+      childrenGroupLeft.set(parentGroupId, left);
+      childrenGroupRight.set(parentGroupId, right);
+
+      handledIds.add(parentGroupId);
+    }
+
+    // TODO: prevent overlap of groups
+
+    const groupCounts = new Map<GroupID, number>();
+    const arrangement = new Map<PersonID, number>();
+
+    handled.clear();
+    parentGroupIds.clear();
+
+    // allocate positions to each node by group position
+    for (const node of nodes) {
+      const groupId = childrenMember.get(node)!;
+      const count = groupCounts.get(groupId) ?? 0;
+
+      const left = childrenGroupLeft.get(groupId)!;
+      const pos = left + count * 2;
+      groupCounts.set(groupId, count + 1);
+      arrangement.set(node, pos);
+
+      handled.add(node);
+      parentGroupIds.add(groups.members[node]);
+    }
+
+    assignments.set(depth, arrangement);
+    depth++;
+  }
+
+  return assignments;
 }
 
 const NODE_WIDTH = 80;
