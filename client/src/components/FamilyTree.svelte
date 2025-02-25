@@ -245,10 +245,7 @@
               >
                 <button
                   onclick={() => handleClick(id, person.name)}
-                  class="flex h-full w-full cursor-pointer items-center justify-center text-center text-sm {tree
-                    .people[0][0] === id
-                    ? 'text-white'
-                    : ''}"
+                  class="flex h-full w-full cursor-pointer items-center justify-center text-center text-sm"
                 >
                   {person.name}
                 </button>
