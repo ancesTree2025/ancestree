@@ -21,6 +21,10 @@
   let familyTree: FamilyTree | null = $state(null);
 
   let showSettings = $state(false);
+  let maxWidth = $state(4);
+  let maxHeight = $state(4);
+
+
   function toggleSettings() {
     showSettings = !showSettings;
   }
@@ -152,7 +156,19 @@
     <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div class="bg-white p-6 rounded shadow-lg w-96">
         <h2 class="text-lg font-bold mb-4">Settings</h2>
-        <p>Settings content goes here.</p>
+        <label class="block mb-2">Maximum Tree Width
+          <div class="w-12 h-8 flex items-center justify-center border border-gray-400 rounded">
+            {maxWidth}
+          </div>
+          <input type="range" min="1" max="10" bind:value={maxWidth} class="w-full"/>
+        </label>
+
+        <label class="block mb-2">Maximum Tree Height
+          <div class="w-12 h-8 flex items-center justify-center border border-gray-400 rounded">
+            {maxHeight}
+          </div>
+          <input type="range" min="1" max="10" bind:value={maxHeight} class="w-full"/>
+        </label>
         <button class="mt-4 p-2 bg-blue-500 text-black rounded" onclick={toggleSettings}>Close</button>
       </div>
     </div>
