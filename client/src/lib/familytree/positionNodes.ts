@@ -1,4 +1,4 @@
-import type { Marriages, PersonID, Positions, Tree } from './types';
+import type { MarriageHeights, Marriages, PersonID, Positions, Tree } from './types';
 
 /**
  * Assigns a position to each node in the family tree.
@@ -8,6 +8,7 @@ import type { Marriages, PersonID, Positions, Tree } from './types';
  */
 export function positionNodes(tree: Tree): {
   positions: Positions;
+  marriageHeights: MarriageHeights;
   treeWidth: number;
 } {
   // for efficiency, keep mapping from person to marriages and from person to parents' marriage
@@ -28,13 +29,17 @@ export function positionNodes(tree: Tree): {
     highestGroup
   );
 
+  console.log(depths);
+
   const sortedLevels = sortDepths(groups, depths, personMarriages, personParents);
 
   const arrangedLevels = arrangeNodes(sortedLevels, groups, personMarriages, nextHighestGroup);
 
-  const positions = calculatePositions(arrangedLevels);
+  const marriageHeights = getMarriageHeights(tree, arrangedLevels);
 
-  return positions;
+  const { positions, treeWidth } = calculatePositions(arrangedLevels);
+
+  return { positions, treeWidth, marriageHeights };
 }
 
 /**
@@ -701,4 +706,92 @@ function calculatePositions(levels: Map<number, Map<PersonID, number>>): {
   }
 
   return { positions, treeWidth: maxX - minX };
+}
+
+function getMarriageHeights(
+  tree: Tree,
+  arrangements: Map<number, Map<PersonID, number>>
+): MarriageHeights {
+  const lefts: number[] = [];
+  const mids: number[] = [];
+  const rights: number[] = [];
+  const hasChildren: boolean[] = [];
+  const offsets: MarriageHeights = [];
+  const depthIndices = new Map<number, number[]>();
+
+  const xs = new Map<PersonID, number>();
+  const depths = new Map<PersonID, number>();
+  for (const [depth, arrangement] of arrangements) {
+    for (const [person, x] of arrangement) {
+      depths.set(person, depth);
+      xs.set(person, x);
+    }
+  }
+
+  let i = 0;
+  for (const marriage of tree.marriages) {
+    let mid = 0;
+    for (const parent of marriage.parents) {
+      mid += xs.get(parent)!;
+    }
+    mid /= marriage.parents.length;
+    mids.push(mid);
+
+    let left = mid;
+    let right = mid;
+    for (const child of marriage.children) {
+      const x = xs.get(child)!;
+      left = Math.min(left, x);
+      right = Math.max(right, x);
+    }
+    lefts.push(left);
+    rights.push(right);
+
+    hasChildren.push(marriage.children.length > 0);
+
+    offsets.push(0);
+
+    const depth = depths.get(marriage.parents[0])!;
+
+    depthIndices.set(depth, [...(depthIndices.get(depth) ?? []), i]);
+    i++;
+  }
+
+  console.log(depthIndices);
+
+  for (const indices of depthIndices.values()) {
+    for (let i = 0; i < indices.length; i++) {
+      for (let j = 0; j < indices.length; j++) {
+        if (i === j) continue;
+        const first = indices[i];
+        const second = indices[j];
+
+        if (!hasChildren[first] || !hasChildren[second]) continue;
+
+        const cond1 =
+          lefts[first] <= lefts[second] &&
+          lefts[second] <= rights[first] &&
+          rights[first] < mids[second];
+        const cond2 =
+          mids[second] < lefts[first] &&
+          lefts[first] <= rights[second] &&
+          rights[second] <= rights[first];
+        const cond3 = lefts[first] <= lefts[second] && rights[second] <= rights[first];
+        console.log(
+          [...tree.marriages[first].parents],
+          [...tree.marriages[second].parents],
+          cond1,
+          cond2,
+          cond3
+        );
+
+        if (offsets[first] === offsets[second] && (cond1 || cond2 || cond3)) {
+          offsets[first] = Math.max(offsets[first], offsets[second] + 1);
+        }
+      }
+    }
+    console.log(indices.map((i) => [tree.marriages[i].parents, offsets[i]]));
+  }
+
+  return offsets;
 }

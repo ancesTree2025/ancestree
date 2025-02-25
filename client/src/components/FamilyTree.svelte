@@ -1,7 +1,7 @@
 <script lang="ts">
   import * as d3 from 'd3';
   import { positionNodes } from '$lib';
-  import type { Positions, Tree } from '$lib/types';
+  import type { MarriageHeights, Positions, Tree } from '$lib/types';
   import { onMount } from 'svelte';
   import FamilyTreeLines from './FamilyTreeLines.svelte';
 
@@ -11,12 +11,14 @@
   }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } = $props();
   let positions = $state<Positions>({});
   let treeWidth = $state<number>();
+  let marriageHeights = $state<MarriageHeights>([]);
 
   $effect(() => {
     if (tree) {
       const result = positionNodes(tree);
       positions = result.positions;
       treeWidth = result.treeWidth;
+      marriageHeights = result.marriageHeights;
     } else {
       positions = {};
     }
@@ -52,8 +54,8 @@
   <g id="zoom-group">
     <g transform="translate({xOffset}, {yOffset}) scale({zoomFactor})">
       {#if tree}
-        {#each tree.marriages as marriage}
-          <FamilyTreeLines {marriage} {positions} />
+        {#each tree.marriages as marriage, i}
+          <FamilyTreeLines {marriage} {positions} height={marriageHeights[i] ?? 0} />
         {/each}
         {#each tree.people as [id, person]}
           {@const position = positions[id]}

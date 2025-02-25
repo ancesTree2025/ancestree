@@ -26,3 +26,5 @@ export type Position = {
 };
 
 export type Positions = Record<PersonID, Position>;
+
+export type MarriageHeights = number[];

@@ -1,7 +1,11 @@
 <script lang="ts">
   import type { Marriage, Position, Positions } from '$lib/types';
 
-  const { marriage, positions }: { marriage: Marriage; positions: Positions } = $props();
+  const {
+    marriage,
+    positions,
+    height
+  }: { marriage: Marriage; positions: Positions; height: number } = $props();
 
   const spouse1 = $derived(positions[marriage.parents[0]] as Position | undefined);
   const spouse2 = $derived(positions[marriage.parents[1]] as Position | undefined);
@@ -10,7 +14,11 @@
   const parentsX = $derived(((spouse1?.x ?? 0) + (spouse2?.x ?? 0)) / 2);
   const parentsY = $derived(Math.max(spouse1?.y ?? Infinity, spouse2?.y ?? Infinity));
 
-  const childrenY = $derived(Math.min(Infinity, ...children.map((child) => child?.y ?? Infinity)));
+  const HEIGHT_OFFSET = 20;
+
+  const childrenY = $derived(
+    Math.min(Infinity, ...children.map((child) => child?.y ?? Infinity)) - height * HEIGHT_OFFSET
+  );
   const midY = $derived((parentsY + childrenY) / 2);
   const leftChildX = $derived(Math.min(parentsX, ...children.map((child) => child?.x ?? Infinity)));
   const rightChildX = $derived(
