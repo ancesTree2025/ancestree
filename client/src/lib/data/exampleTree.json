@@ -25,12 +25,14 @@
     ["V", { "name": "V" }],
     ["W", { "name": "W" }],
     ["X", { "name": "X" }],
-    ["Y", { "name": "Y" }]
+    ["Y", { "name": "Y" }],
+    ["Z", { "name": "Z" }],
+    ["AA", { "name": "AA" }]
   ],
   "marriages": [
     {
       "parents": ["A", "B"],
-      "children": ["J", "L"]
+      "children": ["J", "L", "Z"]
     },
     {
       "parents": ["J", "K"],
@@ -67,6 +69,10 @@
     {
       "parents": ["Q", "W"],
       "children": ["Y"]
+    },
+    {
+      "parents": ["R", "AA"],
+      "children": ["K"]
     }
   ]
 }

@@ -337,6 +337,8 @@ function sortDepths(
   return outputDepths;
 }
 
+const UNORDERED_WEIGHT = 2;
+
 function sortByWeights<T>(
   elements: T[],
   weights: Map<T, Map<T, number>>,
@@ -347,23 +349,22 @@ function sortByWeights<T>(
 
   const perms = permutations(elements);
   for (const permutation of perms) {
-    // if it violates any constraints then skip
-    let valid = true;
+    // if it violates any constraints then increase total
+
+    let total = 0;
     for (const [a, b] of constraints) {
       const aPos = permutation.indexOf(a);
       const bPos = permutation.indexOf(b);
       if (aPos !== -1 && bPos !== -1 && aPos > bPos) {
-        valid = false;
-        break;
+        total += UNORDERED_WEIGHT;
       }
     }
-    if (!valid) continue;
 
-    let total = 0;
     for (let x = 0; x < permutation.length - 1; x++) {
       for (let y = x + 1; y < permutation.length; y++) {
-        const d = weights.get(permutation[x])?.get(permutation[y]) ?? 0;
-        total += d * (y - x);
+        const w = weights.get(permutation[x])?.get(permutation[y]) ?? 0;
+        const d = y - x;
+        total += w * d * d;
       }
     }
     if (total < minimum) {
@@ -517,8 +518,8 @@ function arrangeNodes(
         }
       }
       const mid = (childrenLeft + childrenRight) / 2;
-      const left = Math.floor(mid - (group.length - 1));
-      const right = Math.floor(mid + (group.length - 1));
+      const left = mid - (group.length - 1);
+      const right = mid + (group.length - 1);
       groupLeft.set(groupId, left);
       groupRight.set(groupId, right);
     }
@@ -556,7 +557,7 @@ function arrangeNodes(
     const childrenGroupLeft: Map<GroupID, number> = new Map();
     const childrenGroupRight: Map<GroupID, number> = new Map();
     const childrenGroups: Map<GroupID, PersonID[]> = new Map();
-    const childrenMember: Map<PersonID, GroupID> = new Map();
+    const childrenMember: Map<PersonID, GroupID[]> = new Map();
 
     // for each parent group, find average position of parents in layer above,
     // and find left + right bounds of children of each parent group
@@ -587,7 +588,7 @@ function arrangeNodes(
         // assigned its position, do not include in this children group
         if (handled.has(id)) {
           const groupId = highestGroup++;
-          childrenMember.set(id, groupId);
+          childrenMember.set(id, [...(childrenMember.get(id) ?? []), groupId]);
           childrenGroups.set(groupId, [id]);
 
           const pos = assignments.get(depth - 1)!.get(id)!;
@@ -598,12 +599,14 @@ function arrangeNodes(
         return true;
       });
 
-      childrenGroup.forEach((id) => childrenMember.set(id, parentGroupId));
+      childrenGroup.forEach((id) =>
+        childrenMember.set(id, [...(childrenMember.get(id) ?? []), parentGroupId])
+      );
       childrenGroups.set(parentGroupId, childrenGroup);
 
       const mid = (parentsLeft + parentsRight) / 2;
-      const left = Math.floor(mid - (childrenGroup.length - 1));
-      const right = Math.floor(mid + (childrenGroup.length - 1));
+      const left = mid - (childrenGroup.length - 1);
+      const right = mid + (childrenGroup.length - 1);
       childrenGroupLeft.set(parentGroupId, left);
       childrenGroupRight.set(parentGroupId, right);
 
@@ -620,7 +623,9 @@ function arrangeNodes(
 
     // allocate positions to each node by group position
     for (const node of nodes) {
-      const groupId = childrenMember.get(node)!;
+      const groupId = childrenMember
+        .get(node)!
+        .sort((a, b) => childrenGroups.get(b)!.length - childrenGroups.get(a)!.length)[0];
       const count = groupCounts.get(groupId) ?? 0;
 
       const left = childrenGroupLeft.get(groupId)!;
@@ -641,19 +646,19 @@ function arrangeNodes(
 }
 
 function shuntOverlapping(level: PersonID[], assignments: Map<PersonID, number>) {
-  let avg = 0;
-  for (const person of level) {
-    avg += assignments.get(person)!;
-  }
-  avg /= level.length;
-
   let iters = 1000;
   let happy = false;
   while (!happy) {
     iters--;
     if (iters === 0) return;
-    console.log(Object.fromEntries([...assignments.entries()]));
     happy = true;
+
+    let avg = 0;
+    for (const person of level) {
+      avg += assignments.get(person)!;
+    }
+    avg /= level.length;
+
     for (let i = 0; i < level.length - 1; i++) {
       const index = i % 2 === 0 ? i / 2 : level.length - 2 - (i - 1) / 2;
       const person1 = level[index];
@@ -676,7 +681,7 @@ function shuntOverlapping(level: PersonID[], assignments: Map<PersonID, number>)
 }
 
 const NODE_WIDTH = 80;
-const NODE_HEIGHT = 100;
+const NODE_HEIGHT = 120;
 
 function calculatePositions(levels: Map<number, Map<PersonID, number>>): {
   positions: Positions;
