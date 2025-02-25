@@ -52,7 +52,7 @@
     if (!name.length) return;
 
     status = { state: 'loading' };
-    const result = await fetchTree(name, useFakeData);
+    const result = await fetchTree(name, useFakeData, maxWidth, maxHeight);
     const [fetched, error] = result.toTuple();
     if (fetched) {
       filteredTree = undefined;
