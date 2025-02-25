@@ -1,6 +1,7 @@
 <script lang="ts">
   import FamilyTree from '../components/FamilyTree.svelte';
   import NameInput from '../components/NameInput.svelte';
+  import SettingsImg from '$lib/assets/—Pngtree—settings icon_4419959.png'
   import SidePanel from '../components/SidePanel.svelte';
 
   import { fetchTree, fetchInfo } from '$lib';
@@ -18,6 +19,11 @@
   const useFakeData = page.url.searchParams.get('useFakeData') === 'true';
 
   let familyTree: FamilyTree | null = $state(null);
+
+  let showSettings = $state(false);
+  function toggleSettings() {
+    showSettings = !showSettings;
+  }
 
   $effect(() => {
     if (name) {
@@ -125,7 +131,11 @@
     <div class="flex flex-1 justify-center">
       <NameInput {onSubmit} {status} />
     </div>
-    <div class="w-48"></div>
+    <div class="w-48 flex justify-end">
+      <button class="p-2" onclick={toggleSettings}>
+        <img src={SettingsImg} alt="Settings" class="w-10"/>
+      </button>
+    </div>
   </nav>
   <div class="flex flex-1">
     <div class="flex-1">
@@ -138,6 +148,15 @@
       onclose={closeSidePanel}
     />
   </div>
+  {#if showSettings}
+    <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div class="bg-white p-6 rounded shadow-lg w-96">
+        <h2 class="text-lg font-bold mb-4">Settings</h2>
+        <p>Settings content goes here.</p>
+        <button class="mt-4 p-2 bg-blue-500 text-black rounded" onclick={toggleSettings}>Close</button>
+      </div>
+    </div>
+  {/if}
   {#if tree}
     <div class="flex justify-center pb-60">
       <TreeSearchInput

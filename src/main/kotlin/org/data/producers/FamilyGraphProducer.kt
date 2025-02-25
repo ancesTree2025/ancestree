@@ -14,12 +14,6 @@ import org.domain.producers.GraphProducer
 
 class FamilyGraphProducer : GraphProducer<Label, Person> {
 
-  /** A companion object housing graph configuration details. */
-  companion object {
-    const val MAX_DEPTH = 4
-    const val MAX_WIDTH = 4
-  }
-
   /** Various maps and sets to be used during graph generation. */
   private val visited = mutableSetOf<Pair<QID, QID>>()
   private val nodes = mutableMapOf<QID, Node<Person>>()
@@ -75,7 +69,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
    * @param root The initial string passed in by the user.
    * @returns The graph representation sent to the front-end.
    */
-  override suspend fun produceGraph(root: Label): Graph<Person> {
+  override suspend fun produceGraph(root: Label, depth: Int, width: Int): Graph<Person> {
 
     /** Clearing the used sets */
     visited.clear()
@@ -108,12 +102,12 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
 
       /** Early stopping for exceeding horizontal width */
       println(traversals)
-      if (traversals++ == MAX_WIDTH) {
+      if (traversals++ == width) {
         break
       }
 
       /** Producing the result map of QIDs to relations */
-      val batchItems = queue.filter { abs(it.depth) <= MAX_DEPTH }
+      val batchItems = queue.filter { abs(it.depth) <= depth }
       if (batchItems.isEmpty()) break
 
       val namesToQuery = batchItems.map { it.qid }.distinct()
@@ -156,7 +150,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
         /** Repopulating queue */
         if (!visited.contains(Pair(item.qid, item.parentId))) {
 
-          if (abs(item.depth - 1) <= MAX_DEPTH) {
+          if (abs(item.depth - 1) <= depth) {
             if (relation.Father.isNotBlank()) {
               queue.add(QueueItem(relation.Father, item.depth - 1, person.id, RelationType.Parent))
             }
@@ -165,7 +159,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
             }
           }
 
-          if (abs(item.depth) <= MAX_DEPTH) {
+          if (abs(item.depth) <= depth) {
             for (spouse in relation.Spouses) {
               if (spouse.isNotBlank()) {
                 queue.add(QueueItem(spouse, item.depth, person.id, RelationType.Spouse))
@@ -173,7 +167,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
             }
           }
 
-          if (abs(item.depth + 1) <= MAX_DEPTH) {
+          if (abs(item.depth + 1) <= depth) {
             for (child in relation.Children) {
               if (child.isNotBlank()) {
                 queue.add(QueueItem(child, item.depth + 1, person.id, RelationType.Child))

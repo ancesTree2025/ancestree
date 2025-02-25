@@ -28,7 +28,10 @@ fun Application.configureRouting() {
             "name is required. Nothing was passed",
           )
 
-      val graph = graphProducer.produceGraph(name)
+      val width = call.request.queryParameters["width"]?.toIntOrNull() ?: 4
+      val height = call.request.queryParameters["height"]?.toIntOrNull() ?: 4
+
+      val graph = graphProducer.produceGraph(name, width, height)
       if (graph.isEmpty()) return@get call.respond(HttpStatusCode.NoContent)
 
       call.respond(graph)
