@@ -187,7 +187,7 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     val mappings = mutableMapOf<QID, PropertyMapping>()
     val subQs = unseenQids.chunked(CHUNK_SIZE)
     subQs.forEach {
-      val claimsResp = ComplexRequester.getLabelsOrClaims(it)
+      val claimsResp = ComplexRequester.getInfo(it)
       mappings.putAll(WikiRequestParser.parseWikidataClaims(claimsResp))
     }
 
@@ -210,8 +210,8 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
    */
   suspend fun getDetailedInfo(qid: QID, queryParams: InfoQueryBuilder): PersonalInfo {
 
-    val familyResp = ComplexRequester.getLabelsOrClaims(listOf(qid))
-    val infoMap = WikiRequestParser.parseWikidataClaims(familyResp, propertyQIDMapPersonal)[qid]!!
+    val response = ComplexRequester.getInfo(listOf(qid))
+    val infoMap = WikiRequestParser.parseWikidataClaims(response, propertyQIDMapPersonal)[qid]!!
 
     val info = PersonalInfo()
 
@@ -230,13 +230,13 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     }
 
     if (queryParams.description) {
-      println("Description requested: $qid.")
-      info.description = "stub" // TODO: implement
+      val desc = WikiRequestParser.parseWikiDescriptions(response)
+      info.description = desc[qid]
     }
 
     if (queryParams.wikiLink) {
-      println("Wiki link requested: $qid.")
-      info.description = "stub" // TODO: implement
+      val link = WikiRequestParser.parseWikiLinks(response)
+      info.wikiLink = link[qid]
     }
 
     return info
@@ -269,7 +269,7 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     val subQs = unseenQids.chunked(45)
     subQs.forEach {
       println("--${c++} out of ${(unseenQids.size/45)}$")
-      val claimsResp = ComplexRequester.getLabelsOrClaims(it)
+      val claimsResp = ComplexRequester.getInfo(it)
       val qidToLabels = WikiRequestParser.parseWikidataLabels(claimsResp)
 
       qidToLabels.forEach { (qid, label) -> WikiCacheManager.putLabel(qid, label) }
@@ -313,7 +313,7 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     if (locQID == null) return "Unknown"
 
     if (WikiCacheManager.getLabel(locQID) == null) {
-      val locReq = ComplexRequester.getLabelsOrClaims(listOf(locQID))
+      val locReq = ComplexRequester.getInfo(listOf(locQID))
       val locInfo = WikiRequestParser.parseWikidataLabels(locReq)
       val name = locInfo[locQID]!!
       WikiCacheManager.putLabel(locQID, name)

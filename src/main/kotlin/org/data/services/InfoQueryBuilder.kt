@@ -8,6 +8,16 @@ class InfoQueryBuilder(
   var wikiLink: Boolean = false,
 ) {
 
+  // For testing purposes
+  fun withAll(): InfoQueryBuilder {
+    this.image = true
+    this.birth = true
+    this.death = true
+    this.description = true
+    this.wikiLink = true
+    return this
+  }
+
   fun withImage(): InfoQueryBuilder {
     this.image = true
     return this
