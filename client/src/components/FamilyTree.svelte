@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as d3 from 'd3';
-  import { positionNodes } from '$lib';
+  import { positionNodes, fetchTree } from '$lib';
   import {
     type People,
     type Marriages,
@@ -8,19 +8,23 @@
     type Tree,
     type MarriagePositions
   } from '$lib/types';
+  import { scale } from 'svelte/transition';
   import { onMount } from 'svelte';
   import FamilyTreeLines from './FamilyTreeLines.svelte';
   import { SvelteSet } from 'svelte/reactivity';
 
-  const {
-    tree,
-    getPersonInfo
-  }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } = $props();
+  let { tree, getPersonInfo }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } =
+    $props();
   let positions = $state<Positions>({});
   let treeWidth = $state<number>();
   let marriagePositions = $state<MarriagePositions>([]);
   let marriages = $state<Marriages>([]);
   let people = $state<People>([]);
+
+  /**
+   * list of nodes where the loading must be shown.
+   */
+  let loadingStatusOnNode = $state<string[]>([]);
 
   $effect(() => {
     if (tree) {
@@ -105,6 +109,19 @@
   );
 
   const yOffset = $derived(height / 2);
+
+  async function onExpandNode(id: string, name: string) {
+    loadingStatusOnNode = [...loadingStatusOnNode, id];
+    const result = await fetchTree(name, false);
+    const childTree = result.getOrThrow();
+
+    tree = {
+      focus: tree!.focus,
+      people: Array.from(new Set([...tree!.people, ...childTree.people])),
+      marriages: Array.from(new Set([...tree!.marriages, ...childTree.marriages]))
+    };
+    loadingStatusOnNode = loadingStatusOnNode.filter((_id) => id !== _id);
+  }
 </script>
 
 <svg id="svg-root" class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
@@ -145,9 +162,26 @@
               >
                 <button
                   onclick={() => handleClick(id, person.name)}
-                  class="flex h-full w-full cursor-pointer items-center justify-center text-center text-sm"
+                  class="relative flex h-full w-full cursor-pointer items-center justify-center text-center text-sm"
                 >
                   {person.name}
+                  <span
+                    class="absolute right-0 top-0 rounded-lg border border-black px-1 text-xs"
+                    role="button"
+                    tabindex="0"
+                    onclick={() => onExpandNode(id, person.name)}
+                    onkeypress={() => onExpandNode(id, person.name)}
+                  >
+                    +
+                  </span>
+
+                  <!--{#if loadingStatusOnNode.includes(id)}-->
+                  <!--  <span class="absolute grid h-full w-full place-items-center bg-gray opacity-70">-->
+                  <!--    <div class="absolute right-1 top-2" transition:scale={{ duration: 150 }}>-->
+                  <!--      <div class="loader h-5 w-5 bg-black p-1 opacity-50"></div>-->
+                  <!--    </div>-->
+                  <!--  </span>-->
+                  <!--{/if}-->
                 </button>
               </foreignObject>
             </g>
