@@ -4,6 +4,7 @@ import io.ktor.client.statement.*
 import kotlinx.serialization.json.*
 import org.data.models.*
 import org.data.models.WikidataProperties.propertyQIDMap
+import sun.awt.image.ImageWatched
 
 object WikiRequestParser {
   /**
@@ -80,4 +81,15 @@ object WikiRequestParser {
 
     return result.entities.mapValues { (_, entityInfo) -> entityInfo.labels.en?.value ?: "Unknown" }
   }
+
+  suspend fun parseWikiLinks(response: HttpResponse): Map<QID, String> {
+    val json = Json { ignoreUnknownKeys = true }
+
+    val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
+
+    return result.entities.mapValues { (_, entityInfo) -> entityInfo.sitelinks.enwiki.url }
+  }
+
+
+
 }
