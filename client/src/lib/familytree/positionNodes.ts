@@ -1,4 +1,12 @@
-import type { MarriageHeights, GroupAssignments, GroupID, Marriages, PersonID, Positions, Tree } from './types';
+import type {
+  MarriageHeights,
+  GroupAssignments,
+  GroupID,
+  Marriages,
+  PersonID,
+  Positions,
+  Tree
+} from './types';
 import sr from 'seedrandom';
 
 const SEED = '1234';
@@ -26,11 +34,6 @@ export function positionNodes(tree: Tree): {
 
   const { groups, highestGroup } = getMarriageGroups(tree);
 
-  console.log(
-    Object.fromEntries(groups.groups.entries()),
-    JSON.parse(JSON.stringify(groups.members))
-  );
-
   const { depths, highestGroup: nextHighestGroup } = assignDepths(
     tree,
     groups,
@@ -38,8 +41,6 @@ export function positionNodes(tree: Tree): {
     personParents,
     highestGroup
   );
-
-  console.log(depths)
 
   const sortedLevels = sortDepths(groups, depths, personMarriages, personParents);
 
@@ -79,7 +80,8 @@ function getMarriageGroups(tree: Tree): { groups: GroupAssignments; highestGroup
     const groupId = memberOf[parents[0]];
     let newGroup: PersonID[] = [];
     for (const person of parents) {
-      const group = marriageGroups.get(memberOf[person])!;
+      const group = marriageGroups.get(memberOf[person]);
+      if (group === undefined) continue;
       newGroup = newGroup.concat(group);
       marriageGroups.delete(memberOf[person]);
       for (const person of group) {
@@ -390,7 +392,7 @@ function sortByWeights<T>(
     for (let j = 0; j <= i; j++) {
       result1.push(solution1[j]);
     }
-    const result2 = solution2.filter(x => !result1.includes(x))
+    const result2 = solution2.filter((x) => !result1.includes(x));
     Array.prototype.push.apply(result1, result2);
     return result1;
   }
@@ -430,11 +432,11 @@ function sortByWeights<T>(
           parents.push(elem2);
         }
       }
-      solutions = [...parents]
+      solutions = [...parents];
       for (let i = 0; i < parents.length; i += 1) {
         const parent1 = parents[i];
         const parent2 = parents[(i + 1) % parents.length];
-        solutions.push(mutate(crossover(parent1, parent2)))
+        solutions.push(mutate(crossover(parent1, parent2)));
       }
     }
     return solutions;
@@ -592,8 +594,6 @@ function arrangeNodes(
       if (visitedGroups.has(groupId)) continue;
       visitedGroups.add(groupId);
 
-      console.log(node);
-
       const group = groups.groups.get(groupId)!;
       let childrenLeft = Infinity;
       let childrenRight = -Infinity;
@@ -747,12 +747,6 @@ function shuntOverlapping(level: PersonID[], assignments: Map<PersonID, number>)
     if (iters === 0) return;
     happy = true;
 
-    let avg = 0;
-    for (const person of level) {
-      avg += assignments.get(person)!;
-    }
-    avg /= level.length;
-
     for (let i = 0; i < level.length - 1; i++) {
       const index = i % 2 === 0 ? i / 2 : level.length - 2 - (i - 1) / 2;
       const person1 = level[index];
@@ -762,20 +756,15 @@ function shuntOverlapping(level: PersonID[], assignments: Map<PersonID, number>)
       const pos2 = assignments.get(person2)!;
       if (pos2 - pos1 < 2) {
         happy = false;
-        const us = (pos1 + pos2) / 2;
-        if (us <= avg) {
-          assignments.set(person1, pos1 - 1);
-        }
-        if (us >= avg) {
-          assignments.set(person2, pos2 + 1);
-        }
+        assignments.set(person1, pos1 - 0.5);
+        assignments.set(person2, pos2 + 0.5);
       }
     }
   }
 }
 
 const NODE_WIDTH = 80;
-const NODE_HEIGHT = 120;
+const NODE_HEIGHT = 120 * 2;
 
 function calculatePositions(levels: Map<number, Map<PersonID, number>>): {
   positions: Positions;
@@ -847,10 +836,11 @@ function getMarriageHeights(
   }
 
   for (const indices of depthIndices.values()) {
+    let highest = 0;
     for (let i = 0; i < indices.length; i++) {
+      const first = indices[i];
       for (let j = 0; j < indices.length; j++) {
         if (i === j) continue;
-        const first = indices[i];
         const second = indices[j];
 
         if (!hasChildren[first] || !hasChildren[second]) continue;
@@ -866,9 +856,40 @@ function getMarriageHeights(
         const cond3 = lefts[first] <= lefts[second] && rights[second] <= rights[first];
 
         if (offsets[first] === offsets[second] && (cond1 || cond2 || cond3)) {
-          offsets[first] = Math.max(offsets[first], offsets[second] + 1);
+          offsets[first] = Math.max(offsets[first] + 1);
+          highest = Math.max(highest, offsets[first]);
         }
       }
+    }
+
+    for (let i = 0; i < indices.length; i++) {
+      const first = indices[i];
+      let hasConflict = false;
+      const levels = new Set([offsets[first]]);
+      for (let j = 0; j < indices.length; j++) {
+        if (i === j) continue;
+        const second = indices[j];
+
+        if (!hasChildren[first] || !hasChildren[second]) continue;
+
+        if (rights[first] >= lefts[second] && lefts[first] <= rights[second]) {
+          levels.add(offsets[second]);
+          if (offsets[first] === offsets[second]) {
+            hasConflict = true;
+          }
+        }
+      }
+      if (hasConflict) {
+        for (;;) {
+          if (!levels.has(offsets[first])) break;
+          offsets[first]++;
+          highest = Math.max(highest, offsets[first]);
+        }
+      }
+    }
+
+    for (let i = 0; i < indices.length; i++) {
+      offsets[indices[i]] -= highest / 2;
     }
   }
 
