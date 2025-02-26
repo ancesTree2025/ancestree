@@ -208,37 +208,36 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
    * @param qid The person's Wikidata QID.
    * @returns A various info and personal attributes.
    */
-  suspend fun getDetailedInfo(qid: QID): PersonalInfo {
-
-    lateinit var infoMap: PropertyMapping
-    lateinit var label: Label
+  suspend fun getDetailedInfo(qid: QID, queryParams: InfoQueryBuilder): PersonalInfo {
 
     val familyResp = ComplexRequester.getLabelsOrClaims(listOf(qid))
-    infoMap = WikiRequestParser.parseWikidataClaims(familyResp, propertyQIDMapPersonal)[qid]!!
+    val infoMap = WikiRequestParser.parseWikidataClaims(familyResp, propertyQIDMapPersonal)[qid]!!
 
-    val imageString = mkImage(infoMap["Wikimedia Image File"]!!)
+    val info = PersonalInfo()
 
-    val PoB = getPlaceName(infoMap["PoB"]!!.getOrNull(0))
-    val PoD = getPlaceName(infoMap["PoD"]!!.getOrNull(0))
-
-    if (WikiCacheManager.getLabel(qid) == null) {
-      val labelResp = ComplexRequester.getLabelsOrClaims(listOf(qid))
-      label = WikiRequestParser.parseWikidataLabels(labelResp)[qid]!!
-      WikiCacheManager.putLabel(qid, label)
-    } else {
-      label = WikiCacheManager.getLabel(qid)!!
+    if (queryParams.image) {
+      info.image = mkImage(infoMap["Wikimedia Image File"]!!)
     }
 
-    val info =
-      PersonalInfo(
-        imageString,
-        mapOf(
-          "Born" to formatDatePlaceInfo(PoB, infoMap["DoB"]),
-          "Died" to formatDatePlaceInfo(PoD, infoMap["DoD"]),
-        ),
-        "stub", // ChatGPTDescriptionService.summarise(allInfo[qid]!!.first),
-        "stub",
-      )
+    if (queryParams.birth) {
+      val birthPlace = getPlaceName(infoMap["PoB"]!!.getOrNull(0))
+      info.birth = formatDatePlaceInfo(birthPlace, infoMap["DoB"])
+    }
+
+    if (queryParams.death) {
+      val deathPlace = getPlaceName(infoMap["PoD"]!!.getOrNull(0))
+      info.death = formatDatePlaceInfo(deathPlace, infoMap["DoD"])
+    }
+
+    if (queryParams.description) {
+      println("Description requested: $qid.")
+      info.description = "stub" // TODO: implement
+    }
+
+    if (queryParams.wikiLink) {
+      println("Wiki link requested: $qid.")
+      info.description = "stub" // TODO: implement
+    }
 
     return info
   }
