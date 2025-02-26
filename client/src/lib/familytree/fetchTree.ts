@@ -1,6 +1,6 @@
 import { Result } from 'typescript-result';
 import type { Marriages, People, PersonID, Tree } from './types';
-import exampleTree from '../data/joeBiden.json';
+import exampleTree from '../data/exampleTree.json';
 import { z } from 'zod';
 
 const personIdSchema = z.string();

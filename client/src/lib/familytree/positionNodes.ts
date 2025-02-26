@@ -1,4 +1,5 @@
 import type { MarriageHeights, Marriages, PersonID, Positions, Tree } from './types';
+import sr from 'seedrandom';
 
 /**
  * Assigns a position to each node in the family tree.
@@ -21,6 +22,11 @@ export function positionNodes(tree: Tree): {
 
   const { groups, highestGroup } = getMarriageGroups(tree);
 
+  console.log(
+    Object.fromEntries(groups.groups.entries()),
+    JSON.parse(JSON.stringify(groups.members))
+  );
+
   const { depths, highestGroup: nextHighestGroup } = assignDepths(
     tree,
     groups,
@@ -28,8 +34,6 @@ export function positionNodes(tree: Tree): {
     personParents,
     highestGroup
   );
-
-  console.log(depths);
 
   const sortedLevels = sortDepths(groups, depths, personMarriages, personParents);
 
@@ -86,7 +90,9 @@ function getMarriageGroups(tree: Tree): { groups: GroupAssignments; highestGroup
       const group = marriageGroups.get(memberOf[person])!;
       newGroup = newGroup.concat(group);
       marriageGroups.delete(memberOf[person]);
-      memberOf[person] = groupId;
+      for (const person of group) {
+        memberOf[person] = groupId;
+      }
     }
     marriageGroups.set(groupId, newGroup);
   }
@@ -155,7 +161,11 @@ function assignDepths(
     const minDepth = minDepths.get(groupId) ?? -Infinity;
     const maxDepth = maxDepths.get(groupId) ?? Infinity;
     let depth = 0;
-    if (minDepth > 0) {
+    if (maxDepth === Infinity && minDepth !== -Infinity) {
+      depth = minDepth;
+    } else if (minDepth === -Infinity && maxDepth !== Infinity) {
+      depth = maxDepth;
+    } else if (minDepth > 0) {
       depth = minDepth;
     } else if (maxDepth < 0) {
       depth = maxDepth;
@@ -168,22 +178,28 @@ function assignDepths(
       for (const marriage of personParents[person]) {
         const parents = marriage.parents;
         for (const parent of parents) {
-          const groupId = groups.members[parent];
+          const parentGroupId = groups.members[parent];
           // don't bother updating groups whose depths have been found
-          if (!unfound.has(groupId)) continue;
+          if (!unfound.has(parentGroupId)) continue;
 
-          maxDepths.set(groupId, Math.min(maxDepths.get(groupId) ?? Infinity, depth - 1));
+          maxDepths.set(
+            parentGroupId,
+            Math.min(maxDepths.get(parentGroupId) ?? Infinity, depth - 1)
+          );
         }
       }
       // update the min depth of all the children to be higher than this group's depth
       for (const marriage of personMarriages[person]) {
         const children = marriage.children;
         for (const child of children) {
-          const groupId = groups.members[child];
+          const childGroupId = groups.members[child];
           // don't bother updating groups whose depths have been found
-          if (!unfound.has(groupId)) continue;
+          if (!unfound.has(childGroupId)) continue;
 
-          minDepths.set(groupId, Math.max(minDepths.get(groupId) ?? -Infinity, depth + 1));
+          minDepths.set(
+            childGroupId,
+            Math.max(minDepths.get(childGroupId) ?? -Infinity, depth + 1)
+          );
         }
       }
     }
@@ -344,11 +360,22 @@ function sortDepths(
 
 const UNORDERED_WEIGHT = 2;
 
+/**
+ * Sorts an array of elements with respect to weights and constraints.
+ * This needs rewriting
+ * @template T - The type of elements in the array.
+ * @param {T[]} elements - The array of elements to be sorted.
+ * @param {Map<T, Map<T, number>>} weights - A map of "from" node to a map of "to" nodes to weights. A smaller weight indicates the nodes should be closer closer.
+ * @param {[T, T][]} constraints - An array of constraints where each constraint is a tuple [a, b] indicating
+ *                                 that element `a` should come before element `b`. (soft constraint)
+ * @returns {T[]} - The sorted array of elements that minimizes the total weight and respects the constraints.
+ */
 function sortByWeights<T>(
   elements: T[],
   weights: Map<T, Map<T, number>>,
   constraints: [T, T][]
 ): T[] {
+  console.log(elements, weights, constraints);
   let minimum = Infinity;
   let minimumPermutation: T[] = [];
 
@@ -367,6 +394,7 @@ function sortByWeights<T>(
 
     for (let x = 0; x < permutation.length - 1; x++) {
       for (let y = x + 1; y < permutation.length; y++) {
+        // score is weight times (distance squared)
         const w = weights.get(permutation[x])?.get(permutation[y]) ?? 0;
         const d = y - x;
         total += w * d * d;
@@ -407,12 +435,15 @@ function permutations<T>(xs: T[]): T[][] {
   return result;
 }
 
+const SEED = '1234';
+
 function generateRandomPermutations<T>(elements: T[], count: number): T[][] {
+  const rand = sr.alea(SEED);
   const permutations: T[][] = [];
   for (let i = 0; i < count; i++) {
     const shuffled = [...elements];
     for (let j = 0; j < elements.length; j++) {
-      const k = Math.floor(Math.random() * elements.length);
+      const k = Math.floor(rand.double() * elements.length);
       [shuffled[j], shuffled[k]] = [shuffled[k], shuffled[j]];
     }
     permutations.push(shuffled);
@@ -502,14 +533,23 @@ function arrangeNodes(
   for (;;) {
     const nodes = depths.get(depth);
     if (nodes === undefined) break;
-    const groupIds = new Set(nodes.map((id) => groups.members[id]));
 
     const groupLeft: Map<GroupID, number> = new Map();
     const groupRight: Map<GroupID, number> = new Map();
 
+    const visitedGroups = new Set<GroupID>();
+
+    let lastRight = -2;
+
     // for each parent group, find average position of children in layer below,
     // and find left + right bounds of each parent group
-    for (const groupId of groupIds) {
+    for (const node of nodes) {
+      const groupId = groups.members[node];
+      if (visitedGroups.has(groupId)) continue;
+      visitedGroups.add(groupId);
+
+      console.log(node);
+
       const group = groups.groups.get(groupId)!;
       let childrenLeft = Infinity;
       let childrenRight = -Infinity;
@@ -522,11 +562,16 @@ function arrangeNodes(
           childrenRight = Math.max(childrenRight, pos);
         }
       }
+      if (childrenLeft === Infinity) {
+        childrenLeft = lastRight + 2;
+        childrenRight = lastRight + 2;
+      }
       const mid = (childrenLeft + childrenRight) / 2;
       const left = mid - (group.length - 1);
       const right = mid + (group.length - 1);
       groupLeft.set(groupId, left);
       groupRight.set(groupId, right);
+      lastRight = right;
     }
 
     // TODO: prevent overlap of groups
@@ -685,8 +730,8 @@ function shuntOverlapping(level: PersonID[], assignments: Map<PersonID, number>)
   }
 }
 
-const NODE_WIDTH = 80;
-const NODE_HEIGHT = 120;
+const NODE_WIDTH = 80 * 3;
+const NODE_HEIGHT = 120 * 3;
 
 function calculatePositions(levels: Map<number, Map<PersonID, number>>): {
   positions: Positions;
@@ -757,8 +802,6 @@ function getMarriageHeights(
     i++;
   }
 
-  console.log(depthIndices);
-
   for (const indices of depthIndices.values()) {
     for (let i = 0; i < indices.length; i++) {
       for (let j = 0; j < indices.length; j++) {
@@ -777,20 +820,12 @@ function getMarriageHeights(
           lefts[first] <= rights[second] &&
           rights[second] <= rights[first];
         const cond3 = lefts[first] <= lefts[second] && rights[second] <= rights[first];
-        console.log(
-          [...tree.marriages[first].parents],
-          [...tree.marriages[second].parents],
-          cond1,
-          cond2,
-          cond3
-        );
 
         if (offsets[first] === offsets[second] && (cond1 || cond2 || cond3)) {
           offsets[first] = Math.max(offsets[first], offsets[second] + 1);
         }
       }
     }
-    console.log(indices.map((i) => [tree.marriages[i].parents, offsets[i]]));
   }
 
   return offsets;
