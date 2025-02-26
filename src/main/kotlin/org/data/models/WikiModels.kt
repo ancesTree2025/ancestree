@@ -1,6 +1,5 @@
 package org.data.models
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
@@ -16,7 +15,13 @@ import kotlinx.serialization.json.JsonElement
 /** Wikidata response from making a query on a QID */
 @Serializable data class WikidataResponse(val entities: Map<String, EntityInfo>)
 
-@Serializable data class EntityInfo(val labels: EnString, val descriptions: EnString, val claims: Map<String, List<WikiClaim>>, val sitelinks: SiteLinks)
+@Serializable
+data class EntityInfo(
+  val labels: EnString,
+  val descriptions: EnString,
+  val claims: Map<String, List<WikiClaim>>,
+  val sitelinks: SiteLinks,
+)
 
 @Serializable data class EnString(val en: StringValue? = null)
 

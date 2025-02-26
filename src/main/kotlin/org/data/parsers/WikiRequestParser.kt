@@ -4,7 +4,6 @@ import io.ktor.client.statement.*
 import kotlinx.serialization.json.*
 import org.data.models.*
 import org.data.models.WikidataProperties.propertyQIDMap
-import sun.awt.image.ImageWatched
 
 object WikiRequestParser {
   /**
@@ -95,7 +94,8 @@ object WikiRequestParser {
 
     val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
-    return result.entities.mapValues { (_, entityInfo) -> entityInfo.descriptions.en?.value ?: "Unknown" }
+    return result.entities.mapValues { (_, entityInfo) ->
+      entityInfo.descriptions.en?.value ?: "Unknown"
+    }
   }
-
 }
