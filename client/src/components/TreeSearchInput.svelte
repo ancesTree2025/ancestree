@@ -29,12 +29,14 @@
 
 <div class="relative flex w-60 items-center gap-3 self-start rounded-full bg-input pl-4">
   <IconUserSearch class="flex-none text-black opacity-50" />
-  <input
-    bind:value={searchValue}
-    class="flex-1 bg-transparent py-2 outline-none"
-    placeholder="Search in tree..."
-    oninput={onChange}
-  />
+  <form onsubmit={() => searchCompletion[0] && onSearchSubmit(searchCompletion[0])}>
+    <input
+      bind:value={searchValue}
+      class="flex-1 bg-transparent py-2 outline-none"
+      placeholder="Search in tree..."
+      oninput={onChange}
+    />
+  </form>
   {#if searchCompletion.length && !hideCompletion}
     <div class="absolute left-0 right-0 top-full mx-5">
       <div class="rounded-lg bg-white shadow-lg">
