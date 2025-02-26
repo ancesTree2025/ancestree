@@ -3,7 +3,7 @@ name: Deploy
 on:
   push:
     branches:
-      - main
+      - release
 
 jobs:
   test-frontend:
@@ -97,3 +97,27 @@ jobs:
           context: ./client
           push: true
           tags: ghcr.io/ancestree2025/ancestree-client:latest
+
+  publish-frontend:
+    runs-on: ubuntu-latest
+    needs: push-frontend-image
+    steps:
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Deploy
+        run: doctl apps create-deployment ${{ secrets.CLIENT_APP_ID }}
+
+  publish-backend:
+    runs-on: ubuntu-latest
+    needs: push-backend-image
+    steps:
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Deploy
+        run: doctl apps create-deployment ${{ secrets.SERVER_APP_ID }}
