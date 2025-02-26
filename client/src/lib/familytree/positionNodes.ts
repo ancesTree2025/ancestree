@@ -1,4 +1,4 @@
-import type { MarriageHeights, Marriages, PersonID, Positions, Tree } from './types';
+import type { MarriageHeights, GroupAssignments, GroupID, Marriages, PersonID, Positions, Tree } from './types';
 import sr from 'seedrandom';
 
 const SEED = '1234';
@@ -51,20 +51,6 @@ export function positionNodes(tree: Tree): {
 
   return { positions, treeWidth, marriageHeights };
 }
-
-/**
- * Represents the assignments of people to "marriage groups" within a family tree.
- *
- * @typedef {Object} GroupAssigments
- *
- * @property {Map<GroupID, PersonID[]>} groups - A mapping from group ID to the members of that group.
- * @property {Record<PersonID, GroupID>} members - A mapping from person ID to the group they are in.
- */
-type GroupAssignments = {
-  groups: Map<GroupID, PersonID[]>;
-  members: Record<PersonID, GroupID>;
-};
-type GroupID = number;
 
 /**
  * Arrange people into marriage groups from a given family tree.
@@ -121,6 +107,7 @@ function getMarriageGroups(tree: Tree): { groups: GroupAssignments; highestGroup
  * @param groups - The group assignments from getMarriageGroups
  * @param personMarriages - A record of marriages a person is a parent of
  * @param personParents - A record of marriages a person is a child of
+ * @param highestGroup - TODO
  * @returns A record mapping each group ID to its assigned depth
  */
 function assignDepths(
