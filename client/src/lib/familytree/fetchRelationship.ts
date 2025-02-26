@@ -3,6 +3,7 @@ import { personIdSchema } from './fetchTree';
 import exampleRelationship from '../data/exampleRelationship.json';
 import { Result } from 'typescript-result';
 import type { PersonID } from './types';
+import { env } from '$env/dynamic/public';
 
 const relationshipSchema = z.object({
   relation: z.string(),
@@ -26,7 +27,7 @@ export async function fetchRelationship(
     return Result.error('Only have sample data for qid1=D&qid2=C3');
   }
   const response = await Result.fromAsyncCatching(
-    fetch(`http://localhost:8080/relation?orig=${from}&dest=${to}`)
+    fetch(`${env.PUBLIC_API_BASE_URL}/relation?orig=${from}&dest=${to}`)
   ).mapError(() => 'Could not connect to server');
   if (response.getOrNull()?.status === 404) {
     return Result.error('Person not found');
