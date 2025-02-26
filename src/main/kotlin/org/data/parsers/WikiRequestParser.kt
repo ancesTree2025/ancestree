@@ -86,7 +86,9 @@ object WikiRequestParser {
 
     val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
-    return result.entities.mapValues { (_, entityInfo) -> entityInfo.sitelinks.enwiki?.url ?: "Unknown" }
+    return result.entities.mapValues { (_, entityInfo) ->
+      entityInfo.sitelinks.enwiki?.url ?: "Unknown"
+    }
   }
 
   suspend fun parseWikiDescriptions(response: HttpResponse): Map<QID, String> {
