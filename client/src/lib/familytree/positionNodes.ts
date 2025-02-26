@@ -1,6 +1,9 @@
 import type { MarriageHeights, Marriages, PersonID, Positions, Tree } from './types';
 import sr from 'seedrandom';
 
+const SEED = '1234';
+let rand = sr.alea(SEED);
+
 /**
  * Assigns a position to each node in the family tree.
  *
@@ -12,6 +15,7 @@ export function positionNodes(tree: Tree): {
   marriageHeights: MarriageHeights;
   treeWidth: number;
 } {
+  rand = sr.alea(SEED, { state: true });
   // for efficiency, keep mapping from person to marriages and from person to parents' marriage
   const personMarriages: Record<PersonID, Marriages> = Object.fromEntries(
     tree.people.map(([id]) => [id, tree.marriages.filter((m) => m.parents.includes(id))])
@@ -34,6 +38,8 @@ export function positionNodes(tree: Tree): {
     personParents,
     highestGroup
   );
+
+  console.log(depths)
 
   const sortedLevels = sortDepths(groups, depths, personMarriages, personParents);
 
@@ -362,6 +368,7 @@ const UNORDERED_WEIGHT = 2;
 
 /**
  * Sorts an array of elements with respect to weights and constraints.
+ * Minimizes sum of weight * distance^2 between all pairs of nodes in resulting in array
  * This needs rewriting
  * @template T - The type of elements in the array.
  * @param {T[]} elements - The array of elements to be sorted.
@@ -375,31 +382,87 @@ function sortByWeights<T>(
   weights: Map<T, Map<T, number>>,
   constraints: [T, T][]
 ): T[] {
-  console.log(elements, weights, constraints);
-  let minimum = Infinity;
-  let minimumPermutation: T[] = [];
+  function randomNumber(start: number, end: number) {
+    return start + Math.floor(rand.double() * (1 + end - start));
+  }
 
-  const perms = permutations(elements);
-  for (const permutation of perms) {
-    // if it violates any constraints then increase total
+  function mutate(solution: T[]): T[] {
+    const result = [...solution];
+    const i = randomNumber(0, solution.length - 1);
+    let j = randomNumber(0, solution.length - 2);
+    if (i === j) {
+      j++;
+    }
+    [result[i], result[j]] = [result[j], result[i]];
+    return result;
+  }
 
+  function crossover(solution1: T[], solution2: T[]): T[] {
+    const i = randomNumber(0, solution1.length - 1);
+    const result = [];
+    for (let j = 0; j <= i; j++) {
+      result.push(solution1[j]);
+    }
+    for (const value of solution2) {
+      if (!solution1.includes(value)) {
+        result.push(value);
+      }
+    }
+    return result;
+  }
+
+  function evaluate(solution: T[]) {
     let total = 0;
     for (const [a, b] of constraints) {
-      const aPos = permutation.indexOf(a);
-      const bPos = permutation.indexOf(b);
+      const aPos = solution.indexOf(a);
+      const bPos = solution.indexOf(b);
       if (aPos !== -1 && bPos !== -1 && aPos > bPos) {
         total += UNORDERED_WEIGHT;
       }
     }
 
-    for (let x = 0; x < permutation.length - 1; x++) {
-      for (let y = x + 1; y < permutation.length; y++) {
+    for (let x = 0; x < solution.length - 1; x++) {
+      for (let y = x + 1; y < solution.length; y++) {
         // score is weight times (distance squared)
-        const w = weights.get(permutation[x])?.get(permutation[y]) ?? 0;
+        const w = weights.get(solution[x])?.get(solution[y]) ?? 0;
         const d = y - x;
         total += w * d * d;
       }
     }
+    return total;
+  }
+
+  function geneticAlgorithm() {
+    const GENERATION_SIZE = 8;
+    let solutions = generateRandomPermutations(elements, GENERATION_SIZE);
+    for (let epoch = 0; epoch < 100; epoch++) {
+      const parents = [];
+      while (solutions.length > GENERATION_SIZE / 2) {
+        const elem1 = solutions.splice(randomNumber(0, solutions.length - 1), 1)[0];
+        const elem2 = solutions.splice(randomNumber(0, solutions.length - 1), 1)[0];
+        if (evaluate(elem1) < evaluate(elem2)) {
+          parents.push(elem1);
+        } else {
+          parents.push(elem2);
+        }
+      }
+      solutions = []
+      for (let i = 0; i < parents.length - 2; i++) {
+        const parent1 = parents[i];
+        const parent2 = parents[i + 1];
+        solutions.push(mutate(crossover(parent1, parent2)))
+      }
+    }
+    return solutions;
+  }
+
+  let minimum = Infinity;
+  let minimumPermutation: T[] = [];
+
+  const perms = elements.length > 8 ? geneticAlgorithm() : permutations(elements);
+  for (const permutation of perms) {
+    // if it violates any constraints then increase total
+    const total = evaluate(permutation);
     if (total < minimum) {
       minimum = total;
       minimumPermutation = permutation;
@@ -435,10 +498,7 @@ function permutations<T>(xs: T[]): T[][] {
   return result;
 }
 
-const SEED = '1234';
-
 function generateRandomPermutations<T>(elements: T[], count: number): T[][] {
-  const rand = sr.alea(SEED);
   const permutations: T[][] = [];
   for (let i = 0; i < count; i++) {
     const shuffled = [...elements];
@@ -730,8 +790,8 @@ function shuntOverlapping(level: PersonID[], assignments: Map<PersonID, number>)
   }
 }
 
-const NODE_WIDTH = 80 * 3;
-const NODE_HEIGHT = 120 * 3;
+const NODE_WIDTH = 80;
+const NODE_HEIGHT = 120;
 
 function calculatePositions(levels: Map<number, Map<PersonID, number>>): {
   positions: Positions;
