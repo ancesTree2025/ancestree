@@ -27,7 +27,7 @@ data class EntityInfo(
 
 @Serializable data class StringValue(val value: String)
 
-@Serializable data class SiteLinks(val enwiki: WikiLink)
+@Serializable data class SiteLinks(val enwiki: WikiLink? = null)
 
 @Serializable data class WikiLink(val url: String)
 
