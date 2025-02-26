@@ -13,7 +13,10 @@
 
   function onChange() {
     hideCompletion = false;
-    searchCompletion = searchValue === '' ? [] : names.filter((name) => name.includes(searchValue));
+    searchCompletion =
+      searchValue === ''
+        ? []
+        : names.filter((name) => name.toLowerCase().includes(searchValue.toLowerCase()));
     clearSearch();
   }
 
