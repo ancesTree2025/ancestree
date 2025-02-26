@@ -399,16 +399,13 @@ function sortByWeights<T>(
 
   function crossover(solution1: T[], solution2: T[]): T[] {
     const i = randomNumber(0, solution1.length - 1);
-    const result = [];
+    const result1: T[] = [];
     for (let j = 0; j <= i; j++) {
-      result.push(solution1[j]);
+      result1.push(solution1[j]);
     }
-    for (const value of solution2) {
-      if (!solution1.includes(value)) {
-        result.push(value);
-      }
-    }
-    return result;
+    const result2 = solution2.filter(x => !result1.includes(x))
+    Array.prototype.push.apply(result1, result2);
+    return result1;
   }
 
   function evaluate(solution: T[]) {
@@ -435,9 +432,9 @@ function sortByWeights<T>(
   function geneticAlgorithm() {
     const GENERATION_SIZE = 8;
     let solutions = generateRandomPermutations(elements, GENERATION_SIZE);
-    for (let epoch = 0; epoch < 100; epoch++) {
+    for (let epoch = 0; epoch < 1000; epoch++) {
       const parents = [];
-      while (solutions.length > GENERATION_SIZE / 2) {
+      while (solutions.length > 1) {
         const elem1 = solutions.splice(randomNumber(0, solutions.length - 1), 1)[0];
         const elem2 = solutions.splice(randomNumber(0, solutions.length - 1), 1)[0];
         if (evaluate(elem1) < evaluate(elem2)) {
@@ -446,10 +443,10 @@ function sortByWeights<T>(
           parents.push(elem2);
         }
       }
-      solutions = []
-      for (let i = 0; i < parents.length - 2; i++) {
+      solutions = [...parents]
+      for (let i = 0; i < parents.length; i += 1) {
         const parent1 = parents[i];
-        const parent2 = parents[i + 1];
+        const parent2 = parents[(i + 1) % parents.length];
         solutions.push(mutate(crossover(parent1, parent2)))
       }
     }
@@ -459,7 +456,7 @@ function sortByWeights<T>(
   let minimum = Infinity;
   let minimumPermutation: T[] = [];
 
-  const perms = elements.length > 8 ? geneticAlgorithm() : permutations(elements);
+  const perms = elements.length > 1 ? geneticAlgorithm() : permutations(elements);
   for (const permutation of perms) {
     // if it violates any constraints then increase total
     const total = evaluate(permutation);
