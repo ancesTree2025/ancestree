@@ -1,15 +1,18 @@
 package org.data.caches
 
 import org.data.models.Label
+import org.data.models.Person
 import org.data.models.PropertyMapping
 import org.data.models.QID
 import org.data.parsers.WikiRequestParser
 import org.data.requests.ComplexRequester
+import org.domain.models.Graph
 
 object InMemWikiCacheManager : WikiCacheManager {
   private val labelToQIDCache = mutableMapOf<Label, QID>()
   private val qidToLabelCache = mutableMapOf<QID, Label>()
   private val qidToPropsCache = mutableMapOf<QID, PropertyMapping>()
+  private val qidToGraphsCache = mutableMapOf<QID, MutableList<Graph<Person>>>()
 
   override suspend fun getQID(id: Label): QID? {
     return labelToQIDCache.getOrElse(id) {
@@ -40,5 +43,15 @@ object InMemWikiCacheManager : WikiCacheManager {
 
   override fun putProps(id: QID, entity: PropertyMapping) {
     qidToPropsCache[id] = entity
+  }
+
+  override fun getGraphs(id: QID): List<Graph<Person>>? = qidToGraphsCache[id]
+
+  override fun putGraphs(id: QID, entity: Graph<Person>) {
+    if (qidToGraphsCache[id].isNullOrEmpty()) {
+      qidToGraphsCache[id] = mutableListOf(entity)
+    } else {
+      qidToGraphsCache[id]!!.add(entity)
+    }
   }
 }

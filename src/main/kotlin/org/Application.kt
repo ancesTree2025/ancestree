@@ -14,7 +14,10 @@ fun main(args: Array<String>) {
 fun Application.module() {
   di { import(appModule) }
   install(CORS) {
-    anyHost() // TODO: unsafe
+    val allowedHosts =
+      with(System.getenv("ALLOWED_HOSTS") ?: "") { this.split(",").map(String::trim) }
+
+    allowedHosts.forEach { allowHost(it) }
   }
   configureSerialization()
   configureRouting()

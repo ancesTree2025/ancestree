@@ -2,8 +2,9 @@ import { Result } from 'typescript-result';
 import type { Marriages, People, PersonID, Tree } from './types';
 import exampleTree from '../data/exampleTree.json';
 import { z } from 'zod';
+import { env } from '$env/dynamic/public';
 
-const personIdSchema = z.string();
+export const personIdSchema = z.string();
 
 const personSchema = z.object({
   data: z.object({
@@ -34,7 +35,7 @@ export function apiResponseToTree(res: ApiResponse): Tree {
   const depths: Map<PersonID, number> = new Map();
 
   for (const person of res.nodes) {
-    people.push([person.id, { name: person.data.name }]);
+    people.push([person.id, { name: person.data.name }, person.data.gender]);
     depths.set(person.id, person.depth);
   }
 
@@ -101,9 +102,10 @@ export async function fetchTree(name: string, useFakeData: boolean): Promise<Res
   if (useFakeData) {
     return Result.ok(exampleTree as Tree);
   }
-  const response = await Result.fromAsyncCatching(fetch(`http://localhost:8080/${name}`)).mapError(
-    () => 'Could not connect to server'
-  );
+
+  const response = await Result.fromAsyncCatching(
+    fetch(`${env.PUBLIC_API_BASE_URL}/${name}`)
+  ).mapError(() => 'Could not connect to server');
   if (response.getOrNull()?.status === 404) {
     return Result.error('Person not found');
   }

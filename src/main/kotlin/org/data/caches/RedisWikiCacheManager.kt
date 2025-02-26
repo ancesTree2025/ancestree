@@ -1,8 +1,10 @@
 package org.data.caches
 
 import org.data.models.Label
+import org.data.models.Person
 import org.data.models.PropertyMapping
 import org.data.models.QID
+import org.domain.models.Graph
 
 object RedisWikiCacheManager : WikiCacheManager {
   override suspend fun getQID(id: Label): QID? {
@@ -26,6 +28,14 @@ object RedisWikiCacheManager : WikiCacheManager {
   }
 
   override fun putProps(id: QID, entity: PropertyMapping) {
+    TODO("Not yet implemented")
+  }
+
+  override fun getGraphs(id: QID): List<Graph<Person>>? {
+    TODO("Not yet implemented")
+  }
+
+  override fun putGraphs(id: QID, entity: Graph<Person>) {
     TODO("Not yet implemented")
   }
 }

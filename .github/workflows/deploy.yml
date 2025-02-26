@@ -33,7 +33,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Test
-        run: bun test
+        run: bun vitest run
 
   test-backend:
     runs-on: ubuntu-latest

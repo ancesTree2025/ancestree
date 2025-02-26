@@ -1,5 +1,6 @@
 package org.data.producers
 
+import org.data.caches.InMemWikiCacheManager.putGraphs
 import kotlin.math.abs
 import org.data.models.Label
 import org.data.models.Person
@@ -216,6 +217,12 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
 
     val rootNode = nodes.values.find { it.data.id == rootQid } ?: error("Root not found...")
 
-    return Graph(rootNode, nodes.values.toSet(), edges)
+    val final = Graph(rootNode, nodes.values.toSet(), edges.toSet())
+
+    print("Caching final graph: $final")
+
+    nodes.forEach { putGraphs(it.key, final) }
+
+    return final
   }
 }

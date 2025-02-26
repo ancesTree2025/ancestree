@@ -1,8 +1,10 @@
 <script lang="ts">
   import * as d3 from 'd3';
   import { balanceTree } from '$lib';
+  import { zip } from '$lib/utils';
   import type { Marriage, Positions, Tree } from '$lib/types';
   import { onMount } from 'svelte';
+  import { SvelteSet } from 'svelte/reactivity';
 
   const {
     tree,
@@ -39,6 +41,36 @@
 
   let height = $state(0);
   let width = $state(0);
+  let selectedID = $state('');
+  const highlightSet = new SvelteSet<string>();
+
+  function handleClick(id: string, name: string) {
+    selectedID = id; // Update selected person ID
+    getPersonInfo(id, name); // Fetch person info
+
+    highlightSet.clear();
+    highlightSet.add(id);
+
+    if (!visMarriages) return;
+
+    visMarriages.forEach((marriage) => {
+      if (marriage[0].children.includes(id)) {
+        highlightSet.add(marriage[0].parents[0]);
+        highlightSet.add(marriage[0].parents[1]);
+      }
+
+      if (marriage[0].parents.includes(id)) {
+        marriage[0].children.forEach((child) => highlightSet.add(child));
+      }
+    });
+  }
+
+  function closeSidePanel() {
+    highlightSet.clear();
+    selectedID = '';
+  }
+
+  export { closeSidePanel };
 
   const zoomFactor = $derived(Math.min(1, treeWidth ? width / treeWidth : 1));
 
@@ -55,8 +87,10 @@
       {#if tree && visMarriages}
         {#each visMarriages as marriage}
           <!-- fetch Person for each parent, child -->
-          {@const mother = positions[marriage[0].parents[0]]}
-          {@const father = positions[marriage[0].parents[1]]}
+          {@const motherID = marriage[0].parents[0]}
+          {@const fatherID = marriage[0].parents[1]}
+          {@const mother = positions[motherID]}
+          {@const father = positions[fatherID]}
           {@const children = marriage[0].children.map((id) => positions[id])}
 
           {#if mother && father}
@@ -68,8 +102,21 @@
                 y1={mother.y}
                 x2={father.x}
                 y2={father.y}
-                class="stroke-node stroke-line"
+                class="{highlightSet.has(motherID) && highlightSet.has(fatherID)
+                  ? 'stroke-highlight_border'
+                  : 'stroke-node'} stroke-line"
               />
+
+              {#if (motherID === selectedID || fatherID === selectedID) && !highlightSet.isDisjointFrom(new Set(marriage[0].children))}
+                {@const startPoint = selectedID === motherID ? mother.x : father.x}
+                <line
+                  x1={startPoint}
+                  y1={mother.y}
+                  x2={parentsX}
+                  y2={father.y}
+                  class="stroke-highlight_border stroke-line"
+                />
+              {/if}
             {:else}
               <line
                 x1={mother.x}
@@ -104,7 +151,11 @@
                 y1={parentsY}
                 x2={parentsX}
                 y2={midY}
-                class="stroke-node stroke-line"
+                class="{motherID === selectedID ||
+                fatherID === selectedID ||
+                marriage[0].children.includes(selectedID)
+                  ? 'stroke-highlight_border'
+                  : 'stroke-node'} stroke-line"
               />
 
               <!-- Draw children line -->
@@ -116,30 +167,57 @@
                 parentsX,
                 ...children.map((child) => child?.x ?? -Infinity)
               )}
-              <line
-                x1={leftChildX}
-                y1={midY}
-                x2={rightChildX}
-                y2={midY}
-                class="stroke-node stroke-line"
-              />
+
+              {#if motherID === selectedID || fatherID === selectedID}
+                <line
+                  x1={leftChildX}
+                  y1={midY}
+                  x2={rightChildX}
+                  y2={midY}
+                  class="stroke-highlight_border stroke-line"
+                />
+              {:else}
+                <line
+                  x1={leftChildX}
+                  y1={midY}
+                  x2={rightChildX}
+                  y2={midY}
+                  class="stroke-node stroke-line"
+                />
+              {/if}
 
               <!-- Draw line from each child to children line -->
-              {#each children as child}
+              {#each zip(children, marriage[0].children) as childAndID}
+                {@const child = childAndID[0]}
+                {@const childID = childAndID[1]}
                 {#if child}
+                  {#if childID === selectedID}
+                    <line
+                      x1={child.x}
+                      y1={midY}
+                      x2={parentsX}
+                      y2={midY}
+                      class="stroke-highlight_border stroke-line"
+                    />
+                  {/if}
+
                   <line
                     x1={child.x}
                     y1={midY}
                     x2={child.x}
                     y2={child.y}
-                    class="stroke-node stroke-line"
+                    class="{motherID === selectedID ||
+                    fatherID === selectedID ||
+                    childID === selectedID
+                      ? 'stroke-highlight_border'
+                      : 'stroke-node'} stroke-line"
                   />
                 {/if}
               {/each}
             {/if}
           {/if}
         {/each}
-        {#each tree.people as [id, person]}
+        {#each tree.people as [id, person, gender]}
           {@const position = positions[id]}
           {#if position}
             <g transform="translate({position.x},{position.y})">
@@ -149,7 +227,15 @@
                 width={RECT_WIDTH}
                 height={RECT_HEIGHT}
                 rx={RECT_RADIUS}
-                class="fill-node"
+                class="{tree.people[0][0] === id
+                  ? 'fill-highlight'
+                  : gender === 'male'
+                    ? 'fill-blue'
+                    : gender === 'female'
+                      ? 'fill-red'
+                      : 'fill-node'} {highlightSet.has(id)
+                  ? 'stroke-highlight_border stroke-line'
+                  : ''}"
               ></rect>
               <foreignObject
                 x={-RECT_WIDTH / 2}
@@ -158,7 +244,7 @@
                 height={RECT_HEIGHT}
               >
                 <button
-                  onclick={() => getPersonInfo(id, person.name)}
+                  onclick={() => handleClick(id, person.name)}
                   class="flex h-full w-full cursor-pointer items-center justify-center text-center text-sm"
                 >
                   {person.name}

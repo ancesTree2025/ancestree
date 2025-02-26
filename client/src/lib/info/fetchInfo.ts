@@ -2,6 +2,7 @@ import { Result } from 'typescript-result';
 import exampleData from './exampleData.json';
 import { personInfoSchema } from './schemas';
 import type { PersonInfo } from './types';
+import { env } from '$env/dynamic/public';
 
 export async function fetchInfo(
   qid: string,
@@ -11,7 +12,7 @@ export async function fetchInfo(
     return Result.ok(exampleData);
   }
   const response = await Result.fromAsyncCatching(
-    fetch(`http://localhost:8080/info?${new URLSearchParams({ qid })}`)
+    fetch(`${env.PUBLIC_API_BASE_URL}/info?${new URLSearchParams({ qid })}`)
   ).mapError(() => 'Could not connect to server');
   if (response.getOrNull()?.status === 404) {
     return Result.error('Person not found');
