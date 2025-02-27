@@ -6,14 +6,16 @@
   import type { LoadingStatus } from '$lib/types';
   import { scale } from 'svelte/transition';
   import { fetchNames } from '$lib';
+  import { goto } from '$app/navigation';
 
   interface Props {
     status: LoadingStatus;
     onSubmit: (_: string) => void;
+    initialValue: string;
   }
-  const { status, onSubmit }: Props = $props();
+  const { status, onSubmit, initialValue }: Props = $props();
 
-  let name = $state('');
+  let name = $state(initialValue);
 
   /**
    * A loading state to notify the user when
@@ -68,6 +70,7 @@
     searchResults = [];
     name = selectedName; // Replaces the typed name with the selected name
     searchQuery = '';
+    goto(`/${name}`);
     onSubmit(name);
   }
 
@@ -87,7 +90,7 @@
   <form onsubmit={() => selectName(name)}>
     <input
       class="flex-1 bg-transparent py-2 outline-none"
-      value={name}
+      value={initialValue}
       oninput={onChange}
       placeholder="Enter a name..."
     />

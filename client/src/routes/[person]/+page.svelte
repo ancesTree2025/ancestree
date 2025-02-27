@@ -1,17 +1,19 @@
 <script lang="ts">
-  import FamilyTree from '../components/FamilyTree.svelte';
-  import NameInput from '../components/NameInput.svelte';
-  import SidePanel from '../components/SidePanel.svelte';
+  import FamilyTree from '../../components/FamilyTree.svelte';
+  import NameInput from '../../components/NameInput.svelte';
+  import SidePanel from '../../components/SidePanel.svelte';
 
   import { fetchTree, fetchInfo } from '$lib';
   import type { Tree, LoadingStatus, PersonInfo } from '$lib/types';
 
   import { page } from '$app/state';
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
-  import TreeSearchInput from '../components/TreeSearchInput.svelte';
+  import TreeSearchInput from '../../components/TreeSearchInput.svelte';
+  import { afterNavigate } from '$app/navigation';
 
-  const name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
+
+  let name = $state(page.params.person);
 
   let tree = $state<Tree | undefined>();
   let filteredTree = $state<Tree | undefined>();
@@ -19,23 +21,24 @@
 
   let familyTree: FamilyTree | null = $state(null);
 
+  afterNavigate(navigation => {
+    name = navigation.to?.params!['person']!;
+  })
   $effect(() => {
-    if (name) {
-      status = { state: 'loading' };
-      fetchTree(name, useFakeData).then((result) => {
-        const [fetched, error] = result.toTuple();
-        if (fetched) {
-          tree = fetched;
-          status = { state: 'idle' };
+    status = { state: 'loading' };
+    fetchTree(name, useFakeData).then((result) => {
+      const [fetched, error] = result.toTuple();
+      if (fetched) {
+        tree = fetched;
+        status = { state: 'idle' };
 
-          // Opening the side panel with the focus on search complete
-          const [qid, personName] = fetched.people.find((p) => p[0] === fetched.focus)!;
-          if (qid && personName) getPersonInfo(qid, personName.name);
-        } else if (error) {
-          status = { state: 'error', error };
-        }
-      });
-    }
+        // Opening the side panel with the focus on search complete
+        const [qid, personName] = fetched.people.find((p) => p[0] === fetched.focus)!;
+        if (qid && personName) getPersonInfo(qid, personName.name);
+      } else if (error) {
+        status = { state: 'error', error };
+      }
+    });
   });
 
   async function onSubmit(name: string) {
@@ -123,7 +126,7 @@
   <nav class="flex items-center gap-12 px-8 py-4 shadow-lg">
     <h1 class="w-48 text-lg">Ancestree</h1>
     <div class="flex flex-1 justify-center">
-      <NameInput {onSubmit} {status} />
+      <NameInput {onSubmit} {status} initialValue={name} />
     </div>
     <div class="w-48"></div>
   </nav>
