@@ -1,12 +1,12 @@
 package org.core
 
 import io.ktor.client.*
-import io.ktor.client.plugins.websocket.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.data.models.Person
+import org.data.services.InfoQueryBuilder
 import org.data.services.WikiLookupService
 import org.domain.models.AutocompleteResponse
 import org.domain.producers.GraphProducer
@@ -50,9 +50,30 @@ fun Application.configureRouting() {
             "qid is required. Nothing was passed",
           )
 
+      val paramList =
+        call.parameters.getAll("params[]")
+          ?: return@get call.respond(
+            HttpStatusCode.BadRequest,
+            "params is required. Nothing was passed",
+          )
+
+      println("Parameters: $paramList")
+
+      val queryParams = InfoQueryBuilder()
+
+      for (param in paramList) {
+        when (param) {
+          "image" -> queryParams.withImage()
+          "birth" -> queryParams.withBirth()
+          "death" -> queryParams.withDeath()
+          "description" -> queryParams.withDescription()
+          "wikiLink" -> queryParams.withWikiLink()
+        }
+      }
+
       val wikiLookupService = WikiLookupService()
-      val personInfo = wikiLookupService.getDetailedInfo(qid)
-      call.respond(personInfo!!)
+      val personInfo = wikiLookupService.getDetailedInfo(qid, queryParams)
+      call.respond(personInfo)
     }
   }
 

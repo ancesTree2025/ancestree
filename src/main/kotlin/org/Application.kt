@@ -1,6 +1,5 @@
 package org
 
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.cors.routing.CORS
 import org.core.configureRouting
