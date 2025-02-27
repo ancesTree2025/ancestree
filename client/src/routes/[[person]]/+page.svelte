@@ -22,12 +22,12 @@
 
   let familyTree: FamilyTree | null = $state(null);
 
-  afterNavigate(navigation => {
+  afterNavigate((navigation) => {
     name = navigation.to?.params!['person'] ?? '';
     if (!name) {
       tree = undefined;
     }
-  })
+  });
   $effect(() => {
     if (name) {
       status = { state: 'loading' };
