@@ -80,22 +80,4 @@ object WikiRequestParser {
 
     return result.entities.mapValues { (_, entityInfo) -> entityInfo.labels.en?.value ?: "Unknown" }
   }
-
-  suspend fun parseWikiLinks(response: HttpResponse): Map<QID, String> {
-    val json = Json { ignoreUnknownKeys = true }
-
-    val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
-
-    return result.entities.mapValues { (_, entityInfo) -> entityInfo.sitelinks.enwiki.url }
-  }
-
-  suspend fun parseWikiDescriptions(response: HttpResponse): Map<QID, String> {
-    val json = Json { ignoreUnknownKeys = true }
-
-    val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
-
-    return result.entities.mapValues { (_, entityInfo) ->
-      entityInfo.descriptions.en?.value ?: "Unknown"
-    }
-  }
 }

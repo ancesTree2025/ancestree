@@ -2,12 +2,11 @@ package org.data.models
 
 import kotlinx.serialization.Serializable
 
-/** Data structure to specify information contained in the sidebar. Fields can be null. */
+/** Simple record structure to house personal information to be displayed on the side-bar. */
 @Serializable
 data class PersonalInfo(
-  var image: String? = null,
-  var birth: String? = null, // String of place and date of birth
-  var death: String? = null, // String of place and date of death
-  var description: String? = null,
-  var wikiLink: String? = null,
+  val image: String,
+  val attributes: Map<String, String>,
+  val description: String,
+  val wikipedia_link: String,
 )

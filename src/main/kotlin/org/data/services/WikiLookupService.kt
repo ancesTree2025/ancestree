@@ -187,7 +187,7 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     val mappings = mutableMapOf<QID, PropertyMapping>()
     val subQs = unseenQids.chunked(CHUNK_SIZE)
     subQs.forEach {
-      val claimsResp = ComplexRequester.getInfo(it)
+      val claimsResp = ComplexRequester.getLabelsOrClaims(it)
       mappings.putAll(WikiRequestParser.parseWikidataClaims(claimsResp))
     }
 
@@ -208,36 +208,37 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
    * @param qid The person's Wikidata QID.
    * @returns A various info and personal attributes.
    */
-  suspend fun getDetailedInfo(qid: QID, queryParams: InfoQueryBuilder): PersonalInfo {
+  suspend fun getDetailedInfo(qid: QID): PersonalInfo {
 
-    val response = ComplexRequester.getInfo(listOf(qid))
-    val infoMap = WikiRequestParser.parseWikidataClaims(response, propertyQIDMapPersonal)[qid]!!
+    lateinit var infoMap: PropertyMapping
+    lateinit var label: Label
 
-    val info = PersonalInfo()
+    val familyResp = ComplexRequester.getLabelsOrClaims(listOf(qid))
+    infoMap = WikiRequestParser.parseWikidataClaims(familyResp, propertyQIDMapPersonal)[qid]!!
 
-    if (queryParams.image) {
-      info.image = mkImage(infoMap["Wikimedia Image File"]!!)
+    val imageString = mkImage(infoMap["Wikimedia Image File"]!!)
+
+    val PoB = getPlaceName(infoMap["PoB"]!!.getOrNull(0))
+    val PoD = getPlaceName(infoMap["PoD"]!!.getOrNull(0))
+
+    if (WikiCacheManager.getLabel(qid) == null) {
+      val labelResp = ComplexRequester.getLabelsOrClaims(listOf(qid))
+      label = WikiRequestParser.parseWikidataLabels(labelResp)[qid]!!
+      WikiCacheManager.putLabel(qid, label)
+    } else {
+      label = WikiCacheManager.getLabel(qid)!!
     }
 
-    if (queryParams.birth) {
-      val birthPlace = getPlaceName(infoMap["PoB"]!!.getOrNull(0))
-      info.birth = formatDatePlaceInfo(birthPlace, infoMap["DoB"])
-    }
-
-    if (queryParams.death) {
-      val deathPlace = getPlaceName(infoMap["PoD"]!!.getOrNull(0))
-      info.death = formatDatePlaceInfo(deathPlace, infoMap["DoD"])
-    }
-
-    if (queryParams.description) {
-      val desc = WikiRequestParser.parseWikiDescriptions(response)
-      info.description = desc[qid]
-    }
-
-    if (queryParams.wikiLink) {
-      val link = WikiRequestParser.parseWikiLinks(response)
-      info.wikiLink = link[qid]
-    }
+    val info =
+      PersonalInfo(
+        imageString,
+        mapOf(
+          "Born" to formatDatePlaceInfo(PoB, infoMap["DoB"]),
+          "Died" to formatDatePlaceInfo(PoD, infoMap["DoD"]),
+        ),
+        "stub", // ChatGPTDescriptionService.summarise(allInfo[qid]!!.first),
+        "stub",
+      )
 
     return info
   }
@@ -269,7 +270,7 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     val subQs = unseenQids.chunked(45)
     subQs.forEach {
       println("--${c++} out of ${(unseenQids.size/45)}$")
-      val claimsResp = ComplexRequester.getInfo(it)
+      val claimsResp = ComplexRequester.getLabelsOrClaims(it)
       val qidToLabels = WikiRequestParser.parseWikidataLabels(claimsResp)
 
       qidToLabels.forEach { (qid, label) -> WikiCacheManager.putLabel(qid, label) }
@@ -313,7 +314,7 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     if (locQID == null) return "Unknown"
 
     if (WikiCacheManager.getLabel(locQID) == null) {
-      val locReq = ComplexRequester.getInfo(listOf(locQID))
+      val locReq = ComplexRequester.getLabelsOrClaims(listOf(locQID))
       val locInfo = WikiRequestParser.parseWikidataLabels(locReq)
       val name = locInfo[locQID]!!
       WikiCacheManager.putLabel(locQID, name)

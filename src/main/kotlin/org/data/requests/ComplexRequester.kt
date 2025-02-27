@@ -27,16 +27,16 @@ object ComplexRequester {
   }
 
   /**
-   * Gets all the info for each QID passed in.
+   * Gets the label and claims for particular QIDs passed in.
    *
-   * @param qids A list of QIDs to retrieve info for.
+   * @param qids A list of QIDs to retrieve labels or claims for.
    * @returns HTTP response.
    */
-  suspend fun getInfo(qids: List<QID>): HttpResponse {
+  suspend fun getLabelsOrClaims(qids: List<QID>): HttpResponse {
     val response =
       BaseRequester.doWikidataRequest("wbgetentities") {
         parameter("ids", qids.joinToString("|"))
-        parameter("props", "claims|descriptions|labels|sitelinks/urls")
+        parameter("props", "labels|claims")
         parameter("languages", "en")
       }
 
