@@ -803,7 +803,7 @@ function shuntOverlapping(level: PersonID[], assignments: Map<PersonID, number>)
 }
 
 const NODE_WIDTH = 80;
-const NODE_HEIGHT = 120 * 2;
+const NODE_HEIGHT = 150;
 
 function calculatePositions(levels: Map<number, Map<PersonID, number>>): {
   positions: Positions;
