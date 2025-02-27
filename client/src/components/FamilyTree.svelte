@@ -1,7 +1,7 @@
 <script lang="ts">
   import * as d3 from 'd3';
   import { positionNodes } from '$lib';
-  import type { MarriageHeights, Positions, Tree } from '$lib/types';
+  import type { MarriageDistances, MarriageHeights, Positions, Tree } from '$lib/types';
   import { onMount } from 'svelte';
   import FamilyTreeLines from './FamilyTreeLines.svelte';
 
@@ -12,6 +12,8 @@
   let positions = $state<Positions>({});
   let treeWidth = $state<number>();
   let marriageHeights = $state<MarriageHeights>([]);
+  let marriageDistances = $state<MarriageDistances>([]);
+  let marriageOffsets = $state<number[]>([]);
 
   $effect(() => {
     if (tree) {
@@ -19,6 +21,8 @@
       positions = result.positions;
       treeWidth = result.treeWidth;
       marriageHeights = result.marriageHeights;
+      marriageDistances = result.marriageDistances;
+      marriageOffsets = result.marriageOffsets;
     } else {
       positions = {};
     }
@@ -55,7 +59,13 @@
     <g transform="translate({xOffset}, {yOffset}) scale({zoomFactor})">
       {#if tree}
         {#each tree.marriages as marriage, i}
-          <FamilyTreeLines {marriage} {positions} height={marriageHeights[i] ?? 0} />
+          <FamilyTreeLines
+            {marriage}
+            {positions}
+            height={marriageHeights[i] ?? 0}
+            distance={marriageDistances[i] ?? 1}
+            offset={marriageOffsets[i] ?? 0}
+          />
         {/each}
         {#each tree.people as [id, person]}
           {@const position = positions[id]}

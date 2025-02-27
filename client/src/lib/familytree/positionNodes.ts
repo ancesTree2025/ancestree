@@ -5,7 +5,9 @@ import type {
   Marriages,
   PersonID,
   Positions,
-  Tree
+  Tree,
+  MarriageDistances,
+  MarriageOffsets
 } from './types';
 import sr from 'seedrandom';
 
@@ -21,6 +23,8 @@ let rand = sr.alea(SEED);
 export function positionNodes(tree: Tree): {
   positions: Positions;
   marriageHeights: MarriageHeights;
+  marriageDistances: MarriageDistances;
+  marriageOffsets: MarriageOffsets;
   treeWidth: number;
 } {
   rand = sr.alea(SEED, { state: true });
@@ -42,15 +46,42 @@ export function positionNodes(tree: Tree): {
     highestGroup
   );
 
-  const sortedLevels = sortDepths(groups, depths, personMarriages, personParents);
+  const { sortedLevels, positions: personPositions } = sortDepths(
+    groups,
+    depths,
+    personMarriages,
+    personParents
+  );
+
+  const marriageDistances = findMarriageDistances(tree, personPositions);
+
+  console.log(marriageDistances);
 
   const arrangedLevels = arrangeNodes(sortedLevels, groups, personMarriages, nextHighestGroup);
+
+  const marriageOffsets = getMarriageOffsets(
+    tree,
+    groups,
+    depths,
+    arrangedLevels,
+    marriageDistances
+  );
+
+  console.log(marriageOffsets);
 
   const marriageHeights = getMarriageHeights(tree, arrangedLevels);
 
   const { positions, treeWidth } = calculatePositions(arrangedLevels);
 
-  return { positions, treeWidth, marriageHeights };
+  console.log(arrangedLevels);
+
+  return {
+    positions,
+    treeWidth,
+    marriageHeights,
+    marriageDistances,
+    marriageOffsets
+  };
 }
 
 /**
@@ -235,10 +266,12 @@ function sortDepths(
   depths: Map<GroupID, number>,
   personMarriages: Record<PersonID, Marriages>,
   personParents: Record<PersonID, Marriages>
-): Map<number, PersonID[]> {
+): { sortedLevels: Map<number, PersonID[]>; positions: Map<PersonID, number> } {
   // process the depths from bottom to top
   const depthNumbers: number[] = Array.from(new Set(depths.values())).sort((a, b) => b - a);
   const outputDepths: Map<number, PersonID[]> = new Map();
+
+  const positions = new Map<PersonID, number>();
 
   let lastAssignment: PersonID[] | null = null;
   for (const depth of depthNumbers) {
@@ -350,7 +383,13 @@ function sortDepths(
     outputDepths.set(depth, minimumPermutation);
   }
 
-  return outputDepths;
+  for (const depth of outputDepths.values()) {
+    for (const [i, person] of depth.entries()) {
+      positions.set(person, i);
+    }
+  }
+
+  return { sortedLevels: outputDepths, positions };
 }
 
 const UNORDERED_WEIGHT = 2;
@@ -893,5 +932,112 @@ function getMarriageHeights(
     }
   }
 
+  return offsets;
+}
+
+function findMarriageDistances(tree: Tree, positions: Map<PersonID, number>): MarriageDistances {
+  const distances: MarriageDistances = [];
+  for (const marriage of tree.marriages) {
+    let min = Infinity;
+    let max = -Infinity;
+    for (const parent of marriage.parents) {
+      const pos = positions.get(parent)!;
+      min = Math.min(min, pos);
+      max = Math.max(max, pos);
+    }
+    const distance = max - min;
+    distances.push(distance);
+  }
+  return distances;
+}
+
+function getMarriageOffsets(
+  tree: Tree,
+  groups: GroupAssignments,
+  depths: Map<GroupID, number>,
+  positions: Map<number, Map<PersonID, number>>,
+  distances: MarriageDistances
+): MarriageOffsets {
+  const bounds: Map<number, Map<number, [number, number][]>> = new Map();
+  console.log(tree.marriages);
+  let i = 0;
+  for (const marriage of tree.marriages) {
+    console.log(i);
+    const groupId = groups.members[marriage.parents[0]];
+    if (groupId === undefined) {
+      i++;
+      continue;
+    }
+    const depth = depths.get(groupId)!;
+    const distance = distances[i];
+    const layer = positions.get(depth)!;
+    let left = Infinity;
+    let right = -Infinity;
+    for (const person of marriage.parents) {
+      const pos = layer.get(person)!;
+      left = Math.min(left, pos);
+      right = Math.max(right, pos);
+    }
+    if (!bounds.has(depth)) bounds.set(depth, new Map());
+    const depthBound = bounds.get(depth)!;
+    if (!depthBound.has(distance)) depthBound.set(distance, []);
+    depthBound.get(distance)!.push([left, right]);
+    i++;
+  }
+  console.log(bounds);
+
+  const offsets = [];
+  i = 0;
+  for (const marriage of tree.marriages) {
+    const distance = distances[i];
+    const groupId = groups.members[marriage.parents[0]];
+    if (groupId === undefined) {
+      offsets.push(0);
+      continue;
+    }
+    const depth = depths.get(groupId)!;
+    const layer = positions.get(depth)!;
+    const leftParent = Math.min(...marriage.parents.map((p) => layer.get(p) ?? Infinity));
+    const rightParent = Math.max(...marriage.parents.map((p) => layer.get(p) ?? -Infinity));
+    const mid = (leftParent + rightParent) / 2;
+
+    let happy = false;
+    let left = mid;
+    while (!happy) {
+      happy = true;
+      for (let d = 1; d < distance; d++) {
+        for (const [min, max] of bounds.get(depth)!.get(d)!) {
+          if (min <= left && left <= max) {
+            happy = false;
+            left = min - 1;
+          }
+        }
+      }
+    }
+
+    happy = false;
+    let right = mid;
+    while (!happy) {
+      happy = true;
+      for (let d = 1; d < distance; d++) {
+        console.log(marriage, mid);
+        for (const [min, max] of bounds.get(depth)!.get(d)!) {
+          if (min <= right && right <= max) {
+            console.log(min, right, max);
+            happy = false;
+            right = max + 1;
+          }
+        }
+        console.log(left, right);
+      }
+    }
+
+    if (mid - left < right - mid) {
+      offsets.push((left - mid) * NODE_WIDTH);
+    } else {
+      offsets.push((right - mid) * NODE_WIDTH);
+    }
+    i++;
+  }
   return offsets;
 }

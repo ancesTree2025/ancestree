@@ -29,6 +29,10 @@ export type Positions = Record<PersonID, Position>;
 
 export type MarriageHeights = number[];
 
+export type MarriageDistances = number[];
+
+export type MarriageOffsets = number[];
+
 export type GroupID = number;
 /**
  * Represents the assignments of people to "marriage groups" within a family tree.
