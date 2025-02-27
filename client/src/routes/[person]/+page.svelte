@@ -10,6 +10,7 @@
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
   import TreeSearchInput from '../../components/TreeSearchInput.svelte';
   import { afterNavigate } from '$app/navigation';
+  import { goto } from '$app/navigation';
 
   let status = $state<LoadingStatus>({ state: 'idle' });
 
@@ -43,6 +44,8 @@
 
   async function onSubmit(name: string) {
     if (!name.length) return;
+
+    goto(`/${name}`);
 
     status = { state: 'loading' };
     const result = await fetchTree(name, useFakeData);

@@ -6,7 +6,6 @@
   import type { LoadingStatus } from '$lib/types';
   import { scale } from 'svelte/transition';
   import { fetchNames } from '$lib';
-  import { goto } from '$app/navigation';
 
   interface Props {
     status: LoadingStatus;
@@ -70,7 +69,6 @@
     searchResults = [];
     name = selectedName; // Replaces the typed name with the selected name
     searchQuery = '';
-    goto(`/${name}`);
     onSubmit(name);
   }
 
