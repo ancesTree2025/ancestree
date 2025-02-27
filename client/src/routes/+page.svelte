@@ -10,6 +10,7 @@
   import { page } from '$app/state';
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
   import TreeSearchInput from '../components/TreeSearchInput.svelte';
+  import { optional } from 'zod';
 
   const name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
@@ -23,6 +24,13 @@
   let showSettings = $state(false);
   let maxWidth = $state(4);
   let maxHeight = $state(4);
+  let checkboxOptions = [
+    { label: 'Show Image', checked: true },
+    { label: 'Show Birth Date', checked: true },
+    { label: 'Show Death Date', checked: true },
+    { label: 'Show Description', checked: true },
+    { label: 'Show Wikipedia Link', checked: true }
+  ];
 
 
   function toggleSettings() {
@@ -169,6 +177,16 @@
           </div>
           <input type="range" min="1" max="10" bind:value={maxHeight} class="w-full"/>
         </label>
+        <div class="mb-4">
+          {#each checkboxOptions as option}
+            <div class="flex items-center gap-2 mb-1">
+              <label>
+                <input id="checkbox-{option}" type="checkbox" bind:checked={option.checked} />
+                {option.label}
+              </label>
+            </div>
+          {/each}
+        </div>
         <button class="mt-4 p-2 bg-blue-500 text-black rounded" onclick={toggleSettings}>Close</button>
       </div>
     </div>
