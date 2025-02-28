@@ -23,8 +23,6 @@
     if (name) {
       status = { state: 'loading' };
       fetchTree(name, useFakeData).then((result) => {
-        sidePanelData = undefined;
-        sidePanelName = undefined;
         const [fetched, error] = result.toTuple();
         if (fetched) {
           tree = fetched;
