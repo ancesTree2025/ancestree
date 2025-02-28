@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { PersonInfo } from '$lib/types';
-  import IconClose from '~icons/tabler/x';
 
   interface Props {
     name?: string;
@@ -19,9 +18,6 @@
       {:else}
         <div class="h-8 w-3/4 animate-pulse rounded-lg bg-gray"></div>
       {/if}
-      <button class="cursor-pointer p-4" onclick={onclose}>
-        <IconClose />
-      </button>
     </div>
     {#if data}
       <img alt={name} class="mx-8 mb-4 aspect-square rounded-xl object-cover" src={data.image} />
