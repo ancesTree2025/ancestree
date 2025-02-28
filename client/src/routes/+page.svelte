@@ -5,12 +5,11 @@
   import SidePanel from '../components/SidePanel.svelte';
 
   import { fetchTree, fetchInfo } from '$lib';
-  import type { Tree, LoadingStatus, PersonInfo } from '$lib/types';
+  import type { Tree, LoadingStatus, PersonInfo, InfoChecklist } from '$lib/types';
 
   import { page } from '$app/state';
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
   import TreeSearchInput from '../components/TreeSearchInput.svelte';
-  import { optional } from 'zod';
 
   const name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
@@ -24,12 +23,12 @@
   let showSettings = $state(false);
   let maxWidth = $state(4);
   let maxHeight = $state(4);
-  let checkboxOptions = [
-    { label: 'Show Image', checked: true },
-    { label: 'Show Birth Date', checked: true },
-    { label: 'Show Death Date', checked: true },
-    { label: 'Show Description', checked: true },
-    { label: 'Show Wikipedia Link', checked: true }
+  let checkboxOptions: InfoChecklist = [
+    { key: 'image', label: 'Show Image', checked: true },
+    { key: 'birth', label: 'Show Birth Date', checked: true },
+    { key: 'death', label: 'Show Death Date', checked: true },
+    { key: 'description', label: 'Show Description', checked: true },
+    { key: 'wikiLink', label: 'Show Wikipedia Link', checked: true }
   ];
 
 
@@ -120,7 +119,9 @@
   let sidePanelData = $state<PersonInfo | undefined>(undefined);
 
   async function getPersonInfo(qid: string, name: string) {
-    const [fetched] = (await fetchInfo(qid, useFakeData)).toTuple();
+    const [fetched] = (await fetchInfo(qid, useFakeData, checkboxOptions)).toTuple();
+
+    console.log("fetched: ", fetched)
     if (fetched) {
       sidePanelData = fetched;
       sidePanelName = name;
