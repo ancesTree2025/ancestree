@@ -24,9 +24,9 @@
       {#if data.image}
         <img alt={name} class="mx-8 mb-4 aspect-square rounded-xl object-cover" src={data.image} />
       {/if}
-      {@const ingoreKeys = new Set(["image", "wikiLink", "description"])}
+      {@const ingoreKeys = new Set(['image', 'wikiLink', 'description'])}
       {#each Object.entries(data) as [key, value]}
-        {#if (!ingoreKeys.has(key))}
+        {#if !ingoreKeys.has(key)}
           <div class="flex">
             <p class="w-16 font-bold">{titleCase(key)}</p>
             <p class="flex-1">{value}</p>
@@ -36,7 +36,7 @@
 
       {#if data.description}
         <p class="mt-4">
-          {data.description} 
+          {data.description}
         </p>
       {/if}
 

@@ -13,9 +13,9 @@ export async function fetchInfo(
     return Result.ok(exampleData);
   }
 
-  const params = new URLSearchParams({ qid })
+  const params = new URLSearchParams({ qid });
 
-  infoList.forEach(element => {
+  infoList.forEach((element) => {
     if (element.checked) {
       params.append('params[]', element.key);
     }

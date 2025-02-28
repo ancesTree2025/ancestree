@@ -1,7 +1,7 @@
 <script lang="ts">
   import FamilyTree from '../components/FamilyTree.svelte';
   import NameInput from '../components/NameInput.svelte';
-  import SettingsImg from '$lib/assets/—Pngtree—settings icon_4419959.png'
+  import SettingsImg from '$lib/assets/—Pngtree—settings icon_4419959.png';
   import SidePanel from '../components/SidePanel.svelte';
 
   import { fetchTree, fetchInfo } from '$lib';
@@ -30,7 +30,6 @@
     { key: 'description', label: 'Show Description', checked: true },
     { key: 'wikiLink', label: 'Show Wikipedia Link', checked: true }
   ];
-
 
   function toggleSettings() {
     showSettings = !showSettings;
@@ -121,7 +120,7 @@
   async function getPersonInfo(qid: string, name: string) {
     const [fetched] = (await fetchInfo(qid, useFakeData, checkboxOptions)).toTuple();
 
-    console.log("fetched: ", fetched)
+    console.log('fetched: ', fetched);
     if (fetched) {
       sidePanelData = fetched;
       sidePanelName = name;
@@ -144,9 +143,9 @@
     <div class="flex flex-1 justify-center">
       <NameInput {onSubmit} {status} />
     </div>
-    <div class="w-48 flex justify-end">
+    <div class="flex w-48 justify-end">
       <button class="p-2" onclick={toggleSettings}>
-        <img src={SettingsImg} alt="Settings" class="w-10"/>
+        <img src={SettingsImg} alt="Settings" class="w-10" />
       </button>
     </div>
   </nav>
@@ -163,24 +162,26 @@
   </div>
   {#if showSettings}
     <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div class="bg-white p-6 rounded shadow-lg w-96">
-        <h2 class="text-lg font-bold mb-4">Settings</h2>
-        <label class="block mb-2">Maximum Tree Width
-          <div class="w-12 h-8 flex items-center justify-center border border-gray-400 rounded">
+      <div class="w-96 rounded bg-white p-6 shadow-lg">
+        <h2 class="mb-4 text-lg font-bold">Settings</h2>
+        <label class="mb-2 block"
+          >Maximum Tree Width
+          <div class="border-gray-400 flex h-8 w-12 items-center justify-center rounded border">
             {maxWidth}
           </div>
-          <input type="range" min="1" max="10" bind:value={maxWidth} class="w-full"/>
+          <input type="range" min="1" max="10" bind:value={maxWidth} class="w-full" />
         </label>
 
-        <label class="block mb-2">Maximum Tree Height
-          <div class="w-12 h-8 flex items-center justify-center border border-gray-400 rounded">
+        <label class="mb-2 block"
+          >Maximum Tree Height
+          <div class="border-gray-400 flex h-8 w-12 items-center justify-center rounded border">
             {maxHeight}
           </div>
-          <input type="range" min="1" max="10" bind:value={maxHeight} class="w-full"/>
+          <input type="range" min="1" max="10" bind:value={maxHeight} class="w-full" />
         </label>
         <div class="mb-4">
           {#each checkboxOptions as option}
-            <div class="flex items-center gap-2 mb-1">
+            <div class="mb-1 flex items-center gap-2">
               <label>
                 <input id="checkbox-{option}" type="checkbox" bind:checked={option.checked} />
                 {option.label}
@@ -188,7 +189,9 @@
             </div>
           {/each}
         </div>
-        <button class="mt-4 p-2 bg-blue-500 text-black rounded" onclick={toggleSettings}>Close</button>
+        <button class="bg-blue-500 mt-4 rounded p-2 text-black" onclick={toggleSettings}
+          >Close</button
+        >
       </div>
     </div>
   {/if}
