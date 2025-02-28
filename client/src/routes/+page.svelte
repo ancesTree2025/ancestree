@@ -97,12 +97,6 @@
       sidePanelName = name;
     }
   }
-
-  function closeSidePanel() {
-    if (familyTree) {
-      familyTree.closeSidePanel();
-    }
-  }
 </script>
 
 <div class="flex h-full flex-col overflow-x-hidden">
@@ -117,7 +111,7 @@
     <div class="flex-1">
       <FamilyTree bind:this={familyTree} {getPersonInfo} tree={filteredTree ?? tree} />
     </div>
-    <SidePanel name={sidePanelName} show={true} data={sidePanelData} onclose={closeSidePanel} />
+    <SidePanel name={sidePanelName} show={true} data={sidePanelData} />
   </div>
   {#if tree}
     <div class="flex justify-center pb-60">
