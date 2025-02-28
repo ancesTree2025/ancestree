@@ -23,7 +23,7 @@
   let showSettings = $state(false);
   let maxWidth = $state(4);
   let maxHeight = $state(4);
-  let checkboxOptions: InfoChecklist = [
+  const checkboxOptions: InfoChecklist = [
     { key: 'image', label: 'Show Image', checked: true },
     { key: 'birth', label: 'Show Birth Date', checked: true },
     { key: 'death', label: 'Show Death Date', checked: true },
