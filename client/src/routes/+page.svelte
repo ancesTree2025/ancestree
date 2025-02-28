@@ -23,6 +23,8 @@
     if (name) {
       status = { state: 'loading' };
       fetchTree(name, useFakeData).then((result) => {
+        sidePanelData = undefined;
+        sidePanelName = undefined;
         const [fetched, error] = result.toTuple();
         if (fetched) {
           tree = fetched;
@@ -91,6 +93,8 @@
   let sidePanelData = $state<PersonInfo | undefined>(undefined);
 
   async function getPersonInfo(qid: string, name: string) {
+    sidePanelData = undefined;
+    sidePanelName = undefined;
     const [fetched] = (await fetchInfo(qid, useFakeData)).toTuple();
     if (fetched) {
       sidePanelData = fetched;
