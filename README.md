@@ -25,7 +25,7 @@ environmnet variables.
 
 ## Deployment
 
-To create a deployment, merge `main` to the `release` branch and push.
+To create a deployment, go to the GitHub page, go to the Actions tab, select the "Deploy" action then click run workflow and run it for branch main.
 
 ## Project management
 
