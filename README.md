@@ -23,6 +23,10 @@ environmnet variables.
 |    GOOGLE_API_KEY    | Ask for it                                 | For the search autocomplete feature       |
 |    OPENAI_API_KEY    | Ask for it                                 | For getting details about a person        |
 
+## Deployment
+
+To create a deployment, merge `main` to the `release` branch and push.
+
 ## Project management
 
 ### Commits
