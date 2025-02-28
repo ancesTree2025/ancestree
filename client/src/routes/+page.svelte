@@ -10,7 +10,7 @@
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
   import TreeSearchInput from '../components/TreeSearchInput.svelte';
 
-  const name = $state<string | undefined>();
+  let name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
 
   let tree = $state<Tree | undefined>();
@@ -38,19 +38,9 @@
     }
   });
 
-  async function onSubmit(name: string) {
-    if (!name.length) return;
-
-    status = { state: 'loading' };
-    const result = await fetchTree(name, useFakeData);
-    const [fetched, error] = result.toTuple();
-    if (fetched) {
-      filteredTree = undefined;
-      tree = fetched;
-      status = { state: 'idle' };
-    } else if (error) {
-      status = { state: 'error', error };
-    }
+  async function onSubmit(newName: string) {
+    if (!newName.length) return;
+    name = newName;
   }
 
   function searchWithinTree(result: string) {
@@ -97,7 +87,6 @@
     });
   }
 
-  let showSidePanel = $state(false);
   let sidePanelName = $state<string | undefined>(undefined);
   let sidePanelData = $state<PersonInfo | undefined>(undefined);
 
@@ -106,7 +95,6 @@
     if (fetched) {
       sidePanelData = fetched;
       sidePanelName = name;
-      showSidePanel = true;
     }
   }
 
@@ -114,8 +102,6 @@
     if (familyTree) {
       familyTree.closeSidePanel();
     }
-
-    showSidePanel = false;
   }
 </script>
 
@@ -131,12 +117,7 @@
     <div class="flex-1">
       <FamilyTree bind:this={familyTree} {getPersonInfo} tree={filteredTree ?? tree} />
     </div>
-    <SidePanel
-      name={sidePanelName}
-      show={showSidePanel}
-      data={sidePanelData}
-      onclose={closeSidePanel}
-    />
+    <SidePanel name={sidePanelName} show={true} data={sidePanelData} onclose={closeSidePanel} />
   </div>
   {#if tree}
     <div class="flex justify-center pb-60">
