@@ -28,3 +28,21 @@ export type Position = {
 };
 
 export type Positions = Record<PersonID, Position>;
+
+export type MarriageHeights = number[];
+
+export type MarriageDistances = number[];
+
+export type MarriageOffsets = number[];
+
+export type GroupID = number;
+/**
+ * Represents the assignments of people to "marriage groups" within a family tree.
+ *
+ * @property groups - A mapping from group ID to the members of that group.
+ * @property members - A mapping from person ID to the group they are in.
+ */
+export type GroupAssignments = {
+  groups: Map<GroupID, PersonID[]>;
+  members: Record<PersonID, GroupID>;
+};

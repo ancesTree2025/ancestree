@@ -26,6 +26,7 @@
         const [fetched, error] = result.toTuple();
         if (fetched) {
           tree = fetched;
+          console.log(fetched);
           status = { state: 'idle' };
 
           // Opening the side panel with the focus on search complete
