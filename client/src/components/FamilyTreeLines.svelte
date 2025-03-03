@@ -64,7 +64,7 @@
       y1={spouse1.y}
       x2={spouse2.x}
       y2={spouse2.y}
-      class="stroke-line-border stroke-rounded stroke-white"
+      class="stroke-rounded stroke-white stroke-line-border"
     />
   {:else}
     <line
@@ -72,21 +72,21 @@
       y1={spouse1.y}
       x2={spouse1.x + OVERLAP_OFFSET}
       y2={spouse1.y - OVERLAP_OFFSET}
-      class="stroke-line-border stroke-rounded stroke-white"
+      class="stroke-rounded stroke-white stroke-line-border"
     />
     <line
       x1={spouse1.x + OVERLAP_OFFSET}
       y1={spouse1.y - OVERLAP_OFFSET}
       x2={spouse2.x - OVERLAP_OFFSET}
       y2={spouse2.y - OVERLAP_OFFSET}
-      class="stroke-line-border stroke-rounded stroke-white"
+      class="stroke-rounded stroke-white stroke-line-border"
     />
     <line
       x1={spouse2.x - OVERLAP_OFFSET}
       y1={spouse2.y - OVERLAP_OFFSET}
       x2={spouse2.x}
       y2={spouse2.y}
-      class="stroke-line-border stroke-rounded stroke-white"
+      class="stroke-rounded stroke-white stroke-line-border"
     />
   {/if}
 
@@ -97,7 +97,7 @@
       y1={parentsY}
       x2={parentsX}
       y2={midY}
-      class="stroke-line-border stroke-rounded stroke-white"
+      class="stroke-rounded stroke-white stroke-line-border"
     />
 
     <!-- Draw children line -->
@@ -106,7 +106,7 @@
       y1={midY}
       x2={rightChildX}
       y2={midY}
-      class="stroke-line-border stroke-rounded stroke-white"
+      class="stroke-rounded stroke-white stroke-line-border"
     />
 
     <!-- Draw line from each child to children line -->
@@ -118,7 +118,7 @@
           y1={midY}
           x2={childPos.x}
           y2={childPos.y}
-          class="stroke-line-border stroke-rounded stroke-white"
+          class="stroke-rounded stroke-white stroke-line-border"
         />
       {/if}
     {/each}
@@ -141,7 +141,7 @@
       y2={parentsY}
       class="{highlightSpouse1
         ? 'stroke-highlight_border'
-        : 'stroke-node'} stroke-line stroke-rounded"
+        : 'stroke-node'} stroke-rounded stroke-line"
     />
     <line
       x1={spouse2.x}
@@ -150,7 +150,7 @@
       y2={parentsY}
       class="{highlightSpouse2
         ? 'stroke-highlight_border'
-        : 'stroke-node'} stroke-line stroke-rounded"
+        : 'stroke-node'} stroke-rounded stroke-line"
     />
   {:else}
     <line
@@ -160,7 +160,7 @@
       y2={spouse1.y - OVERLAP_OFFSET}
       class="{highlightSpouse1
         ? 'stroke-highlight_border'
-        : 'stroke-node'} stroke-line stroke-rounded"
+        : 'stroke-node'} stroke-rounded stroke-line"
     />
     <line
       x1={spouse1.x + OVERLAP_OFFSET}
@@ -169,7 +169,7 @@
       y2={parentsY - OVERLAP_OFFSET}
       class="{highlightSpouse1
         ? 'stroke-highlight_border'
-        : 'stroke-node'} stroke-line stroke-rounded"
+        : 'stroke-node'} stroke-rounded stroke-line"
     />
     <line
       x1={spouse2.x - OVERLAP_OFFSET}
@@ -178,7 +178,7 @@
       y2={parentsY - OVERLAP_OFFSET}
       class="{highlightSpouse2
         ? 'stroke-highlight_border'
-        : 'stroke-node'} stroke-line stroke-rounded"
+        : 'stroke-node'} stroke-rounded stroke-line"
     />
     <line
       x1={spouse2.x - OVERLAP_OFFSET}
@@ -187,7 +187,7 @@
       y2={spouse2.y}
       class="{highlightSpouse2
         ? 'stroke-highlight_border'
-        : 'stroke-node'} stroke-line stroke-rounded"
+        : 'stroke-node'} stroke-rounded stroke-line"
     />
   {/if}
 
@@ -201,7 +201,7 @@
       y2={midY}
       class="{highlightChildren || marriage.children.includes(selectedID)
         ? 'stroke-highlight_border'
-        : 'stroke-node'} stroke-line stroke-rounded"
+        : 'stroke-node'} stroke-rounded stroke-line"
     />
 
     <!-- Draw children line -->
@@ -212,7 +212,7 @@
       y2={midY}
       class="{highlightChildren
         ? 'stroke-highlight_border'
-        : 'stroke-node'} stroke-line stroke-rounded"
+        : 'stroke-node'} stroke-rounded stroke-line"
     />
 
     <!-- Draw line from each child to children line -->
@@ -225,7 +225,7 @@
             y1={midY}
             x2={parentsX}
             y2={midY}
-            class="stroke-highlight_border stroke-line stroke-rounded"
+            class="stroke-rounded stroke-highlight_border stroke-line"
           />
         {/if}
         <line
@@ -235,7 +235,7 @@
           y2={childPos.y}
           class="{highlightChildren || child[0] === selectedID
             ? 'stroke-highlight_border'
-            : 'stroke-node'} stroke-line stroke-rounded"
+            : 'stroke-node'} stroke-rounded stroke-line"
         />
       {/if}
     {/each}

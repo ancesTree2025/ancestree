@@ -1,10 +1,9 @@
 <script lang="ts">
   import * as d3 from 'd3';
   import { positionNodes } from '$lib';
-  import type { MarriageDistances, MarriageHeights, Marriage, Positions, Tree } from '$lib/types';
+  import type { MarriageDistances, MarriageHeights, Positions, Tree } from '$lib/types';
   import { onMount } from 'svelte';
   import FamilyTreeLines from './FamilyTreeLines.svelte';
-  import { zip } from '$lib/utils';
   import { SvelteSet } from 'svelte/reactivity';
 
   const {
