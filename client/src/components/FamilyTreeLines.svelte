@@ -20,17 +20,16 @@
     selectedID: string;
   } = $props();
 
-  const spouse1Id = $derived(marriage.parents[0]);
-  const spouse2Id = $derived(marriage.parents[1]);
+  const rawSpouse1Id = $derived(marriage.parents[0]);
+  const rawSpouse2Id = $derived(marriage.parents[1]);
+  const rawSpouse1 = $derived(positions[rawSpouse1Id] as Position | undefined);
+  const rawSpouse2 = $derived(positions[rawSpouse2Id] as Position | undefined);
 
-  const rawSpouse1 = $derived(positions[spouse1Id] as Position | undefined);
-  const rawSpouse2 = $derived(positions[spouse2Id] as Position | undefined);
-  const spouse1 = $derived(
-    rawSpouse1 && rawSpouse2 && rawSpouse1?.x < rawSpouse2?.x ? rawSpouse1 : rawSpouse2
-  );
-  const spouse2 = $derived(
-    rawSpouse1 && rawSpouse2 && rawSpouse1?.x < rawSpouse2?.x ? rawSpouse2 : rawSpouse1
-  );
+  const swap = $derived(rawSpouse1 && rawSpouse2 && rawSpouse1?.x > rawSpouse2?.x);
+  const spouse1 = $derived(swap ? rawSpouse2 : rawSpouse1);
+  const spouse2 = $derived(swap ? rawSpouse1 : rawSpouse2);
+  const spouse1Id = $derived(swap ? rawSpouse2Id : rawSpouse1Id);
+  const spouse2Id = $derived(swap ? rawSpouse1Id : rawSpouse2Id);
   const children = $derived(
     marriage.children.map((id) => [id, positions[id]] as [PersonID, Position | undefined])
   );
@@ -64,7 +63,7 @@
       y1={spouse1.y}
       x2={spouse2.x}
       y2={spouse2.y}
-      class="stroke-rounded stroke-white stroke-line-border"
+      class="stroke-rounded stroke-line-border stroke-white"
     />
   {:else}
     <line
@@ -72,21 +71,21 @@
       y1={spouse1.y}
       x2={spouse1.x + OVERLAP_OFFSET}
       y2={spouse1.y - OVERLAP_OFFSET}
-      class="stroke-rounded stroke-white stroke-line-border"
+      class="stroke-rounded stroke-line-border stroke-white"
     />
     <line
       x1={spouse1.x + OVERLAP_OFFSET}
       y1={spouse1.y - OVERLAP_OFFSET}
       x2={spouse2.x - OVERLAP_OFFSET}
       y2={spouse2.y - OVERLAP_OFFSET}
-      class="stroke-rounded stroke-white stroke-line-border"
+      class="stroke-rounded stroke-line-border stroke-white"
     />
     <line
       x1={spouse2.x - OVERLAP_OFFSET}
       y1={spouse2.y - OVERLAP_OFFSET}
       x2={spouse2.x}
       y2={spouse2.y}
-      class="stroke-rounded stroke-white stroke-line-border"
+      class="stroke-rounded stroke-line-border stroke-white"
     />
   {/if}
 
@@ -97,7 +96,7 @@
       y1={parentsY}
       x2={parentsX}
       y2={midY}
-      class="stroke-rounded stroke-white stroke-line-border"
+      class="stroke-rounded stroke-line-border stroke-white"
     />
 
     <!-- Draw children line -->
@@ -106,7 +105,7 @@
       y1={midY}
       x2={rightChildX}
       y2={midY}
-      class="stroke-rounded stroke-white stroke-line-border"
+      class="stroke-rounded stroke-line-border stroke-white"
     />
 
     <!-- Draw line from each child to children line -->
@@ -118,7 +117,7 @@
           y1={midY}
           x2={childPos.x}
           y2={childPos.y}
-          class="stroke-rounded stroke-white stroke-line-border"
+          class="stroke-rounded stroke-line-border stroke-white"
         />
       {/if}
     {/each}
@@ -126,7 +125,7 @@
 {/if}
 
 {#if spouse1 && spouse2}
-  {@const parentsY = (spouse1.y + spouse2.y) / 2}
+  {@const parentsMidY = (spouse1.y + spouse2.y) / 2}
   {@const highlightMarriage = highlightSet.has(spouse1Id) && highlightSet.has(spouse2Id)}
   {@const highlightHalf = !highlightSet.isDisjointFrom(new Set(marriage.children))}
   {@const highlightSpouse1 = highlightMarriage || (spouse1Id === selectedID && highlightHalf)}
@@ -138,7 +137,7 @@
       x1={spouse1.x}
       y1={spouse1.y}
       x2={parentsX}
-      y2={parentsY}
+      y2={parentsMidY}
       class="{highlightSpouse1
         ? 'stroke-highlight_border'
         : 'stroke-node'} stroke-rounded stroke-line"
@@ -147,7 +146,7 @@
       x1={spouse2.x}
       y1={spouse2.y}
       x2={parentsX}
-      y2={parentsY}
+      y2={parentsMidY}
       class="{highlightSpouse2
         ? 'stroke-highlight_border'
         : 'stroke-node'} stroke-rounded stroke-line"
@@ -165,8 +164,8 @@
     <line
       x1={spouse1.x + OVERLAP_OFFSET}
       y1={spouse1.y - OVERLAP_OFFSET}
-      x2={parentsX - OVERLAP_OFFSET}
-      y2={parentsY - OVERLAP_OFFSET}
+      x2={parentsX}
+      y2={parentsMidY - OVERLAP_OFFSET}
       class="{highlightSpouse1
         ? 'stroke-highlight_border'
         : 'stroke-node'} stroke-rounded stroke-line"
@@ -174,8 +173,8 @@
     <line
       x1={spouse2.x - OVERLAP_OFFSET}
       y1={spouse2.y - OVERLAP_OFFSET}
-      x2={parentsX - OVERLAP_OFFSET}
-      y2={parentsY - OVERLAP_OFFSET}
+      x2={parentsX}
+      y2={parentsMidY - OVERLAP_OFFSET}
       class="{highlightSpouse2
         ? 'stroke-highlight_border'
         : 'stroke-node'} stroke-rounded stroke-line"
@@ -216,10 +215,9 @@
     />
 
     <!-- Draw line from each child to children line -->
-    {#each children as child}
-      {@const childPos = child[1]}
+    {#each children as [childId, childPos]}
       {#if childPos}
-        {#if child[0] === selectedID}
+        {#if childId === selectedID}
           <line
             x1={childPos.x}
             y1={midY}
@@ -233,7 +231,7 @@
           y1={midY}
           x2={childPos.x}
           y2={childPos.y}
-          class="{highlightChildren || child[0] === selectedID
+          class="{highlightChildren || childId === selectedID
             ? 'stroke-highlight_border'
             : 'stroke-node'} stroke-rounded stroke-line"
         />
