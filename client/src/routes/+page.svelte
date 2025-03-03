@@ -11,7 +11,7 @@
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
   import TreeSearchInput from '../components/TreeSearchInput.svelte';
 
-  const name = $state<string | undefined>();
+  let name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
 
   let tree = $state<Tree | undefined>();
@@ -42,6 +42,7 @@
         const [fetched, error] = result.toTuple();
         if (fetched) {
           tree = fetched;
+          console.log(fetched);
           status = { state: 'idle' };
 
           // Opening the side panel with the focus on search complete
@@ -113,7 +114,6 @@
     });
   }
 
-  let showSidePanel = $state(false);
   let sidePanelName = $state<string | undefined>(undefined);
   let sidePanelData = $state<PersonInfo | undefined>(undefined);
 
@@ -123,16 +123,7 @@
     if (fetched) {
       sidePanelData = fetched;
       sidePanelName = name;
-      showSidePanel = true;
     }
-  }
-
-  function closeSidePanel() {
-    if (familyTree) {
-      familyTree.closeSidePanel();
-    }
-
-    showSidePanel = false;
   }
 </script>
 
@@ -152,12 +143,7 @@
     <div class="flex-1">
       <FamilyTree bind:this={familyTree} {getPersonInfo} tree={filteredTree ?? tree} />
     </div>
-    <SidePanel
-      name={sidePanelName}
-      show={showSidePanel}
-      data={sidePanelData}
-      onclose={closeSidePanel}
-    />
+    <SidePanel name={sidePanelName} show={true} data={sidePanelData} />
   </div>
   {#if showSettings}
     <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

@@ -13,7 +13,8 @@ export default {
       input: '#eee',
       gray: '#f3f4f6',
       node: '#ddd',
-      red: '#ffada9',
+      pink: '#ffada9',
+      red: '#f44',
       blue: '#b5e2ff',
       highlight: '#e8bf8b',
       highlight_border: '#2D2D2D',
@@ -21,7 +22,8 @@ export default {
     },
     extend: {
       strokeWidth: {
-        line: '3'
+        line: '4',
+        'line-border': '12'
       }
     }
   },

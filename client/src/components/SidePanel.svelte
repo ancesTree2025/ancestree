@@ -7,18 +7,18 @@
     name?: string;
     data?: PersonInfo;
     show: boolean;
-    onclose: () => void;
   }
-  const { name, data, show, onclose }: Props = $props();
+  const { name, data, show }: Props = $props();
 </script>
 
 <div class={`${show ? 'w-96' : 'w-0'} shadow-lg transition-all duration-500`}>
   <div class="flex w-96 flex-col gap-6 px-8 py-6">
     <div class="flex items-center justify-between">
-      <div class="text-xl font-semibold">{name}</div>
-      <button class="cursor-pointer p-4" onclick={onclose}>
-        <IconClose />
-      </button>
+      {#if data}
+        <div class="text-xl font-semibold">{name}</div>
+      {:else}
+        <div class="h-8 w-3/4 animate-pulse rounded-lg bg-gray"></div>
+      {/if}
     </div>
     {#if data}
       {#if data.image}
@@ -45,6 +45,7 @@
           <a href={data.wikiLink}>Wikipedia</a>
         </p>
       {/if}
+
     {/if}
   </div>
 </div>
