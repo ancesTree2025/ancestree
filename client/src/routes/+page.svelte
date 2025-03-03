@@ -10,7 +10,7 @@
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
   import TreeSearchInput from '../components/TreeSearchInput.svelte';
 
-  const name = $state<string | undefined>();
+  let name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
 
   let tree = $state<Tree | undefined>();
@@ -99,14 +99,6 @@
       sidePanelData = fetched;
       sidePanelName = name;
     }
-  }
-
-  function closeSidePanel() {
-    if (familyTree) {
-      familyTree.closeSidePanel();
-    }
-
-    showSidePanel = false;
   }
 </script>
 
