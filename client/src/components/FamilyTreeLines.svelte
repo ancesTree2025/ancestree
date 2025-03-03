@@ -69,20 +69,20 @@
     <line
       x1={spouse1.x}
       y1={spouse1.y}
-      x2={spouse1.x + OVERLAP_OFFSET}
-      y2={spouse1.y - OVERLAP_OFFSET}
+      x2={spouse1.x + spouse1.y - parentsY}
+      y2={parentsY}
       class="stroke-rounded stroke-white stroke-line-border"
     />
     <line
-      x1={spouse1.x + OVERLAP_OFFSET}
-      y1={spouse1.y - OVERLAP_OFFSET}
-      x2={spouse2.x - OVERLAP_OFFSET}
-      y2={spouse2.y - OVERLAP_OFFSET}
+      x1={spouse1.x + spouse1.y - parentsY}
+      y1={parentsY}
+      x2={spouse2.x - spouse2.y + parentsY}
+      y2={parentsY}
       class="stroke-rounded stroke-white stroke-line-border"
     />
     <line
-      x1={spouse2.x - OVERLAP_OFFSET}
-      y1={spouse2.y - OVERLAP_OFFSET}
+      x1={spouse2.x - spouse2.y + parentsY}
+      y1={parentsY}
       x2={spouse2.x}
       y2={spouse2.y}
       class="stroke-rounded stroke-white stroke-line-border"
@@ -125,7 +125,6 @@
 {/if}
 
 {#if spouse1 && spouse2}
-  {@const parentsMidY = (spouse1.y + spouse2.y) / 2}
   {@const highlightMarriage = highlightSet.has(spouse1Id) && highlightSet.has(spouse2Id)}
   {@const highlightHalf = !highlightSet.isDisjointFrom(new Set(marriage.children))}
   {@const highlightSpouse1 = highlightMarriage || (spouse1Id === selectedID && highlightHalf)}
@@ -137,7 +136,7 @@
       x1={spouse1.x}
       y1={spouse1.y}
       x2={parentsX}
-      y2={parentsMidY}
+      y2={parentsY}
       class="{highlightSpouse1
         ? 'stroke-highlight_border'
         : 'stroke-node'} stroke-rounded stroke-line"
@@ -146,7 +145,7 @@
       x1={spouse2.x}
       y1={spouse2.y}
       x2={parentsX}
-      y2={parentsMidY}
+      y2={parentsY}
       class="{highlightSpouse2
         ? 'stroke-highlight_border'
         : 'stroke-node'} stroke-rounded stroke-line"
@@ -155,33 +154,33 @@
     <line
       x1={spouse1.x}
       y1={spouse1.y}
-      x2={spouse1.x + OVERLAP_OFFSET}
-      y2={spouse1.y - OVERLAP_OFFSET}
+      x2={spouse1.x + spouse1.y - parentsY}
+      y2={parentsY}
       class="{highlightSpouse1
         ? 'stroke-highlight_border'
         : 'stroke-node'} stroke-rounded stroke-line"
     />
     <line
-      x1={spouse1.x + OVERLAP_OFFSET}
-      y1={spouse1.y - OVERLAP_OFFSET}
+      x1={spouse1.x + spouse1.y - parentsY}
+      y1={parentsY}
       x2={parentsX}
-      y2={parentsMidY - OVERLAP_OFFSET}
+      y2={parentsY}
       class="{highlightSpouse1
         ? 'stroke-highlight_border'
         : 'stroke-node'} stroke-rounded stroke-line"
     />
     <line
-      x1={spouse2.x - OVERLAP_OFFSET}
-      y1={spouse2.y - OVERLAP_OFFSET}
+      x1={spouse2.x - spouse2.y + parentsY}
+      y1={parentsY}
       x2={parentsX}
-      y2={parentsMidY - OVERLAP_OFFSET}
+      y2={parentsY}
       class="{highlightSpouse2
         ? 'stroke-highlight_border'
         : 'stroke-node'} stroke-rounded stroke-line"
     />
     <line
-      x1={spouse2.x - OVERLAP_OFFSET}
-      y1={spouse2.y - OVERLAP_OFFSET}
+      x1={spouse2.x - spouse2.y + parentsY}
+      y1={parentsY}
       x2={spouse2.x}
       y2={spouse2.y}
       class="{highlightSpouse2

@@ -55,8 +55,6 @@ export function positionNodes(tree: Tree): {
 
   const marriageDistances = findMarriageDistances(tree, personPositions);
 
-  console.log(marriageDistances);
-
   const arrangedLevels = arrangeNodes(sortedLevels, groups, personMarriages, nextHighestGroup);
 
   const marriageOffsets = getMarriageOffsets(
@@ -67,13 +65,9 @@ export function positionNodes(tree: Tree): {
     marriageDistances
   );
 
-  console.log(marriageOffsets);
-
   const marriageHeights = getMarriageHeights(tree, arrangedLevels);
 
   const { positions, treeWidth } = calculatePositions(arrangedLevels);
-
-  console.log(arrangedLevels);
 
   return {
     positions,
@@ -802,8 +796,8 @@ function shuntOverlapping(level: PersonID[], assignments: Map<PersonID, number>)
   }
 }
 
-const NODE_WIDTH = 80;
-const NODE_HEIGHT = 150;
+const NODE_WIDTH = 100;
+const NODE_HEIGHT = 200;
 
 function calculatePositions(levels: Map<number, Map<PersonID, number>>): {
   positions: Positions;
@@ -959,16 +953,18 @@ function getMarriageOffsets(
   distances: MarriageDistances
 ): MarriageOffsets {
   const bounds: Map<number, Map<number, [number, number][]>> = new Map();
-  console.log(tree.marriages);
   let i = 0;
   for (const marriage of tree.marriages) {
-    console.log(i);
     const groupId = groups.members[marriage.parents[0]];
     if (groupId === undefined) {
       i++;
       continue;
     }
-    const depth = depths.get(groupId)!;
+    const depth = depths.get(groupId);
+    if (depth === undefined) {
+      i++;
+      continue;
+    }
     const distance = distances[i];
     const layer = positions.get(depth)!;
     let left = Infinity;
@@ -984,7 +980,6 @@ function getMarriageOffsets(
     depthBound.get(distance)!.push([left, right]);
     i++;
   }
-  console.log(bounds);
 
   const offsets = [];
   i = 0;
@@ -995,7 +990,11 @@ function getMarriageOffsets(
       offsets.push(0);
       continue;
     }
-    const depth = depths.get(groupId)!;
+    const depth = depths.get(groupId);
+    if (depth === undefined) {
+      i++;
+      continue;
+    }
     const layer = positions.get(depth)!;
     const leftParent = Math.min(...marriage.parents.map((p) => layer.get(p) ?? Infinity));
     const rightParent = Math.max(...marriage.parents.map((p) => layer.get(p) ?? -Infinity));
@@ -1007,6 +1006,7 @@ function getMarriageOffsets(
       happy = true;
       for (let d = 1; d < distance; d++) {
         for (const [min, max] of bounds.get(depth)!.get(d)!) {
+          if (max < leftParent) continue;
           if (min <= left && left <= max) {
             happy = false;
             left = min - 1;
@@ -1020,19 +1020,22 @@ function getMarriageOffsets(
     while (!happy) {
       happy = true;
       for (let d = 1; d < distance; d++) {
-        console.log(marriage, mid);
         for (const [min, max] of bounds.get(depth)!.get(d)!) {
+          if (min < leftParent) continue;
           if (min <= right && right <= max) {
-            console.log(min, right, max);
             happy = false;
             right = max + 1;
           }
         }
-        console.log(left, right);
       }
     }
 
-    if (mid - left < right - mid) {
+    if (left <= leftParent && right >= rightParent) {
+      offsets.push(0);
+    } else if (
+      mid - (left <= leftParent ? -Infinity : left) <
+      (right >= rightParent ? Infinity : right) - mid
+    ) {
       offsets.push((left - mid) * NODE_WIDTH);
     } else {
       offsets.push((right - mid) * NODE_WIDTH);
