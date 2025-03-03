@@ -5,12 +5,11 @@
   import SidePanel from '../components/SidePanel.svelte';
 
   import { fetchTree, fetchInfo } from '$lib';
-  import type { Tree, LoadingStatus, PersonInfo } from '$lib/types';
+  import type { Tree, LoadingStatus, PersonInfo, InfoChecklist } from '$lib/types';
 
   import { page } from '$app/state';
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
   import TreeSearchInput from '../components/TreeSearchInput.svelte';
-  import { checkboxOptions } from '$lib/stores/global';
 
   const name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
@@ -24,6 +23,13 @@
   let showSettings = $state(false);
   let maxWidth = $state(4);
   let maxHeight = $state(4);
+  const checkboxOptions: InfoChecklist = [
+    { key: 'image', label: 'Show Image', checked: true },
+    { key: 'birth', label: 'Show Birth Date', checked: true },
+    { key: 'death', label: 'Show Death Date', checked: true },
+    { key: 'description', label: 'Show Description', checked: true },
+    { key: 'wikiLink', label: 'Show Wikipedia Link', checked: true }
+  ];
 
   function toggleSettings() {
     showSettings = !showSettings;
@@ -138,7 +144,7 @@
     </div>
     <div class="flex w-48 justify-end">
       <button class="p-2" onclick={toggleSettings}>
-        <IconSettings />
+        <IconSettings/>
       </button>
     </div>
   </nav>
