@@ -63,7 +63,7 @@
       y1={spouse1.y}
       x2={spouse2.x}
       y2={spouse2.y}
-      class="stroke-rounded stroke-line-border stroke-white"
+      class="stroke-rounded stroke-white stroke-line-border"
     />
   {:else}
     <line
@@ -71,21 +71,21 @@
       y1={spouse1.y}
       x2={spouse1.x + OVERLAP_OFFSET}
       y2={spouse1.y - OVERLAP_OFFSET}
-      class="stroke-rounded stroke-line-border stroke-white"
+      class="stroke-rounded stroke-white stroke-line-border"
     />
     <line
       x1={spouse1.x + OVERLAP_OFFSET}
       y1={spouse1.y - OVERLAP_OFFSET}
       x2={spouse2.x - OVERLAP_OFFSET}
       y2={spouse2.y - OVERLAP_OFFSET}
-      class="stroke-rounded stroke-line-border stroke-white"
+      class="stroke-rounded stroke-white stroke-line-border"
     />
     <line
       x1={spouse2.x - OVERLAP_OFFSET}
       y1={spouse2.y - OVERLAP_OFFSET}
       x2={spouse2.x}
       y2={spouse2.y}
-      class="stroke-rounded stroke-line-border stroke-white"
+      class="stroke-rounded stroke-white stroke-line-border"
     />
   {/if}
 
@@ -96,7 +96,7 @@
       y1={parentsY}
       x2={parentsX}
       y2={midY}
-      class="stroke-rounded stroke-line-border stroke-white"
+      class="stroke-rounded stroke-white stroke-line-border"
     />
 
     <!-- Draw children line -->
@@ -105,7 +105,7 @@
       y1={midY}
       x2={rightChildX}
       y2={midY}
-      class="stroke-rounded stroke-line-border stroke-white"
+      class="stroke-rounded stroke-white stroke-line-border"
     />
 
     <!-- Draw line from each child to children line -->
@@ -117,7 +117,7 @@
           y1={midY}
           x2={childPos.x}
           y2={childPos.y}
-          class="stroke-rounded stroke-line-border stroke-white"
+          class="stroke-rounded stroke-white stroke-line-border"
         />
       {/if}
     {/each}
