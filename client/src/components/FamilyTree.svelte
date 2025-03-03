@@ -115,7 +115,7 @@
                   : gender === 'male'
                     ? 'fill-blue'
                     : gender === 'female'
-                      ? 'fill-red'
+                      ? 'fill-pink'
                       : 'fill-node'} {highlightSet.has(id)
                   ? 'stroke-highlight_border stroke-line'
                   : ''}"
