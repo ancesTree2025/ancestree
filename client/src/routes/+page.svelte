@@ -11,7 +11,7 @@
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
   import TreeSearchInput from '../components/TreeSearchInput.svelte';
 
-  let name = $state<string | undefined>();
+  const name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
 
   let tree = $state<Tree | undefined>();

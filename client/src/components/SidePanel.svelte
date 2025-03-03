@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { PersonInfo } from '$lib/types';
-  import IconClose from '~icons/tabler/x';
   import { titleCase } from '$lib/utils';
 
   interface Props {
@@ -45,7 +44,6 @@
           <a href={data.wikiLink}>Wikipedia</a>
         </p>
       {/if}
-
     {/if}
   </div>
 </div>
