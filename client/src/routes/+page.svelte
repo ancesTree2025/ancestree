@@ -39,19 +39,9 @@
     }
   });
 
-  async function onSubmit(name: string) {
-    if (!name.length) return;
-
-    status = { state: 'loading' };
-    const result = await fetchTree(name, useFakeData);
-    const [fetched, error] = result.toTuple();
-    if (fetched) {
-      filteredTree = undefined;
-      tree = fetched;
-      status = { state: 'idle' };
-    } else if (error) {
-      status = { state: 'error', error };
-    }
+  async function onSubmit(newName: string) {
+    if (!newName.length) return;
+    name = newName;
   }
 
   function searchWithinTree(result: string) {
@@ -98,16 +88,16 @@
     });
   }
 
-  let showSidePanel = $state(false);
   let sidePanelName = $state<string | undefined>(undefined);
   let sidePanelData = $state<PersonInfo | undefined>(undefined);
 
   async function getPersonInfo(qid: string, name: string) {
+    sidePanelData = undefined;
+    sidePanelName = undefined;
     const [fetched] = (await fetchInfo(qid, useFakeData)).toTuple();
     if (fetched) {
       sidePanelData = fetched;
       sidePanelName = name;
-      showSidePanel = true;
     }
   }
 
@@ -132,12 +122,7 @@
     <div class="flex-1">
       <FamilyTree bind:this={familyTree} {getPersonInfo} tree={filteredTree ?? tree} />
     </div>
-    <SidePanel
-      name={sidePanelName}
-      show={showSidePanel}
-      data={sidePanelData}
-      onclose={closeSidePanel}
-    />
+    <SidePanel name={sidePanelName} show={true} data={sidePanelData} />
   </div>
   {#if tree}
     <div class="flex justify-center pb-60">
