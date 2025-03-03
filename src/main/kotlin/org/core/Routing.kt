@@ -15,6 +15,9 @@ import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 
 fun Application.configureRouting() {
+  val DEFAULT_GRAPH_WIDTH = 4
+  val DEFAULT_GRAPH_HEIGHT = 4
+
   val clientFactory by closestDI().factory<String, HttpClient>()
   val graphProducer by closestDI().instance<GraphProducer<String, Person>>()
   val lookupService = WikiLookupService()
@@ -28,8 +31,8 @@ fun Application.configureRouting() {
             "name is required. Nothing was passed",
           )
 
-      val width = call.request.queryParameters["width"]?.toIntOrNull() ?: 4
-      val height = call.request.queryParameters["height"]?.toIntOrNull() ?: 4
+      val width = call.request.queryParameters["width"]?.toIntOrNull() ?: DEFAULT_GRAPH_WIDTH
+      val height = call.request.queryParameters["height"]?.toIntOrNull() ?: DEFAULT_GRAPH_HEIGHT
 
       val graph = graphProducer.produceGraph(name, width, height)
       if (graph.isEmpty()) return@get call.respond(HttpStatusCode.NoContent)

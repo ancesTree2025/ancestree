@@ -1,7 +1,7 @@
 <script lang="ts">
   import FamilyTree from '../components/FamilyTree.svelte';
   import NameInput from '../components/NameInput.svelte';
-  import SettingsImg from '$lib/assets/—Pngtree—settings icon_4419959.png';
+  import IconSettings from '~icons/tabler/settings';
   import SidePanel from '../components/SidePanel.svelte';
 
   import { fetchTree, fetchInfo } from '$lib';
@@ -10,6 +10,7 @@
   import { page } from '$app/state';
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
   import TreeSearchInput from '../components/TreeSearchInput.svelte';
+  import { checkboxOptions } from '$lib/stores/global';
 
   const name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
@@ -23,13 +24,6 @@
   let showSettings = $state(false);
   let maxWidth = $state(4);
   let maxHeight = $state(4);
-  const checkboxOptions: InfoChecklist = [
-    { key: 'image', label: 'Show Image', checked: true },
-    { key: 'birth', label: 'Show Birth Date', checked: true },
-    { key: 'death', label: 'Show Death Date', checked: true },
-    { key: 'description', label: 'Show Description', checked: true },
-    { key: 'wikiLink', label: 'Show Wikipedia Link', checked: true }
-  ];
 
   function toggleSettings() {
     showSettings = !showSettings;
@@ -120,7 +114,6 @@
   async function getPersonInfo(qid: string, name: string) {
     const [fetched] = (await fetchInfo(qid, useFakeData, checkboxOptions)).toTuple();
 
-    console.log('fetched: ', fetched);
     if (fetched) {
       sidePanelData = fetched;
       sidePanelName = name;
@@ -145,7 +138,7 @@
     </div>
     <div class="flex w-48 justify-end">
       <button class="p-2" onclick={toggleSettings}>
-        <img src={SettingsImg} alt="Settings" class="w-10" />
+        <IconSettings/>
       </button>
     </div>
   </nav>
