@@ -217,7 +217,8 @@
     <!-- Draw line from each child to children line -->
     {#each children as [childId, childPos]}
       {#if childPos}
-        {#if childId === selectedID}
+        {@const selectedChild = childId === selectedID}
+        {#if selectedChild}
           <line
             x1={childPos.x}
             y1={midY}
@@ -231,7 +232,7 @@
           y1={midY}
           x2={childPos.x}
           y2={childPos.y}
-          class="{highlightChildren || childId === selectedID
+          class="{highlightChildren || selectedChild
             ? 'stroke-highlight_border'
             : 'stroke-node'} stroke-rounded stroke-line"
         />
