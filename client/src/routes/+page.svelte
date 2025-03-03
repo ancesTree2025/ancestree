@@ -144,7 +144,7 @@
     </div>
     <div class="flex w-48 justify-end">
       <button class="p-2" onclick={toggleSettings}>
-        <IconSettings/>
+        <IconSettings />
       </button>
     </div>
   </nav>
