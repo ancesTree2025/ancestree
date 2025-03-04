@@ -4,6 +4,7 @@ import org.data.caches.WikiCacheManager
 import org.data.models.*
 import org.data.parsers.WikiRequestParser
 import org.data.requests.ComplexRequester
+import org.domain.models.*
 
 class GraphTrawlService {
 
@@ -43,6 +44,15 @@ class GraphTrawlService {
       listOf("Brother", "Spouse") to "Sister-in-law",
       listOf("Sister", "Spouse") to "Brother-in-law",
     )
+
+  fun deltaForRelation(rel: String): Int {
+    return when {
+      rel.startsWith("Father") || rel.startsWith("Mother") -> -1
+      rel.startsWith("Son") || rel.startsWith("Daughter") -> 1
+      rel.startsWith("Wife") || rel.startsWith("Husband") -> 0
+      else -> 0
+    }
+  }
 
   private fun applyDictionaryContractions(inputTokens: List<String>): List<String> {
     val result = mutableListOf<String>()
@@ -125,8 +135,8 @@ class GraphTrawlService {
           WikiRequestParser.parseWikidataIDLookup(qidReq)
         }
 
-    if (dest == null) return RelationLinks("Unrelated", listOf())
-    if (origin == dest) return RelationLinks("Self", listOf())
+    if (dest == null)
+      return RelationLinks("Unrelated", Graph(Node(Person(), "", 0), emptySet(), emptySet()))
 
     val visited = mutableSetOf(origin)
     var currentLevelQueue = mutableListOf(Path(listOf(origin), emptyList()))
@@ -135,15 +145,12 @@ class GraphTrawlService {
     while (currentLevelQueue.isNotEmpty()) {
 
       val currentNodes = currentLevelQueue.map { it.qids.last() }.toSet()
-
       ensurePropsFor(currentNodes)
 
       val missingGenderNeighbors = mutableSetOf<QID>()
-
       for (path in currentLevelQueue) {
         val currentQID = path.qids.last()
         val propMap = WikiCacheManager.getProps(currentQID) ?: emptyMap()
-
         propMap.forEach { (prop, qidList) ->
           if (prop in listOf("Spouse(s)", "Child(ren)")) {
             qidList.forEach { neighbor ->
@@ -162,7 +169,6 @@ class GraphTrawlService {
       val nextLevelQueue = mutableListOf<Path>()
 
       for (path in currentLevelQueue) {
-
         if (path.qids.size > maxDepth) continue
 
         val currentQID = path.qids.last()
@@ -191,15 +197,96 @@ class GraphTrawlService {
 
             if (neighbor !in visited) {
               visited.add(neighbor)
-
               val newPath = Path(path.qids + neighbor, path.rels + relationLabel)
 
               if (neighbor == dest) {
-                val relString =
-                  newPath.rels.joinToString(" ").let {
-                    if (it.endsWith("'s")) it.dropLast(2) else it
+                val chain = newPath.qids
+                val rawRels = newPath.rels
+
+                val depths = mutableListOf<Int>()
+                var currentDepth = 0
+                depths.add(currentDepth)
+                rawRels.forEach { rel ->
+                  currentDepth += deltaForRelation(rel)
+                  depths.add(currentDepth)
+                }
+
+                val service = WikiLookupService()
+                val queryResults: List<Pair<Person, Relations>> = service.queryQIDS(chain)
+                val personMap: Map<QID, Person> = queryResults.associate { it.first.id to it.first }
+
+                val nodes = mutableMapOf<QID, Node<Person>>()
+                chain.forEachIndexed { idx, qid ->
+                  val person = personMap[qid] ?: Person()
+                  nodes[qid] = Node(person, qid, depths.getOrElse(idx) { 0 })
+                }
+
+                val edges = mutableSetOf<Edge>()
+                for (i in 0 until chain.size - 1) {
+                  edges.add(Edge(chain[i], chain[i + 1]))
+                }
+
+                for (i in 0 until rawRels.size) {
+                  val rel = rawRels[i]
+
+                  if (
+                    rel.startsWith("Father") ||
+                      rel.startsWith("Mother") ||
+                      rel.startsWith("Son") ||
+                      rel.startsWith("Daughter")
+                  ) {
+
+                    val nodeA = nodes[chain[i]]!!
+                    val nodeB = nodes[chain[i + 1]]!!
+                    val (parentNode, childNode) =
+                      if (nodeA.depth < nodeB.depth) Pair(nodeA, nodeB) else Pair(nodeB, nodeA)
+
+                    val childProps = WikiCacheManager.getProps(childNode.id) ?: emptyMap()
+                    val missingParentQID: QID? =
+                      when {
+                        rel.startsWith("Father") -> childProps["Mother"]?.firstOrNull()
+                        rel.startsWith("Mother") -> childProps["Father"]?.firstOrNull()
+                        rel.startsWith("Son") -> childProps["Mother"]?.firstOrNull()
+                        rel.startsWith("Daughter") -> childProps["Father"]?.firstOrNull()
+                        else -> null
+                      }
+                    if (missingParentQID != null && missingParentQID !in nodes) {
+                      val missingQuery = service.queryQIDS(listOf(missingParentQID))
+                      val missingParentPerson =
+                        if (missingQuery.isNotEmpty()) missingQuery.first().first else Person()
+                      val newNode = Node(missingParentPerson, missingParentQID, parentNode.depth)
+                      nodes[missingParentQID] = newNode
+                      edges.add(Edge(parentNode.id, missingParentQID))
+                      edges.add(Edge(missingParentQID, parentNode.id))
+                      edges.add(Edge(missingParentQID, childNode.id))
+                      edges.add(Edge(childNode.id, missingParentQID))
+                    }
                   }
-                return RelationLinks(contractFullRelation(relString), newPath.qids.drop(1))
+                }
+
+                val rootNode = nodes[chain.first()]!!
+
+                nodes.forEach { (qid, _) ->
+                  WikiCacheManager.putGraphs(qid, Graph(rootNode, nodes.values.toSet(), edges))
+                }
+
+                val qidsToReplace = mutableSetOf<QID>()
+                nodes.forEach { (qid, node) ->
+                  qidsToReplace.add(qid)
+                  qidsToReplace.add(node.data.gender)
+                }
+                val labels = service.getAllLabels(qidsToReplace.toList()).toMutableMap()
+                labels["Unknown"] = "Unknown"
+                nodes.forEach { (_, node) ->
+                  node.data.name = labels[node.data.id] ?: node.data.name
+                  node.data.gender = labels[node.data.gender] ?: node.data.gender
+                }
+
+                val rawRelString =
+                  rawRels.joinToString(" ").let { if (it.endsWith("'s")) it.dropLast(2) else it }
+                val relString = contractFullRelation(rawRelString)
+
+                return RelationLinks(relString, Graph(rootNode, nodes.values.toSet(), edges))
               }
 
               nextLevelQueue.add(newPath)
@@ -210,6 +297,6 @@ class GraphTrawlService {
       currentLevelQueue = nextLevelQueue
     }
 
-    return RelationLinks("Unrelated", listOf())
+    return RelationLinks("Unrelated", Graph(Node(Person(), "", 0), emptySet(), emptySet()))
   }
 }
