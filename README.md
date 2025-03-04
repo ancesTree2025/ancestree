@@ -23,6 +23,10 @@ environmnet variables.
 |    GOOGLE_API_KEY    | Ask for it                                 | For the search autocomplete feature       |
 |    OPENAI_API_KEY    | Ask for it                                 | For getting details about a person        |
 
+## Deployment
+
+To create a deployment, go to the GitHub page, go to the Actions tab, select the "Deploy" action then click run workflow and run it for branch main.
+
 ## Project management
 
 ### Commits

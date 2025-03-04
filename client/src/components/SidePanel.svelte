@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { PersonInfo } from '$lib/types';
+  import { titleCase } from '$lib/utils';
 
   interface Props {
     name?: string;
@@ -19,16 +20,29 @@
       {/if}
     </div>
     {#if data}
-      <img alt={name} class="mx-8 mb-4 aspect-square rounded-xl object-cover" src={data.image} />
-      {#each Object.entries(data.attributes) as [key, value]}
-        <div class="flex">
-          <p class="w-16 font-bold">{key}</p>
-          <p class="flex-1">{value}</p>
-        </div>
+      {#if data.image}
+        <img alt={name} class="mx-8 mb-4 aspect-square rounded-xl object-cover" src={data.image} />
+      {/if}
+      {@const ingoreKeys = new Set(['image', 'wikiLink', 'description'])}
+      {#each Object.entries(data) as [key, value]}
+        {#if !ingoreKeys.has(key)}
+          <div class="flex">
+            <p class="w-16 font-bold">{titleCase(key)}</p>
+            <p class="flex-1">{value}</p>
+          </div>
+        {/if}
       {/each}
-      <p class="mt-4">
-        {data.description} <a href={data.wikipedia_link}>Wikipedia</a>
-      </p>
+      {#if data.description}
+        <p class="mt-4">
+          {data.description}
+        </p>
+      {/if}
+
+      {#if data.wikiLink}
+        <p class="mt-4">
+          <a href={data.wikiLink}>Wikipedia</a>
+        </p>
+      {/if}
     {:else}
       <img
         alt={name}
