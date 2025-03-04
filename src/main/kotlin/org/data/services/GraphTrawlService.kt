@@ -94,6 +94,25 @@ class GraphTrawlService {
           }
         }
         i += count
+      } else if (
+        token.equals("Son", ignoreCase = true) || token.equals("Daughter", ignoreCase = true)
+      ) {
+        val type = token.replaceFirstChar { it.uppercaseChar() }
+        var count = 1
+        while (
+          i + count < inputTokens.size && inputTokens[i + count].equals(token, ignoreCase = true)
+        ) {
+          count++
+        }
+        when (count) {
+          1 -> result.add(type)
+          2 -> result.add("Grand$type")
+          else -> {
+            val greats = "Great-".repeat(count - 2)
+            result.add(greats + "Grand" + type)
+          }
+        }
+        i += count
       } else {
         result.add(token)
         i++
@@ -185,12 +204,24 @@ class GraphTrawlService {
                 "Spouse(s)" -> {
                   val gender =
                     WikiCacheManager.getProps(neighbor)?.get("Gender")?.firstOrNull() ?: "unknown"
-                  if (gender.equals("female", ignoreCase = true)) "Wife's" else "Husband's"
+                  if (gender.equals("Q6581072", ignoreCase = true)) {
+                    "Wife's"
+                  } else if (gender.equals("Q6581097", ignoreCase = true)) {
+                    "Husband's"
+                  } else {
+                    "Spouse's"
+                  }
                 }
                 "Child(ren)" -> {
                   val gender =
                     WikiCacheManager.getProps(neighbor)?.get("Gender")?.firstOrNull() ?: "unknown"
-                  if (gender.equals("female", ignoreCase = true)) "Daughter's" else "Son's"
+                  if (gender.equals("Q6581072", ignoreCase = true)) {
+                    "Daughter's"
+                  } else if (gender.equals("Q6581097", ignoreCase = true)) {
+                    "Son's"
+                  } else {
+                    "Child's"
+                  }
                 }
                 else -> null
               } ?: return@forEach
@@ -228,38 +259,35 @@ class GraphTrawlService {
 
                 for (i in 0 until rawRels.size) {
                   val rel = rawRels[i]
-
                   if (
                     rel.startsWith("Father") ||
                       rel.startsWith("Mother") ||
                       rel.startsWith("Son") ||
                       rel.startsWith("Daughter")
                   ) {
-
                     val nodeA = nodes[chain[i]]!!
                     val nodeB = nodes[chain[i + 1]]!!
                     val (parentNode, childNode) =
                       if (nodeA.depth < nodeB.depth) Pair(nodeA, nodeB) else Pair(nodeB, nodeA)
 
                     val childProps = WikiCacheManager.getProps(childNode.id) ?: emptyMap()
-                    val missingParentQID: QID? =
-                      when {
-                        rel.startsWith("Father") -> childProps["Mother"]?.firstOrNull()
-                        rel.startsWith("Mother") -> childProps["Father"]?.firstOrNull()
-                        rel.startsWith("Son") -> childProps["Mother"]?.firstOrNull()
-                        rel.startsWith("Daughter") -> childProps["Father"]?.firstOrNull()
-                        else -> null
+                    listOf("Father", "Mother").forEach { parentType ->
+                      val missingParentQID = childProps[parentType]?.firstOrNull()
+                      if (
+                        missingParentQID != null &&
+                          missingParentQID !in nodes &&
+                          missingParentQID != parentNode.id
+                      ) {
+                        val missingQuery = service.queryQIDS(listOf(missingParentQID))
+                        val missingParentPerson =
+                          if (missingQuery.isNotEmpty()) missingQuery.first().first else Person()
+                        val newNode = Node(missingParentPerson, missingParentQID, parentNode.depth)
+                        nodes[missingParentQID] = newNode
+                        edges.add(Edge(parentNode.id, missingParentQID))
+                        edges.add(Edge(missingParentQID, parentNode.id))
+                        edges.add(Edge(missingParentQID, childNode.id))
+                        edges.add(Edge(childNode.id, missingParentQID))
                       }
-                    if (missingParentQID != null && missingParentQID !in nodes) {
-                      val missingQuery = service.queryQIDS(listOf(missingParentQID))
-                      val missingParentPerson =
-                        if (missingQuery.isNotEmpty()) missingQuery.first().first else Person()
-                      val newNode = Node(missingParentPerson, missingParentQID, parentNode.depth)
-                      nodes[missingParentQID] = newNode
-                      edges.add(Edge(parentNode.id, missingParentQID))
-                      edges.add(Edge(missingParentQID, parentNode.id))
-                      edges.add(Edge(missingParentQID, childNode.id))
-                      edges.add(Edge(childNode.id, missingParentQID))
                     }
                   }
                 }
