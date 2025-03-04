@@ -24,7 +24,7 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     val cacheManager: WikiCacheManager = InMemWikiCacheManager
   }
 
-  suspend fun getRelation(origin: QID, dest: QID): RelationLinks {
+  fun getRelation(origin: QID, dest: QID): RelationLinks {
 
     val graphs = cacheManager.getGraphs(origin)
 
@@ -32,57 +32,56 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
 
     if (graphs.isNullOrEmpty()) {
       return RelationLinks("Unrelated", listOf())
-    } else {
+    }
 
-      graphs.forEach { graph ->
-        val relNode = (graph.nodes.find { it.data.id == dest })
+    graphs.forEach { graph ->
+      val relNode = (graph.nodes.find { it.data.id == dest })
 
-        if (relNode != null) {
+      if (relNode != null) {
 
-          println("Relevant graph: $graph")
+        println("Relevant graph: $graph")
 
-          val visited = mutableSetOf(origin)
-          val candidates = mutableListOf(listOf(origin))
+        val visited = mutableSetOf(origin)
+        val candidates = mutableListOf(listOf(origin))
 
-          while (true) {
+        while (true) {
 
-            println("Candidates: $candidates")
+          println("Candidates: $candidates")
 
-            val links = candidates.removeFirst()
-            val c = links.last()
+          val links = candidates.removeFirst()
+          val c = links.last()
 
-            println("Extracted head of first element: $c")
+          println("Extracted head of first element: $c")
 
-            println("Graph edges: ${graph.edges}")
+          println("Graph edges: ${graph.edges}")
 
-            for (edge in graph.edges) {
-              println("Edge: $edge")
-              val a = edge.node1
-              val b = edge.node2
+          for (edge in graph.edges) {
+            println("Edge: $edge")
+            val a = edge.node1
+            val b = edge.node2
 
-              val to =
-                when (c) {
-                  a -> b
-                  b -> a
-                  else -> origin
-                }
-
-              if (to !in visited) {
-                println("Unvisited connection: $to")
-
-                val newLinks = mutableListOf<QID>()
-                newLinks.addAll(links)
-                newLinks.add(to)
-
-                if (to == dest) {
-                  val nameRepresentation = constructLinks(newLinks, graph)
-                  newLinks.removeFirst()
-                  return RelationLinks(nameRepresentation, newLinks)
-                }
-
-                candidates.add(newLinks)
-                visited.add(to)
+            val to =
+              when (c) {
+                a -> b
+                b -> a
+                else -> origin
               }
+
+            if (to !in visited) {
+              println("Unvisited connection: $to")
+
+              val newLinks = mutableListOf<QID>()
+              newLinks.addAll(links)
+              newLinks.add(to)
+
+              if (to == dest) {
+                val nameRepresentation = constructLinks(newLinks, graph)
+                newLinks.removeFirst()
+                return RelationLinks(nameRepresentation, newLinks)
+              }
+
+              candidates.add(newLinks)
+              visited.add(to)
             }
           }
         }
@@ -92,6 +91,13 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     return RelationLinks("Unrelated", listOf())
   }
 
+  /**
+   * Returns a text string describing the relationship between two individuals in a graph.
+   *
+   * @param qids A list of qids on the path between two individuals.
+   * @param g The graph to find the relationship within
+   * @return For qids: [a, a's father, a's father's father] returns a's father's father
+   */
   private fun constructLinks(qids: List<QID>, g: Graph<Person>): String {
 
     val sb = StringBuilder()
