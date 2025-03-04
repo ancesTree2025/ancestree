@@ -12,7 +12,6 @@ import org.data.models.WikidataProperties.propertyQIDMapPersonal
 import org.data.parsers.GoogleKnowledgeRequestParser
 import org.data.parsers.WikiRequestParser
 import org.data.requests.ComplexRequester
-import org.domain.models.Graph
 
 /** Service class for performing Wikipedia/Wikidata lookups. */
 class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
@@ -20,108 +19,6 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
   /** A companion object housing API configuration details. */
   companion object {
     const val CHUNK_SIZE = 45
-  }
-
-  suspend fun getRelation(origin: QID, dest: QID): RelationLinks {
-
-    val graphs = WikiCacheManager.getGraphs(origin)
-
-    println("All related graphs: $graphs")
-
-    if (graphs.isNullOrEmpty()) {
-      return RelationLinks("Unrelated", listOf())
-    } else {
-
-      graphs.forEach { graph ->
-        val relNode = (graph.nodes.find { it.data.id == dest })
-
-        if (relNode != null) {
-
-          println("Relevant graph: $graph")
-
-          val visited = mutableSetOf(origin)
-          val candidates = mutableListOf(listOf(origin))
-
-          while (true) {
-
-            println("Candidates: $candidates")
-
-            val links = candidates.removeFirst()
-            val c = links.last()
-
-            println("Extracted head of first element: $c")
-
-            println("Graph edges: ${graph.edges}")
-
-            for (edge in graph.edges) {
-              println("Edge: $edge")
-              val a = edge.node1
-              val b = edge.node2
-
-              val to =
-                when (c) {
-                  a -> b
-                  b -> a
-                  else -> origin
-                }
-
-              if (to !in visited) {
-                println("Unvisited connection: $to")
-
-                val newLinks = mutableListOf<QID>()
-                newLinks.addAll(links)
-                newLinks.add(to)
-
-                if (to == dest) {
-                  val nameRepresentation = constructLinks(newLinks, graph)
-                  newLinks.removeFirst()
-                  return RelationLinks(nameRepresentation, newLinks)
-                }
-
-                candidates.add(newLinks)
-                visited.add(to)
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return RelationLinks("Unrelated", listOf())
-  }
-
-  private fun constructLinks(qids: List<QID>, g: Graph<Person>): String {
-
-    val sb = StringBuilder()
-
-    var i = 1
-    while (i < qids.size) {
-      val prev = g.nodes.find { it.id == qids[i - 1] }!!
-      val next = g.nodes.find { it.id == qids[i] }!!
-
-      if (prev.depth == next.depth) {
-        if (next.data.gender == "female") {
-          sb.append("Wife's ")
-        } else {
-          sb.append("Husband's ")
-        }
-      } else if (prev.depth > next.depth) {
-        if (next.data.gender == "female") {
-          sb.append("Mother's ")
-        } else {
-          sb.append("Father's ")
-        }
-      } else {
-        if (next.data.gender == "female") {
-          sb.append("Daughter's ")
-        } else {
-          sb.append("Son's ")
-        }
-      }
-      i++
-    }
-
-    return sb.toString().dropLast(3)
   }
 
   /**
