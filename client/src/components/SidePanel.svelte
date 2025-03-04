@@ -47,11 +47,7 @@
       {/if}
     {:else}
       {#if showImage}
-        <img
-          alt={name}
-          class="mx-8 mb-4 aspect-square rounded-xl object-cover"
-          src={defaultPfp}
-        />
+        <img alt={name} class="mx-8 mb-4 aspect-square rounded-xl object-cover" src={defaultPfp} />
       {/if}
       <div class="h-4 w-3/4 animate-pulse rounded-lg bg-gray"></div>
       <div class="h-4 w-1/2 animate-pulse rounded-lg bg-gray"></div>
