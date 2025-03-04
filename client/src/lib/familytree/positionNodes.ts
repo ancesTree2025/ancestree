@@ -67,7 +67,7 @@ export function positionNodes(tree: Tree): {
 
   const marriageHeights = getMarriageHeights(tree, arrangedLevels);
 
-  const { positions, treeWidth } = calculatePositions(arrangedLevels);
+  const { positions, treeWidth } = calculatePositions(arrangedLevels, tree.focus);
 
   return {
     positions,
@@ -799,12 +799,17 @@ function shuntOverlapping(level: PersonID[], assignments: Map<PersonID, number>)
 const NODE_WIDTH = 100;
 const NODE_HEIGHT = 200;
 
-function calculatePositions(levels: Map<number, Map<PersonID, number>>): {
+function calculatePositions(
+  levels: Map<number, Map<PersonID, number>>,
+  focus: PersonID
+): {
   positions: Positions;
   treeWidth: number;
 } {
   let minX = Infinity;
   let maxX = -Infinity;
+  let shiftX = 0;
+  let shiftY = 0;
   const positions: Positions = {};
 
   for (const [depth, arrangement] of levels) {
@@ -813,7 +818,16 @@ function calculatePositions(levels: Map<number, Map<PersonID, number>>): {
       minX = Math.min(minX, actualX);
       maxX = Math.max(maxX, actualX);
       positions[person] = { x: actualX, y: depth * NODE_HEIGHT };
+      if (person === focus) {
+        shiftX = actualX;
+        shiftY = depth * NODE_HEIGHT;
+      }
     }
+  }
+
+  for (const id in positions) {
+    positions[id].x -= shiftX;
+    positions[id].y -= shiftY;
   }
 
   return { positions, treeWidth: maxX - minX };
@@ -988,6 +1002,7 @@ function getMarriageOffsets(
     const groupId = groups.members[marriage.parents[0]];
     if (groupId === undefined) {
       offsets.push(0);
+      i++;
       continue;
     }
     const depth = depths.get(groupId);
@@ -1005,7 +1020,11 @@ function getMarriageOffsets(
     while (!happy) {
       happy = true;
       for (let d = 1; d < distance; d++) {
-        for (const [min, max] of bounds.get(depth)!.get(d)!) {
+        const depthBounds = bounds.get(depth)!;
+
+        const minMaxes = depthBounds.get(d)!;
+
+        for (const [min, max] of minMaxes) {
           if (max < leftParent) continue;
           if (min <= left && left <= max) {
             happy = false;

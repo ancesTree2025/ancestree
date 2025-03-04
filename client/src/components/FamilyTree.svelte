@@ -1,7 +1,15 @@
 <script lang="ts">
   import * as d3 from 'd3';
   import { positionNodes } from '$lib';
-  import type { MarriageDistances, MarriageHeights, Positions, Tree } from '$lib/types';
+  import {
+    type People,
+    type MarriageDistances,
+    type MarriageHeights,
+    type Marriages,
+    type Positions,
+    type Tree,
+    type PersonID
+  } from '$lib/types';
   import { onMount } from 'svelte';
   import FamilyTreeLines from './FamilyTreeLines.svelte';
   import { SvelteSet } from 'svelte/reactivity';
@@ -15,10 +23,19 @@
   let marriageHeights = $state<MarriageHeights>([]);
   let marriageDistances = $state<MarriageDistances>([]);
   let marriageOffsets = $state<number[]>([]);
+  let marriages = $state<Marriages>([]);
+  let people = $state<People>([]);
+  let focus = $state<string>('');
 
   $effect(() => {
     if (tree) {
       const result = positionNodes(tree);
+
+      // to make sure marriage lines update after new positions calculated
+      people = tree.people;
+      marriages = tree.marriages;
+      focus = tree.focus;
+
       positions = result.positions;
       treeWidth = result.treeWidth;
       marriageHeights = result.marriageHeights;
@@ -57,7 +74,7 @@
 
     if (!tree) return;
 
-    tree.marriages.forEach((marriage) => {
+    marriages.forEach((marriage) => {
       if (marriage.children.includes(id)) {
         highlightSet.add(marriage.parents[0]);
         highlightSet.add(marriage.parents[1]);
@@ -79,7 +96,7 @@
   const zoomFactor = $derived(Math.min(1, treeWidth ? width / treeWidth : 1));
 
   const xOffset = $derived(
-    treeWidth !== undefined && treeWidth < width ? (width - treeWidth) / 2 : 0
+    treeWidth !== undefined && treeWidth < width ? (width - treeWidth) / 2 : width / 2
   );
 
   const yOffset = $derived(height / 2);
@@ -89,28 +106,31 @@
   <g id="zoom-group">
     <g transform="translate({xOffset}, {yOffset}) scale({zoomFactor})">
       {#if tree}
-        {#each tree.marriages as marriage, i}
+        {#each marriages as marriage, i (`${focus} ${i}`)}
           <FamilyTreeLines
             {marriage}
             {positions}
-            height={marriageHeights[i] ?? 0}
-            distance={marriageDistances[i] ?? 1}
-            offset={marriageOffsets[i] ?? 0}
+            height={marriageHeights[i]!}
+            distance={marriageDistances[i]!}
+            offset={marriageOffsets[i]!}
             {highlightSet}
             {selectedID}
           />
         {/each}
-        {#each tree.people as [id, person, gender]}
+        {#each people as [id, person, gender] (id)}
           {@const position = positions[id]}
           {#if position}
-            <g transform="translate({position.x},{position.y})">
+            <g
+              transform="translate({position.x},{position.y})"
+              class="transition-transform duration-200"
+            >
               <rect
                 x={-RECT_WIDTH / 2}
                 y={-RECT_HEIGHT / 2}
                 width={RECT_WIDTH}
                 height={RECT_HEIGHT}
                 rx={RECT_RADIUS}
-                class="{tree.people[0][0] === id
+                class="{people[0][0] === id
                   ? 'fill-highlight'
                   : gender === 'male'
                     ? 'fill-blue'

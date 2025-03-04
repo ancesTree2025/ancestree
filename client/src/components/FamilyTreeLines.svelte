@@ -22,22 +22,24 @@
 
   const rawSpouse1Id = $derived(marriage.parents[0]);
   const rawSpouse2Id = $derived(marriage.parents[1]);
-  const rawSpouse1 = $derived(positions[rawSpouse1Id] as Position | undefined);
-  const rawSpouse2 = $derived(positions[rawSpouse2Id] as Position | undefined);
+  const rawSpouse1 = $derived<Position | undefined>(positions[rawSpouse1Id]);
+  const rawSpouse2 = $derived<Position | undefined>(positions[rawSpouse2Id]);
 
-  const swap = $derived(rawSpouse1 && rawSpouse2 && rawSpouse1?.x > rawSpouse2?.x);
+  const swap = $derived(
+    rawSpouse1 !== undefined && rawSpouse2 !== undefined && rawSpouse1.x > rawSpouse2.x
+  );
   const spouse1 = $derived(swap ? rawSpouse2 : rawSpouse1);
   const spouse2 = $derived(swap ? rawSpouse1 : rawSpouse2);
   const spouse1Id = $derived(swap ? rawSpouse2Id : rawSpouse1Id);
   const spouse2Id = $derived(swap ? rawSpouse1Id : rawSpouse2Id);
   const children = $derived(
-    marriage.children.map((id) => [id, positions[id]] as [PersonID, Position | undefined])
+    marriage.children.map<[PersonID, Position | undefined]>((id) => [id, positions[id]])
   );
 
   const OVERLAP_OFFSET = 40;
   const HEIGHT_OFFSET = 20;
 
-  const parentsX = $derived(((spouse1?.x ?? 0) + (spouse2?.x ?? 0)) / 2 + offset);
+  const parentsX = $derived(((spouse1?.x ?? NaN) + (spouse2?.x ?? NaN)) / 2 + offset);
   const rawParentsY = $derived(Math.max(spouse1?.y ?? Infinity, spouse2?.y ?? Infinity));
   const parentsY = $derived(
     rawParentsY - (distance === 1 ? 0 : OVERLAP_OFFSET + HEIGHT_OFFSET * (distance - 2))
@@ -122,9 +124,7 @@
       {/if}
     {/each}
   {/if}
-{/if}
 
-{#if spouse1 && spouse2}
   {@const highlightMarriage = highlightSet.has(spouse1Id) && highlightSet.has(spouse2Id)}
   {@const highlightHalf = !highlightSet.isDisjointFrom(new Set(marriage.children))}
   {@const highlightSpouse1 = highlightMarriage || (spouse1Id === selectedID && highlightHalf)}
