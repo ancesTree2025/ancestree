@@ -7,8 +7,7 @@
     type MarriageHeights,
     type Marriages,
     type Positions,
-    type Tree,
-    type PersonID
+    type Tree
   } from '$lib/types';
   import { onMount } from 'svelte';
   import FamilyTreeLines from './FamilyTreeLines.svelte';
