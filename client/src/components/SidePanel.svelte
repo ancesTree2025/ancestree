@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PersonInfo } from '$lib/types';
   import { titleCase } from '$lib/utils';
+  import defaultPfp from '$lib/assets/Default_pfp.jpg';
 
   interface Props {
     name?: string;
@@ -49,7 +50,7 @@
         <img
           alt={name}
           class="mx-8 mb-4 aspect-square rounded-xl object-cover"
-          src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
+          src={defaultPfp}
         />
       {/if}
       <div class="h-4 w-3/4 animate-pulse rounded-lg bg-gray"></div>
