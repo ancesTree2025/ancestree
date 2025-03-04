@@ -1,13 +1,15 @@
 <script lang="ts">
   import type { PersonInfo } from '$lib/types';
   import { titleCase } from '$lib/utils';
+  import defaultPfp from '$lib/assets/Default_pfp.jpg';
 
   interface Props {
     name?: string;
     data?: PersonInfo;
     show: boolean;
+    showImage: boolean;
   }
-  const { name, data, show }: Props = $props();
+  const { name, data, show, showImage }: Props = $props();
 </script>
 
 <div class={`${show ? 'w-96' : 'w-0'} shadow-lg transition-all duration-500`}>
@@ -32,7 +34,6 @@
           </div>
         {/if}
       {/each}
-
       {#if data.description}
         <p class="mt-4">
           {data.description}
@@ -44,6 +45,13 @@
           <a href={data.wikiLink}>Wikipedia</a>
         </p>
       {/if}
+    {:else}
+      {#if showImage}
+        <img alt={name} class="mx-8 mb-4 aspect-square rounded-xl object-cover" src={defaultPfp} />
+      {/if}
+      <div class="h-4 w-3/4 animate-pulse rounded-lg bg-gray"></div>
+      <div class="h-4 w-1/2 animate-pulse rounded-lg bg-gray"></div>
+      <div class="w-100 h-40 animate-pulse rounded-lg bg-gray"></div>
     {/if}
   </div>
 </div>

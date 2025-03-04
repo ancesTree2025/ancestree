@@ -11,7 +11,7 @@
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
   import TreeSearchInput from '../components/TreeSearchInput.svelte';
 
-  const name = $state<string | undefined>();
+  let name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
 
   let tree = $state<Tree | undefined>();
@@ -38,7 +38,7 @@
   $effect(() => {
     if (name) {
       status = { state: 'loading' };
-      fetchTree(name, useFakeData).then((result) => {
+      fetchTree(name, useFakeData, maxWidth, maxHeight).then((result) => {
         const [fetched, error] = result.toTuple();
         if (fetched) {
           tree = fetched;
@@ -55,19 +55,9 @@
     }
   });
 
-  async function onSubmit(name: string) {
-    if (!name.length) return;
-
-    status = { state: 'loading' };
-    const result = await fetchTree(name, useFakeData, maxWidth, maxHeight);
-    const [fetched, error] = result.toTuple();
-    if (fetched) {
-      filteredTree = undefined;
-      tree = fetched;
-      status = { state: 'idle' };
-    } else if (error) {
-      status = { state: 'error', error };
-    }
+  async function onSubmit(newName: string) {
+    if (!newName.length) return;
+    name = newName;
   }
 
   function searchWithinTree(result: string) {
@@ -118,6 +108,8 @@
   let sidePanelData = $state<PersonInfo | undefined>(undefined);
 
   async function getPersonInfo(qid: string, name: string) {
+    sidePanelData = undefined;
+    sidePanelName = undefined;
     const [fetched] = (await fetchInfo(qid, useFakeData, checkboxOptions)).toTuple();
 
     if (fetched) {
@@ -143,7 +135,12 @@
     <div class="flex-1">
       <FamilyTree bind:this={familyTree} {getPersonInfo} tree={filteredTree ?? tree} />
     </div>
-    <SidePanel name={sidePanelName} show={true} data={sidePanelData} />
+    <SidePanel
+      name={sidePanelName}
+      show={true}
+      data={sidePanelData}
+      showImage={checkboxOptions[0].checked}
+    />
   </div>
   {#if showSettings}
     <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
