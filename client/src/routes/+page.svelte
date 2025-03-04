@@ -135,7 +135,12 @@
     <div class="flex-1">
       <FamilyTree bind:this={familyTree} {getPersonInfo} tree={filteredTree ?? tree} />
     </div>
-    <SidePanel name={sidePanelName} show={true} data={sidePanelData} />
+    <SidePanel
+      name={sidePanelName}
+      show={true}
+      data={sidePanelData}
+      showImage={checkboxOptions[0].checked}
+    />
   </div>
   {#if showSettings}
     <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -143,7 +148,7 @@
         <h2 class="mb-4 text-lg font-bold">Settings</h2>
         <label class="mb-2 block"
           >Maximum Tree Width
-          <div class="border-gray-400 flex h-8 w-12 items-center justify-center rounded border">
+          <div class="flex h-8 w-12 items-center justify-center rounded border border-gray-400">
             {maxWidth}
           </div>
           <input type="range" min="1" max="10" bind:value={maxWidth} class="w-full" />
@@ -151,7 +156,7 @@
 
         <label class="mb-2 block"
           >Maximum Tree Height
-          <div class="border-gray-400 flex h-8 w-12 items-center justify-center rounded border">
+          <div class="flex h-8 w-12 items-center justify-center rounded border border-gray-400">
             {maxHeight}
           </div>
           <input type="range" min="1" max="10" bind:value={maxHeight} class="w-full" />
@@ -166,7 +171,7 @@
             </div>
           {/each}
         </div>
-        <button class="bg-blue-500 mt-4 rounded p-2 text-black" onclick={toggleSettings}
+        <button class="mt-4 rounded bg-blue-500 p-2 text-black" onclick={toggleSettings}
           >Close</button
         >
       </div>
