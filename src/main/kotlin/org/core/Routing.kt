@@ -74,6 +74,11 @@ fun Application.configureRouting() {
           "death" -> queryParams.withDeath()
           "description" -> queryParams.withDescription()
           "wikiLink" -> queryParams.withWikiLink()
+          "rcoords" -> queryParams.withResCoords()
+          "residence" -> queryParams.withResidence()
+          "bcoords" -> queryParams.withBCoords()
+          "dcoords" -> queryParams.withDCoords()
+          "all" -> queryParams.withAll()
         }
       }
 

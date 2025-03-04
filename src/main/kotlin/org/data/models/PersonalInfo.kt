@@ -10,4 +10,8 @@ data class PersonalInfo(
   var death: String? = null, // String of place and date of death
   var description: String? = null,
   var wikiLink: String? = null,
+  var bcoords: String? = null,
+  var dcoords: String? = null,
+  var rcoords: String? = null,
+  var residence: String? = null,
 )

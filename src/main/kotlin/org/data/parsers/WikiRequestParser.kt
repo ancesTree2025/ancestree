@@ -39,6 +39,8 @@ object WikiRequestParser {
 
     val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
+    println(response.bodyAsText())
+
     return result.entities.mapValues { (_, entityInfo) ->
       val familyInfo: MutableMap<String, List<String>> =
         properties.entries
@@ -51,6 +53,11 @@ object WikiRequestParser {
                       dataValue.containsKey("id") -> listOf(dataValue["id"]!!.jsonPrimitive.content)
                       dataValue.containsKey("time") ->
                         listOf(dataValue["time"]!!.jsonPrimitive.content)
+                      dataValue.containsKey("latitude") && dataValue.containsKey("longitude") -> {
+                        val lat = dataValue["latitude"]!!.jsonPrimitive.double
+                        val lon = dataValue["longitude"]!!.jsonPrimitive.double
+                        listOf("$lat,$lon")
+                      }
                       else -> emptyList()
                     }
                   }
@@ -61,7 +68,7 @@ object WikiRequestParser {
           }
           .toMutableMap()
 
-      propertyQIDMap.values.forEach { relation -> familyInfo.putIfAbsent(relation, emptyList()) }
+      properties.values.forEach { relation -> familyInfo.putIfAbsent(relation, emptyList()) }
 
       familyInfo
     }
