@@ -275,10 +275,7 @@
         >
           <FilterIcon />
         </button>
-        <button
-          class="p-3"
-          onclick={() => familyTree?.recenter()}
-        >
+        <button class="p-3" onclick={() => familyTree?.recenter()}>
           <AlignCenterIcon />
         </button>
       </div>
