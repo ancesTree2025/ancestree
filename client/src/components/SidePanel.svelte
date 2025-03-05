@@ -25,18 +25,33 @@
       {#if data.image}
         <img alt={name} class="mx-8 mb-4 aspect-square rounded-xl object-cover" src={data.image} />
       {/if}
-      {@const ignoreKeys = new Set(['image', 'wikiLink', 'description', 'bcoords', 'dcoords'])}
+
+      {#if data.description}
+        <p class="mt-4">
+          {data.description}
+        </p>
+      {/if}
+
+      {@const ignoreKeys = new Set([
+        'image',
+        'wikiLink',
+        'description',
+        'bcoords',
+        'dcoords',
+        'rcoords'
+      ])}
       {#each Object.entries(data) as [key, value]}
         {#if !ignoreKeys.has(key)}
           <div class="flex">
-            <p class="w-16 font-bold">{titleCase(key)}</p>
+            <p class="w-20 font-bold">{titleCase(key)}</p>
             <p class="flex-1">{value}</p>
           </div>
         {/if}
       {/each}
-      {#if data.bcoords || data.dcoords}
+
+      {#if data.bcoords || data.dcoords || data.rcoords}
         <div class="mt-4 space-y-4">
-          {#if data.bcoords || data.bcoords === 'Unknown'}
+          {#if data.bcoords && data.dcoords !== 'Unknown'}
             <div>
               <p><strong>Birthplace:</strong></p>
               <a
@@ -58,7 +73,7 @@
             </div>
           {/if}
 
-          {#if data.dcoords || data.dcoords === 'Unknown'}
+          {#if data.dcoords && data.dcoords !== 'Unknown'}
             <div>
               <p><strong>Death Place:</strong></p>
               <a
@@ -79,13 +94,29 @@
               </a>
             </div>
           {/if}
-        </div>
-      {/if}
 
-      {#if data.description}
-        <p class="mt-4">
-          {data.description}
-        </p>
+          {#if data.rcoords && data.rcoords !== 'Unknown'}
+            <div>
+              <p><strong>Residence</strong></p>
+              <a
+                href={`https://www.google.com/maps?q=${data.rcoords}`}
+                target="_blank"
+                class="block"
+                aria-label="Link to Death place coordinates"
+              >
+                <iframe
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(data.rcoords.split(',')[1]) - 0.01},${Number(data.rcoords.split(',')[0]) - 0.01},${Number(data.rcoords.split(',')[1]) + 0.01},${Number(data.rcoords.split(',')[0]) + 0.01}&layer=mapnik&marker=${data.rcoords.split(',')[0]},${data.rcoords.split(',')[1]}`}
+                  width="100%"
+                  height="200"
+                  class="border-gray-300 pointer-events-none rounded-lg border"
+                  allowfullscreen
+                  loading="lazy"
+                  title="Deathplace map"
+                ></iframe>
+              </a>
+            </div>
+          {/if}
+        </div>
       {/if}
 
       {#if data.wikiLink}
