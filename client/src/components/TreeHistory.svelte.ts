@@ -36,7 +36,6 @@ class TreeHistory {
    * Successive calls will keep redo-ing until no more.
    * Assumes that {@link canRedo} returns true.
    *
-   * @see
    * @return the tree immediately before the current rendered tree.
    */
   redo(): Tree {
@@ -50,7 +49,7 @@ class TreeHistory {
   }
 
   toString(): string {
-    return `TreeHistory[history=${this.history}, index=${this.index}]`;
+    return `TreeHistory[history=${JSON.stringify(this.history)}, index=${this.index}]`;
   }
 }
 
