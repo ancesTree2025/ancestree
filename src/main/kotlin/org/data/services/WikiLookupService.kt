@@ -194,7 +194,10 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
       val claimsResp = ComplexRequester.getInfo(it)
       val qidToLabels = WikiRequestParser.parseWikidataLabels(claimsResp)
 
-      qidToLabels.forEach { (qid, label) -> WikiCacheManager.putLabel(qid, label) }
+      qidToLabels.forEach { (qid, label) ->
+        WikiCacheManager.putLabel(qid, label)
+        WikiCacheManager.putQID(label, qid)
+      }
       finalLabels.putAll(qidToLabels)
     }
 
