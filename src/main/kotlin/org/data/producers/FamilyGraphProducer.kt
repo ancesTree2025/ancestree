@@ -30,7 +30,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     Child,
     Spouse,
     Root,
-    Partner
+    Partner,
   }
 
   /**
@@ -198,18 +198,6 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
 
       queue.removeAll { batchItems.contains(it) }
     }
-
-    /** Connecting unmarried people with children */
-//    for ((_, parentSet) in childToParents) {
-//      val parents = parentSet.toList()
-//      if (parents.size >= 2) {
-//        for (i in parents.indices) {
-//          for (j in i + 1 until parents.size) {
-//            addSpousalEdges(parents[i], parents[j], married = false)
-//          }
-//        }
-//      }
-//    }
 
     /** Re-labelling nodes with name and gender, from QID */
     val qidsToReplace = mutableListOf<QID>()
