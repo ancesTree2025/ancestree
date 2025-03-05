@@ -108,11 +108,10 @@
     fetchRelationship(tree!.focus, tree!.people.find((tup) => tup[1].name === result)![0]!).then(
       (result) => {
         const response = result.getOrNull();
-        if (response === null)
-          return
+        if (response === null) return;
 
         filteredTree = apiResponseToTree(response?.links);
-        treeHistory.put(filteredTree)
+        treeHistory.put(filteredTree);
       }
     );
   }
