@@ -116,9 +116,27 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
       info.image = mkImage(infoMap["Wikimedia Image File"]!!)
     }
 
+    if (queryParams.bcoords) {
+      val birthLoc = getPlaceCoords(infoMap["PoB"]!!.getOrNull(0))
+      info.bcoords = birthLoc
+    }
+
+    if (queryParams.dcoords) {
+      val deathLoc = getPlaceCoords(infoMap["PoD"]!!.getOrNull(0))
+      info.dcoords = deathLoc
+    }
+
     if (queryParams.birth) {
       val birthPlace = getPlaceName(infoMap["PoB"]!!.getOrNull(0))
       info.birth = formatDatePlaceInfo(birthPlace, infoMap["DoB"])
+    }
+
+    if (queryParams.residence) {
+      info.residence = getPlaceName(infoMap["Residence"]!!.getOrNull(0))
+    }
+
+    if (queryParams.rcoords) {
+      info.rcoords = getPlaceCoords(infoMap["Residence"]!!.getOrNull(0))
     }
 
     if (queryParams.death) {
@@ -217,6 +235,22 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
       return name
     } else {
       return WikiCacheManager.getLabel(locQID)!!
+    }
+  }
+
+  private suspend fun getPlaceCoords(locQID: QID?): String {
+    if (locQID == null) return "Unknown"
+
+    if (WikiCacheManager.getProps(locQID) == null) {
+      val locReq = ComplexRequester.getInfo(listOf(locQID))
+      val locInfo = WikiRequestParser.parseWikidataClaims(locReq, propertyQIDMapPersonal)
+      WikiCacheManager.putProps(locQID, locInfo[locQID]!!)
+      println(locQID)
+      println(locInfo)
+      val coords = locInfo[locQID]!!["Coords"]
+      return coords!![0]
+    } else {
+      return WikiCacheManager.getProps(locQID)!!["Coords"]!![0]
     }
   }
 
