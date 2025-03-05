@@ -557,7 +557,10 @@ function weightBetween(
       return 1 / d;
     }
 
-    for (const marriage of personMarriages[current]) {
+    const personMarriage = personMarriages[current];
+    if (personMarriage === undefined) continue;
+
+    for (const marriage of personMarriage) {
       for (const spouse of marriage.parents) {
         if (!distances.has(spouse)) {
           distances.set(spouse, d);
@@ -571,7 +574,11 @@ function weightBetween(
         }
       }
     }
-    for (const marriage of personParents[current]) {
+
+    const personParent = personParents[current];
+    if (personParent === undefined) continue;
+
+    for (const marriage of personParent) {
       for (const parent of marriage.parents) {
         if (!distances.has(parent)) {
           distances.set(parent, d + 1);

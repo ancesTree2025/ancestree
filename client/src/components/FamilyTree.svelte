@@ -36,6 +36,7 @@
       focus = tree.focus;
 
       positions = result.positions;
+      $inspect(positions);
       treeWidth = result.treeWidth;
       marriageHeights = result.marriageHeights;
       marriageDistances = result.marriageDistances;

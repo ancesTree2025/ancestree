@@ -6,13 +6,14 @@
   import IconSettings from '~icons/tabler/settings';
   import SidePanel from '../components/SidePanel.svelte';
 
-  import { fetchTree, fetchInfo } from '$lib';
+  import { fetchTree, fetchInfo, filterByOption } from '$lib';
   import {
     type Tree,
     type LoadingStatus,
     type PersonInfo,
     type InfoChecklist,
-    type PopupStatus
+    type PopupStatus,
+    type FilterOption
   } from '$lib/types';
 
   import { page } from '$app/state';
@@ -25,6 +26,7 @@
   let name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
 
+  let rawTree = $state<Tree | undefined>();
   let tree = $state<Tree | undefined>();
   let filteredTree = $state<Tree | undefined>();
   const useFakeData = page.url.searchParams.get('useFakeData') === 'true';
@@ -43,6 +45,14 @@
     { key: 'wikiLink', label: 'Show Wikipedia Link', checked: true }
   ];
 
+  let filterOptions = $state<Record<FilterOption, boolean>>({
+    sibling: true,
+    spousefamily: true,
+    ancestor: true,
+    descendant: true,
+    all: true
+  });
+
   function toggleSettings() {
     showSettings = !showSettings;
   }
@@ -53,7 +63,7 @@
       fetchTree(name, useFakeData, maxWidth, maxHeight).then((result) => {
         const [fetched, error] = result.toTuple();
         if (fetched) {
-          tree = fetched;
+          rawTree = fetched;
           status = { state: 'idle' };
 
           // Opening the side panel with the focus on search complete
@@ -64,6 +74,10 @@
         }
       });
     }
+  });
+
+  $effect(() => {
+    tree = rawTree && filterByOption(rawTree, filterOptions);
   });
 
   async function onSubmit(newName: string) {
@@ -104,6 +118,8 @@
   function switchPopup(to: PopupStatus) {
     popupStatus = popupStatus === to ? null : to;
   }
+
+  $effect(() => console.log(filterOptions));
 </script>
 
 <div class="flex h-full flex-col overflow-x-hidden">
@@ -184,7 +200,7 @@
         />
       </FilterPopup>
       <FilterPopup show={popupStatus === 'filter'}>
-        <FilterContent />
+        <FilterContent setOption={(option, to) => (filterOptions[option] = to)} />
       </FilterPopup>
       <div class="z-50 flex rounded-xl bg-white text-xl shadow-lg">
         <button

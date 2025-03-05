@@ -55,6 +55,10 @@
   const rightChildX = $derived(
     Math.max(parentsX, ...children.map((child) => child[1]?.x ?? -Infinity))
   );
+
+  $effect(() => {
+    $inspect(positions);
+  });
 </script>
 
 {#if spouse1 && spouse2}
