@@ -17,6 +17,8 @@ export default {
       red: '#f44',
       blue: '#b5e2ff',
       highlight: '#e8bf8b',
+      cream: '#f5ebda',
+      'dark-gray': '#423d3d',
       highlight_border: '#2D2D2D',
       transparent: 'transparent'
     },
