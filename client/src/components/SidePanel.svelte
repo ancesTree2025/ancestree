@@ -25,11 +25,18 @@
       {#if data.image}
         <img alt={name} class="mx-8 mb-4 aspect-square rounded-xl object-cover" src={data.image} />
       {/if}
+
+      {#if data.description}
+        <p class="mt-4">
+          {data.description}
+        </p>
+      {/if}
+
       {@const ignoreKeys = new Set(['image', 'wikiLink', 'description', 'bcoords', 'dcoords', 'rcoords'])}
       {#each Object.entries(data) as [key, value]}
         {#if !ignoreKeys.has(key)}
           <div class="flex">
-            <p class="w-16 font-bold">{titleCase(key)}</p>
+            <p class="w-20 font-bold">{titleCase(key)}</p>
             <p class="flex-1">{value}</p>
           </div>
         {/if}
@@ -103,12 +110,6 @@
             </div>
           {/if}
         </div>
-      {/if}
-
-      {#if data.description}
-        <p class="mt-4">
-          {data.description}
-        </p>
       {/if}
 
       {#if data.wikiLink}
