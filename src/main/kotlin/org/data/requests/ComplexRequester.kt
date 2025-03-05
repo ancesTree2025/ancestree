@@ -37,7 +37,7 @@ object ComplexRequester {
       BaseRequester.doWikidataRequest("wbgetentities") {
         parameter("ids", qids.joinToString("|"))
         parameter("props", "claims|descriptions|labels|sitelinks/urls")
-        parameter("languages", "en")
+        parameter("languages", "en|mul")
       }
 
     return response

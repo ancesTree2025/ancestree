@@ -83,7 +83,9 @@ object WikiRequestParser {
 
     val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
-    return result.entities.mapValues { (_, entityInfo) -> entityInfo.labels.en?.value ?: "Unknown" }
+    return result.entities.mapValues { (_, entityInfo) ->
+      entityInfo.labels["en"]?.value ?: entityInfo.labels["mul"]?.value ?: "Unknown"
+    }
   }
 
   suspend fun parseWikiLinks(response: HttpResponse): Map<QID, String> {
@@ -102,7 +104,7 @@ object WikiRequestParser {
     val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
     return result.entities.mapValues { (_, entityInfo) ->
-      entityInfo.descriptions.en?.value ?: "Unknown"
+      entityInfo.descriptions["en"]?.value ?: "Unknown"
     }
   }
 }

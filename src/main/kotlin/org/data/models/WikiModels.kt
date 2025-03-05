@@ -12,20 +12,17 @@ import kotlinx.serialization.json.JsonElement
 
 @Serializable data class PageInfo(val title: String)
 
-/** Wikidata response from making a query on a QID */
 @Serializable data class WikidataResponse(val entities: Map<String, EntityInfo>)
 
 @Serializable
 data class EntityInfo(
-  val labels: EnString,
-  val descriptions: EnString,
+  val labels: Map<String, StringValue>,
+  val descriptions: Map<String, StringValue>,
   val claims: Map<String, List<WikiClaim>>,
   val sitelinks: SiteLinks,
 )
 
-@Serializable data class EnString(val en: StringValue? = null)
-
-@Serializable data class StringValue(val value: String)
+@Serializable data class StringValue(val language: String, val value: String)
 
 @Serializable data class SiteLinks(val enwiki: WikiLink? = null)
 
