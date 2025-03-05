@@ -36,7 +36,7 @@
       {/each}
       {#if data.bcoords || data.dcoords}
         <div class="mt-4 space-y-4">
-          {#if data.bcoords}
+          {#if data.bcoords || data.bcoords === 'Unknown'}
             <div>
               <p><strong>Birthplace:</strong></p>
               <a
@@ -58,7 +58,7 @@
             </div>
           {/if}
 
-          {#if data.dcoords}
+          {#if data.dcoords || data.dcoords === 'Unknown'}
             <div>
               <p><strong>Death Place:</strong></p>
               <a
