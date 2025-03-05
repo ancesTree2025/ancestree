@@ -279,22 +279,33 @@ class GraphTrawlService {
                       if (nodeA.depth < nodeB.depth) Pair(nodeA, nodeB) else Pair(nodeB, nodeA)
 
                     val childProps = WikiCacheManager.getProps(childNode.id) ?: emptyMap()
+                    val parentQIDs = mutableSetOf<String>()
+
                     listOf("Father", "Mother").forEach { parentType ->
-                      val missingParentQID = childProps[parentType]?.firstOrNull()
-                      if (
-                        missingParentQID != null &&
-                          missingParentQID !in nodes &&
-                          missingParentQID != parentNode.id
-                      ) {
-                        val missingQuery = service.queryQIDS(listOf(missingParentQID))
+                      val parentQID = childProps[parentType]?.firstOrNull()
+                      if (parentQID != null && parentQID !in nodes && parentQID != parentNode.id) {
+                        val missingQuery = service.queryQIDS(listOf(parentQID))
                         val missingParentPerson =
                           if (missingQuery.isNotEmpty()) missingQuery.first().first else Person()
-                        val newNode = Node(missingParentPerson, missingParentQID, parentNode.depth)
-                        nodes[missingParentQID] = newNode
-                        edges.add(Edge(parentNode.id, missingParentQID))
-                        edges.add(Edge(missingParentQID, parentNode.id))
-                        edges.add(Edge(missingParentQID, childNode.id))
-                        edges.add(Edge(childNode.id, missingParentQID))
+                        val newNode = Node(missingParentPerson, parentQID, parentNode.depth)
+                        nodes[parentQID] = newNode
+                        edges.add(Edge(parentNode.id, parentQID))
+                        edges.add(Edge(parentQID, parentNode.id))
+                        edges.add(Edge(parentQID, childNode.id))
+                        edges.add(Edge(childNode.id, parentQID))
+                      }
+                      if (parentQID != null) {
+                        parentQIDs.add(parentQID)
+                      }
+                    }
+
+                    if (parentQIDs.size > 1) {
+                      val parentList = parentQIDs.toList()
+                      for (j in 0 until parentList.size) {
+                        for (k in j + 1 until parentList.size) {
+                          edges.add(Edge(parentList[j], parentList[k]))
+                          edges.add(Edge(parentList[k], parentList[j]))
+                        }
                       }
                     }
                   }
