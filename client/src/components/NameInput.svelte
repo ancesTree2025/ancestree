@@ -3,15 +3,19 @@
 <script lang="ts">
   import IconSearch from '~icons/tabler/search';
   import IconAlert from '~icons/tabler/alert-triangle-filled';
+  import IconTree from '~icons/tabler/sitemap';
   import type { LoadingStatus } from '$lib/types';
   import { scale } from 'svelte/transition';
   import { fetchNames } from '$lib';
 
   interface Props {
     status: LoadingStatus;
-    onSubmit: (_: string) => void;
+    onSubmit: (name: string) => void;
+    clearSearch?: () => void;
+    namesInTree: string[];
+    type: 'Search' | 'RelationFinder';
   }
-  const { status, onSubmit }: Props = $props();
+  const { status, onSubmit, clearSearch = () => {}, namesInTree, type }: Props = $props();
 
   let name = $state('');
 
@@ -29,7 +33,7 @@
   /**
    * A list of search results to show as autocomplete suggestions
    */
-  let searchResults = $state<string[]>([]);
+  let suggestions = $state<{ name: string; inTree: boolean }[]>([]);
   /**
    * A timer to debounce the search request
    * Debouncing is done to prevent making too many requests.
@@ -47,13 +51,23 @@
       };
     } else {
       searching = false;
-      searchResults = [];
+      suggestions = [];
     }
   });
   async function searchForNames() {
     const result = await fetchNames(searchQuery);
     try {
-      searchResults = result.getOrThrow();
+      const treeSuggestions = searchQuery
+        ? namesInTree.filter((name) => name.toLowerCase().includes(searchQuery.toLowerCase()))
+        : [];
+      const searchResults = result.getOrThrow().filter((name) => !treeSuggestions.includes(name));
+      const MAX_SUGGESTIONS = 6;
+      suggestions = [
+        ...treeSuggestions.slice(0, 3).map((name) => ({ name, inTree: true })),
+        ...searchResults
+          .slice(0, Math.max(3, MAX_SUGGESTIONS - treeSuggestions.length))
+          .map((name) => ({ name, inTree: false }))
+      ];
     } catch (_e) {
       // TODO: handle error
     } finally {
@@ -65,7 +79,7 @@
    * @param selectedName the chosen name from the autocomplete suggestions
    */
   function selectName(selectedName: string) {
-    searchResults = [];
+    suggestions = [];
     name = selectedName; // Replaces the typed name with the selected name
     searchQuery = '';
     onSubmit(name);
@@ -73,6 +87,7 @@
 
   function onChange(event: Event) {
     const { value } = event.target as HTMLInputElement;
+    clearSearch();
     name = value;
     searchQuery = value;
   }
@@ -82,7 +97,9 @@
   const HOVER_CLASS = 'scale-100 hover:scale-125 transition-transform duration-150';
 </script>
 
-<div class="relative flex w-80 items-center gap-3 rounded-full bg-input pl-4">
+<div
+  class={`relative flex items-center gap-3 rounded-full bg-input pl-4 ${type === 'Search' ? 'w-80' : 'w-60'}`}
+>
   <IconSearch class="text-black opacity-50" />
   <form onsubmit={() => selectName(name)}>
     <input
@@ -111,15 +128,19 @@
       </div>
     </div>
   {/if}
-  {#if searchResults.length}
+  {#if suggestions.length && searchQuery}
     <div class="absolute left-0 right-0 top-full mx-5">
       <div class="rounded-lg bg-white shadow-lg">
-        {#each searchResults as result}
+        {#each suggestions as result}
           <button
             class="block w-full cursor-pointer p-2 text-left hover:bg-gray"
-            onclick={() => selectName(result)}
+            onclick={() => selectName(result.name)}
           >
-            {result}
+            <div class="flex items-center gap-3">
+              <IconTree
+                class={`text-black opacity-50 ${result.inTree ? '' : 'invisible'}`}
+              />{result.name}
+            </div>
           </button>
         {/each}
       </div>

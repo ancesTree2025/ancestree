@@ -9,7 +9,6 @@
 
   import { page } from '$app/state';
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
-  import TreeSearchInput from '../components/TreeSearchInput.svelte';
   import { apiResponseToTree } from '$lib/familytree/fetchTree';
 
   let name = $state<string | undefined>();
@@ -43,7 +42,6 @@
         const [fetched, error] = result.toTuple();
         if (fetched) {
           tree = fetched;
-          console.log(fetched);
           status = { state: 'idle' };
 
           // Opening the side panel with the focus on search complete
@@ -58,7 +56,12 @@
 
   async function onSubmit(newName: string) {
     if (!newName.length) return;
-    name = newName;
+    const withinTree = tree?.people.find((tup) => tup[1].name === newName);
+    if (withinTree) {
+      familyTree?.handleClick(withinTree[0], withinTree[1].name);
+    } else {
+      name = newName;
+    }
   }
 
   function searchWithinTree(result: string) {
@@ -94,7 +97,12 @@
       <h1 class="text-xl font-semibold text-dark-gray">Ancestree</h1>
     </a>
     <div class="flex flex-1 justify-center">
-      <NameInput {onSubmit} {status} />
+      <NameInput
+        {onSubmit}
+        {status}
+        namesInTree={tree?.people.map((p) => p[1].name) ?? []}
+        type="Search"
+      />
     </div>
     <div class="flex w-48 justify-end">
       <button class="p-2" onclick={toggleSettings}>
@@ -150,12 +158,14 @@
   {/if}
   {#if tree}
     <div class="flex justify-center pb-60">
-      <TreeSearchInput
-        names={tree.people.map((p) => p[1].name)}
+      <NameInput
         onSubmit={searchWithinTree}
+        status={{ state: 'idle' }}
+        namesInTree={tree.people.map((p) => p[1].name)}
         clearSearch={() => {
           filteredTree = undefined;
         }}
+        type="RelationFinder"
       />
     </div>
   {/if}
