@@ -7,6 +7,7 @@
   import type { LoadingStatus } from '$lib/types';
   import { scale } from 'svelte/transition';
   import { fetchNames } from '$lib';
+  import { removeDuplicatesBy } from '$lib/utils';
 
   interface Props {
     status: LoadingStatus;
@@ -72,12 +73,15 @@
         : [];
       const searchResults = result.getOrThrow().filter((name) => !treeSuggestions.includes(name));
       const MAX_SUGGESTIONS = 6;
-      suggestions = [
-        ...treeSuggestions.slice(0, 3).map((name) => ({ name, inTree: true })),
-        ...searchResults
-          .slice(0, Math.max(3, MAX_SUGGESTIONS - treeSuggestions.length))
-          .map((name) => ({ name, inTree: false }))
-      ];
+      suggestions = removeDuplicatesBy(
+        [
+          ...treeSuggestions.slice(0, 3).map((name) => ({ name, inTree: true })),
+          ...searchResults
+            .slice(0, Math.max(3, MAX_SUGGESTIONS - treeSuggestions.length))
+            .map((name) => ({ name, inTree: false }))
+        ],
+        ({ name }) => name
+      );
     } catch (_e) {
       // TODO: handle error
     } finally {
