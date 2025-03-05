@@ -25,9 +25,9 @@
       {#if data.image}
         <img alt={name} class="mx-8 mb-4 aspect-square rounded-xl object-cover" src={data.image} />
       {/if}
-      {@const ingoreKeys = new Set(['image', 'wikiLink', 'description', 'bcoords', 'dcoords'])}
+      {@const ignoreKeys = new Set(['image', 'wikiLink', 'description', 'bcoords', 'dcoords'])}
       {#each Object.entries(data) as [key, value]}
-        {#if !ingoreKeys.has(key)}
+        {#if !ignoreKeys.has(key)}
           <div class="flex">
             <p class="w-16 font-bold">{titleCase(key)}</p>
             <p class="flex-1">{value}</p>
