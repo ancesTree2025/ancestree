@@ -137,11 +137,19 @@ class GraphTrawlService {
   data class Path(val qids: List<QID>, val rels: List<String>)
 
   private suspend fun ensurePropsFor(qids: Collection<QID>) {
+
     val missing = qids.filter { WikiCacheManager.getProps(it) == null }.distinct()
+
     if (missing.isNotEmpty()) {
-      val propReq = ComplexRequester.getInfo(missing.toList())
-      val qidToPropertyMap = WikiRequestParser.parseWikidataClaims(propReq)
-      missing.forEach { qid -> WikiCacheManager.putProps(qid, qidToPropertyMap[qid] ?: emptyMap()) }
+
+      val subqs = missing.chunked(45)
+      subqs.forEach {
+        val propReq = ComplexRequester.getInfo(it)
+        val qidToPropertyMap = WikiRequestParser.parseWikidataClaims(propReq)
+        missing.forEach { qid ->
+          WikiCacheManager.putProps(qid, qidToPropertyMap[qid] ?: emptyMap())
+        }
+      }
     }
   }
 
@@ -293,10 +301,6 @@ class GraphTrawlService {
                 }
 
                 val rootNode = nodes[chain.first()]!!
-
-                nodes.forEach { (qid, _) ->
-                  WikiCacheManager.putGraphs(qid, Graph(rootNode, nodes.values.toSet(), edges))
-                }
 
                 val qidsToReplace = mutableSetOf<QID>()
                 nodes.forEach { (qid, node) ->

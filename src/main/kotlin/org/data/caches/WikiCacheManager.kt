@@ -37,14 +37,4 @@ object WikiCacheManager {
   fun putProps(id: QID, entity: PropertyMapping) {
     qidToPropsCache[id] = entity
   }
-
-  fun getGraphs(id: QID): List<Graph<Person>>? = qidToGraphsCache[id]
-
-  fun putGraphs(id: QID, entity: Graph<Person>) {
-    if (qidToGraphsCache[id].isNullOrEmpty()) {
-      qidToGraphsCache[id] = mutableListOf(entity)
-    } else {
-      qidToGraphsCache[id]!!.add(entity)
-    }
-  }
 }
