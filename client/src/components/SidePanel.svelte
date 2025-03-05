@@ -32,7 +32,14 @@
         </p>
       {/if}
 
-      {@const ignoreKeys = new Set(['image', 'wikiLink', 'description', 'bcoords', 'dcoords', 'rcoords'])}
+      {@const ignoreKeys = new Set([
+        'image',
+        'wikiLink',
+        'description',
+        'bcoords',
+        'dcoords',
+        'rcoords'
+      ])}
       {#each Object.entries(data) as [key, value]}
         {#if !ignoreKeys.has(key)}
           <div class="flex">
