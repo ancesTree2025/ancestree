@@ -121,8 +121,8 @@
 
 <div class="flex h-full flex-col overflow-x-hidden">
   <nav class="flex items-center gap-12 px-8 py-4 shadow-lg">
-    <a href="/" class="flex gap-2 items-center">
-      <img src="/logo.png" alt="Ancestree" class="size-8">
+    <a href="/" class="flex items-center gap-2">
+      <img src="/logo.png" alt="Ancestree" class="size-8" />
       <h1 class="text-xl font-semibold text-dark-gray">Ancestree</h1>
     </a>
     <div class="flex flex-1 justify-center">
