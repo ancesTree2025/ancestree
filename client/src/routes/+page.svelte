@@ -30,9 +30,9 @@
   const checkboxOptions: InfoChecklist = [
     { key: 'image', label: 'Show Image', checked: true },
     { key: 'birth', label: 'Show Birth Date', checked: true },
-    { key: 'birth', label: 'Show Birth Location', checked: true},
+    { key: 'birth', label: 'Show Birth Location', checked: true },
     { key: 'death', label: 'Show Death Date', checked: true },
-    { key: 'dcoords', label: 'Show Death Location', checked: true},
+    { key: 'dcoords', label: 'Show Death Location', checked: true },
     { key: 'description', label: 'Show Description', checked: true },
     { key: 'wikiLink', label: 'Show Wikipedia Link', checked: true }
   ];

@@ -39,17 +39,17 @@
           {#if data.bcoords}
             <div>
               <p><strong>Birthplace:</strong></p>
-              <a 
-                href={`https://www.google.com/maps?q=${data.bcoords}`} 
+              <a
+                href={`https://www.google.com/maps?q=${data.bcoords}`}
                 target="_blank"
                 class="block"
                 aria-label="Link to Birthplace coordinates"
               >
-                <iframe 
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(data.bcoords.split(',')[1])-0.01},${Number(data.bcoords.split(',')[0])-0.01},${Number(data.bcoords.split(',')[1])+0.01},${Number(data.bcoords.split(',')[0])+0.01}&layer=mapnik&marker=${data.bcoords.split(',')[0]},${data.bcoords.split(',')[1]}`}
-                  width="100%" 
-                  height="200" 
-                  class="rounded-lg border border-gray-300 pointer-events-none"
+                <iframe
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(data.bcoords.split(',')[1]) - 0.01},${Number(data.bcoords.split(',')[0]) - 0.01},${Number(data.bcoords.split(',')[1]) + 0.01},${Number(data.bcoords.split(',')[0]) + 0.01}&layer=mapnik&marker=${data.bcoords.split(',')[0]},${data.bcoords.split(',')[1]}`}
+                  width="100%"
+                  height="200"
+                  class="border-gray-300 pointer-events-none rounded-lg border"
                   allowfullscreen
                   loading="lazy"
                   title="Birthplace Map"
@@ -61,17 +61,17 @@
           {#if data.dcoords}
             <div>
               <p><strong>Death Place:</strong></p>
-              <a 
-                href={`https://www.google.com/maps?q=${data.dcoords}`} 
+              <a
+                href={`https://www.google.com/maps?q=${data.dcoords}`}
                 target="_blank"
                 class="block"
                 aria-label="Link to Death place coordinates"
               >
-                <iframe 
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(data.dcoords.split(',')[1])-0.01},${Number(data.dcoords.split(',')[0])-0.01},${Number(data.dcoords.split(',')[1])+0.01},${Number(data.dcoords.split(',')[0])+0.01}&layer=mapnik&marker=${data.dcoords.split(',')[0]},${data.dcoords.split(',')[1]}`}
-                  width="100%" 
-                  height="200" 
-                  class="rounded-lg border border-gray-300 pointer-events-none"
+                <iframe
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(data.dcoords.split(',')[1]) - 0.01},${Number(data.dcoords.split(',')[0]) - 0.01},${Number(data.dcoords.split(',')[1]) + 0.01},${Number(data.dcoords.split(',')[0]) + 0.01}&layer=mapnik&marker=${data.dcoords.split(',')[0]},${data.dcoords.split(',')[1]}`}
+                  width="100%"
+                  height="200"
+                  class="border-gray-300 pointer-events-none rounded-lg border"
                   allowfullscreen
                   loading="lazy"
                   title="Deathplace map"
