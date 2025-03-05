@@ -128,7 +128,7 @@
       </div>
     </div>
   {/if}
-  {#if suggestions.length}
+  {#if suggestions.length && searchQuery}
     <div class="absolute left-0 right-0 top-full mx-5">
       <div class="rounded-lg bg-white shadow-lg">
         {#each suggestions as result}
