@@ -31,6 +31,9 @@
 
   let name = $state<string>('');
   let status = $state<LoadingStatus>({ state: 'idle' });
+  let currentName = '';
+  let currentWidth = 4;
+  let currentHeight = 4;
 
   let rawTree = $state<Tree | undefined>();
   let tree = $state<Tree | undefined>();
@@ -66,11 +69,17 @@
     showSettings = !showSettings;
   }
 
+  function closeSettings() {
+    toggleSettings();
+    onSubmit(currentName);
+  }
+
   async function onSubmit(newName: string) {
     if (!newName.length) return;
+    currentName = newName;
 
     const withinTree = tree?.people.find((tup) => tup[1].name === newName);
-    if (withinTree) {
+    if (withinTree && currentWidth === maxWidth && currentHeight === maxHeight) {
       familyTree?.handleClick(withinTree[0], withinTree[1].name);
     } else {
       status = { state: 'loading' };
@@ -90,6 +99,9 @@
         }
       });
     }
+
+    currentWidth = maxWidth;
+    currentHeight = maxHeight;
   }
 
   $effect(() => {
@@ -100,7 +112,7 @@
    * Assumes that tree is defined
    */
   function getFocusQidAndName(): [string, Person] {
-    const [qid, personName] = rawTree!.people.find((p) => p[0] === tree!.focus)!;
+    const [qid, personName] = rawTree!.people.find((p) => p[0] === rawTree!.focus)!;
     return [qid, personName];
   }
 
@@ -108,9 +120,10 @@
     fetchRelationship(tree!.focus, tree!.people.find((tup) => tup[1].name === result)![0]!).then(
       (result) => {
         const response = result.getOrNull();
-        if (response != null) {
-          filteredTree = apiResponseToTree(response?.links);
-        }
+        if (response === null) return;
+
+        filteredTree = apiResponseToTree(response?.links);
+        treeHistory.put(filteredTree);
       }
     );
   }
@@ -134,6 +147,7 @@
   }
 
   function handleUndo() {
+    filteredTree = undefined;
     tree = treeHistory.undo();
 
     const [qid, personName] = getFocusQidAndName();
@@ -141,6 +155,7 @@
     getPersonInfo(qid, personName.name);
   }
   function handleRedo() {
+    filteredTree = undefined;
     tree = treeHistory.redo();
 
     const [qid, personName] = getFocusQidAndName();
@@ -226,7 +241,7 @@
             </div>
           {/each}
         </div>
-        <button class="bg-blue-500 mt-4 rounded p-2 text-black" onclick={toggleSettings}
+        <button class="bg-blue-500 mt-4 rounded p-2 text-black" onclick={closeSettings}
           >Close</button
         >
       </div>
