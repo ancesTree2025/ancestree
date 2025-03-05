@@ -98,7 +98,7 @@
 </script>
 
 <div
-  class={`bg-input relative flex items-center gap-3 rounded-full pl-4 ${type === 'Search' ? 'w-80' : 'w-60'}`}
+  class={`relative flex items-center gap-3 rounded-full bg-input pl-4 ${type === 'Search' ? 'w-80' : 'w-60'}`}
 >
   <IconSearch class="text-black opacity-50" />
   <form onsubmit={() => selectName(name)}>
@@ -122,7 +122,7 @@
       <div
         class="absolute bottom-0 left-1/2 flex h-0 w-0 -translate-y-4 flex-col items-center opacity-0 transition-all peer-hover:translate-y-0 peer-hover:opacity-100"
       >
-        <p class="bg-red mt-2 text-nowrap rounded-xl px-8 py-1 text-center text-sm text-white">
+        <p class="mt-2 text-nowrap rounded-xl bg-red px-8 py-1 text-center text-sm text-white">
           {status.error}
         </p>
       </div>
@@ -133,7 +133,7 @@
       <div class="rounded-lg bg-white shadow-lg">
         {#each suggestions as result}
           <button
-            class="hover:bg-gray block w-full cursor-pointer p-2 text-left"
+            class="block w-full cursor-pointer p-2 text-left hover:bg-gray"
             onclick={() => selectName(result.name)}
           >
             <div class="flex items-center gap-3">

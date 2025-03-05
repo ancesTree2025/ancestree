@@ -94,7 +94,12 @@
   <nav class="flex items-center gap-12 px-8 py-4 shadow-lg">
     <h1 class="w-48 text-lg">Ancestree</h1>
     <div class="flex flex-1 justify-center">
-      <NameInput {onSubmit} {status} namesInTree={tree?.people.map((p) => p[1].name) ?? []} type='Search' />
+      <NameInput
+        {onSubmit}
+        {status}
+        namesInTree={tree?.people.map((p) => p[1].name) ?? []}
+        type="Search"
+      />
     </div>
     <div class="flex w-48 justify-end">
       <button class="p-2" onclick={toggleSettings}>
@@ -152,12 +157,12 @@
     <div class="flex justify-center pb-60">
       <NameInput
         onSubmit={searchWithinTree}
-        status={{state: 'idle'}}
+        status={{ state: 'idle' }}
         namesInTree={tree.people.map((p) => p[1].name)}
         clearSearch={() => {
           filteredTree = undefined;
         }}
-        type='RelationFinder'
+        type="RelationFinder"
       />
     </div>
   {/if}
