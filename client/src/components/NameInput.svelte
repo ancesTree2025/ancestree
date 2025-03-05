@@ -59,10 +59,13 @@
       const treeSuggestions = searchQuery
         ? namesInTree.filter((name) => name.toLowerCase().includes(searchQuery.toLowerCase()))
         : [];
-      const searchResults = result.getOrThrow().filter(name => !treeSuggestions.includes(name));
+      const searchResults = result.getOrThrow().filter((name) => !treeSuggestions.includes(name));
+      const MAX_SUGGESTIONS = 6;
       suggestions = [
         ...treeSuggestions.slice(0, 3).map((name) => ({ name, inTree: true })),
-        ...searchResults.slice(0, 3).map((name) => ({ name, inTree: false }))
+        ...searchResults
+          .slice(0, Math.max(3, MAX_SUGGESTIONS - treeSuggestions.length))
+          .map((name) => ({ name, inTree: false }))
       ];
     } catch (_e) {
       // TODO: handle error
