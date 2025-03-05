@@ -21,3 +21,17 @@ export function titleCase(str: string) {
     })
     .join(' ');
 }
+
+export function removeDuplicatesBy<T, R>(array: Iterable<T>, selector: (_: T) => R): T[] {
+  const set = new Set<R>();
+  const nubbed: T[] = [];
+
+  for (const elem of array) {
+    if (set.has(selector(elem))) continue;
+
+    set.add(selector(elem));
+    nubbed.push(elem);
+  }
+
+  return nubbed;
+}
