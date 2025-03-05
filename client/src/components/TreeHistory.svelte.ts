@@ -1,4 +1,4 @@
-import type {Tree} from '$lib/types';
+import type { Tree } from '$lib/types';
 
 class TreeHistory {
   private history: Tree[] = $state([]);
