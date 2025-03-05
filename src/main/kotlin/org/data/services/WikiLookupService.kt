@@ -118,12 +118,16 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
 
     if (queryParams.bcoords) {
       val birthLoc = getPlaceCoords(infoMap["PoB"]!!.getOrNull(0))
-      info.bcoords = birthLoc
+      if (birthLoc != "Unknown") {
+        info.bcoords = birthLoc
+      }
     }
 
     if (queryParams.dcoords) {
       val deathLoc = getPlaceCoords(infoMap["PoD"]!!.getOrNull(0))
-      info.dcoords = deathLoc
+      if (deathLoc != "Unknown") {
+        info.dcoords = deathLoc
+      }
     }
 
     if (queryParams.birth) {
@@ -136,7 +140,10 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     }
 
     if (queryParams.rcoords) {
-      info.rcoords = getPlaceCoords(infoMap["Residence"]!!.getOrNull(0))
+      val resLoc = getPlaceCoords(infoMap["Residence"]!!.getOrNull(0))
+      if (resLoc != "Unknown") {
+        info.rcoords = resLoc
+      }
     }
 
     if (queryParams.death) {

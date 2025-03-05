@@ -5,5 +5,7 @@ export const personInfoSchema = z.object({
   birth: z.string().optional(),
   death: z.string().optional(),
   description: z.string().optional(),
-  wikiLink: z.string().optional()
+  wikiLink: z.string().optional(),
+  bcoords: z.string().optional(),
+  dcoords: z.string().optional()
 });

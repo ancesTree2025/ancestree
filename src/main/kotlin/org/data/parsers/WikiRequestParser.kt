@@ -39,8 +39,6 @@ object WikiRequestParser {
 
     val result = json.decodeFromString<WikidataResponse>(response.bodyAsText())
 
-    println(response.bodyAsText())
-
     return result.entities.mapValues { (_, entityInfo) ->
       val familyInfo: MutableMap<String, List<String>> =
         properties.entries

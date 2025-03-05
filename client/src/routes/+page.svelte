@@ -5,25 +5,24 @@
   import FilterIcon from '~icons/tabler/filter';
   import IconSettings from '~icons/tabler/settings';
   import SidePanel from '../components/SidePanel.svelte';
-
+  import { treeHistory } from '../components/TreeHistory.svelte';
+  
   import { fetchTree, fetchInfo, filterByOption } from '$lib';
-  import {
-    type Tree,
-    type LoadingStatus,
-    type PersonInfo,
-    type InfoChecklist,
-    type PopupStatus,
-    type FilterOption
-  } from '$lib/types';
-
-  import { page } from '$app/state';
+  import type { Tree, LoadingStatus, PersonInfo, InfoChecklist, Person, PopupStatus, FilterOption } from '$lib/types';
+  
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
   import { apiResponseToTree } from '$lib/familytree/fetchTree';
   import RelationFinder from '../components/RelationFinder.svelte';
   import FilterPopup from '../components/FilterPopup.svelte';
   import FilterContent from '../components/FilterContent.svelte';
 
-  let name = $state<string | undefined>();
+  import { page } from '$app/state';
+
+  import IconSettings from '~icons/tabler/settings';
+  import IconArrowLeft from '~icons/tabler/arrow-narrow-left';
+  import IconArrowRight from '~icons/tabler/arrow-narrow-right';
+
+  let name = $state<string>('');
   let status = $state<LoadingStatus>({ state: 'idle' });
 
   let rawTree = $state<Tree | undefined>();
@@ -40,7 +39,9 @@
   const checkboxOptions: InfoChecklist = [
     { key: 'image', label: 'Show Image', checked: true },
     { key: 'birth', label: 'Show Birth Date', checked: true },
+    { key: 'birth', label: 'Show Birth Location', checked: true },
     { key: 'death', label: 'Show Death Date', checked: true },
+    { key: 'dcoords', label: 'Show Death Location', checked: true },
     { key: 'description', label: 'Show Description', checked: true },
     { key: 'wikiLink', label: 'Show Wikipedia Link', checked: true }
   ];
@@ -56,24 +57,31 @@
     showSettings = !showSettings;
   }
 
-  $effect(() => {
-    if (name) {
+  async function onSubmit(newName: string) {
+    if (!newName.length) return;
+
+    const withinTree = tree?.people.find((tup) => tup[1].name === newName);
+    if (withinTree) {
+      familyTree?.handleClick(withinTree[0], withinTree[1].name);
+    } else {
       status = { state: 'loading' };
-      fetchTree(name, useFakeData, maxWidth, maxHeight).then((result) => {
+      fetchTree(newName, useFakeData, maxWidth, maxHeight).then((result) => {
         const [fetched, error] = result.toTuple();
         if (fetched) {
           rawTree = fetched;
+          treeHistory.put(rawTree!);
+
           status = { state: 'idle' };
 
           // Opening the side panel with the focus on search complete
-          const [qid, personName] = fetched.people.find((p) => p[0] === fetched.focus)!;
+          const [qid, personName] = getFocusQidAndName();
           if (qid && personName) getPersonInfo(qid, personName.name);
         } else if (error) {
           status = { state: 'error', error };
         }
       });
     }
-  });
+  }
 
   $effect(() => {
     tree = rawTree && filterByOption(rawTree, filterOptions);
@@ -87,6 +95,13 @@
     } else {
       name = newName;
     }
+  }
+  /**
+   * Assumes that tree is defined
+   */
+  function getFocusQidAndName(): [string, Person] {
+    const [qid, personName] = rawTree!.people.find((p) => p[0] === tree!.focus)!;
+    return [qid, personName];
   }
 
   function searchWithinTree(result: string) {
@@ -117,8 +132,21 @@
   function switchPopup(to: PopupStatus) {
     popupStatus = popupStatus === to ? null : to;
   }
+    
+  function handleUndo() {
+    tree = treeHistory.undo();
 
-  $effect(() => console.log(filterOptions));
+    const [qid, personName] = getFocusQidAndName();
+    name = personName.name;
+    getPersonInfo(qid, personName.name);
+  }
+  function handleRedo() {
+    tree = treeHistory.redo();
+
+    const [qid, personName] = getFocusQidAndName();
+    name = personName.name;
+    getPersonInfo(qid, personName.name);
+  }
 </script>
 
 <div class="flex h-full flex-col overflow-x-hidden">
@@ -127,12 +155,29 @@
       <img src="/logo.png" alt="Ancestree" class="size-8" />
       <h1 class="text-dark-gray text-xl font-semibold">Ancestree</h1>
     </a>
-    <div class="flex flex-1 justify-center">
+    <div class="flex flex-1 items-center justify-center gap-4">
+      <div class="flex gap-2">
+        <button
+          class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
+          onclick={() => handleUndo()}
+          disabled={!treeHistory.canUndo()}
+        >
+          <IconArrowLeft />
+        </button>
+        <button
+          class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
+          onclick={() => handleRedo()}
+          disabled={!treeHistory.canRedo()}
+        >
+          <IconArrowRight />
+        </button>
+      </div>
       <NameInput
         {onSubmit}
         {status}
         namesInTree={tree?.people.map((p) => p[1].name) ?? []}
         type="Search"
+        bind:value={name}
       />
     </div>
     <div class="flex justify-end text-xl">
@@ -153,7 +198,7 @@
     />
   </div>
   {#if showSettings}
-    <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50">
       <div class="w-96 rounded bg-white p-6 shadow-lg">
         <h2 class="mb-4 text-lg font-bold">Settings</h2>
         <label class="mb-2 block"
