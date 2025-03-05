@@ -32,7 +32,8 @@
   /**
    * A list of search results to show as autocomplete suggestions
    */
-  let suggestions = $state<{ name: string; inTree: boolean }[]>([]);
+  let treeSuggestions = $state<string[]>([]);
+  let externalSuggestions = $state<string[]>([]);
   /**
    * A timer to debounce the search request
    * Debouncing is done to prevent making too many requests.
@@ -50,23 +51,22 @@
       };
     } else {
       searching = false;
-      suggestions = [];
+      externalSuggestions = [];
     }
   });
   async function searchForNames() {
+    treeSuggestions = searchQuery
+      ? namesInTree
+          .filter((name) => name.toLowerCase().includes(searchQuery.toLowerCase()))
+          .slice(0, 3)
+      : [];
     const result = await fetchNames(searchQuery);
     try {
-      const treeSuggestions = searchQuery
-        ? namesInTree.filter((name) => name.toLowerCase().includes(searchQuery.toLowerCase()))
-        : [];
-      const searchResults = result.getOrThrow().filter((name) => !treeSuggestions.includes(name));
       const MAX_SUGGESTIONS = 6;
-      suggestions = [
-        ...treeSuggestions.slice(0, 3).map((name) => ({ name, inTree: true })),
-        ...searchResults
-          .slice(0, Math.max(3, MAX_SUGGESTIONS - treeSuggestions.length))
-          .map((name) => ({ name, inTree: false }))
-      ];
+      externalSuggestions = result
+        .getOrThrow()
+        .filter((name) => !treeSuggestions.includes(name))
+        .slice(0, MAX_SUGGESTIONS - treeSuggestions.length);
     } catch (_e) {
       // TODO: handle error
     } finally {
@@ -78,7 +78,7 @@
    * @param selectedName the chosen name from the autocomplete suggestions
    */
   function selectName(selectedName: string) {
-    suggestions = [];
+    externalSuggestions = [];
     name = selectedName; // Replaces the typed name with the selected name
     searchQuery = '';
     onSubmit(name);
@@ -124,18 +124,26 @@
       </div>
     </div>
   {/if}
-  {#if suggestions.length}
+  {#if externalSuggestions.length || treeSuggestions.length}
     <div class="absolute left-0 right-0 top-full mx-5">
       <div class="rounded-lg bg-white shadow-lg">
-        {#each suggestions as result}
+        {#each treeSuggestions as result}
           <button
             class="hover:bg-gray block w-full cursor-pointer p-2 text-left"
-            onclick={() => selectName(result.name)}
+            onclick={() => selectName(result)}
           >
             <div class="flex items-center gap-3">
-              <IconTree
-                class={`text-black opacity-50 ${result.inTree ? '' : 'invisible'}`}
-              />{result.name}
+              <IconTree class="text-black opacity-50" />{result}
+            </div>
+          </button>
+        {/each}
+        {#each externalSuggestions as result}
+          <button
+            class="hover:bg-gray block w-full cursor-pointer p-2 text-left"
+            onclick={() => selectName(result)}
+          >
+            <div class="flex items-center gap-3">
+              <IconTree class="invisible text-black opacity-50" />{result}
             </div>
           </button>
         {/each}
