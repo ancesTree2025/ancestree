@@ -16,7 +16,14 @@
     type: 'Search' | 'RelationFinder';
     value: string;
   }
-  let { status, onSubmit, clearSearch = () => {}, namesInTree, type, value = $bindable() }: Props = $props();
+  let {
+    status,
+    onSubmit,
+    clearSearch = () => {},
+    namesInTree,
+    type,
+    value = $bindable()
+  }: Props = $props();
 
   let name = $state('');
 

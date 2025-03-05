@@ -100,11 +100,17 @@
 
   function handleUndo() {
     tree = treeHistory.undo();
-    name = getFocusQidAndName()[1].name;
+
+    const [qid, personName] = getFocusQidAndName();
+    name = personName.name;
+    getPersonInfo(qid, personName.name);
   }
   function handleRedo() {
     tree = treeHistory.redo();
-    name = getFocusQidAndName()[1].name;
+
+    const [qid, personName] = getFocusQidAndName();
+    name = personName.name;
+    getPersonInfo(qid, personName.name);
   }
 </script>
 
@@ -201,7 +207,7 @@
           filteredTree = undefined;
         }}
         type="RelationFinder"
-        value={""}
+        value={''}
       />
     </div>
   {/if}
