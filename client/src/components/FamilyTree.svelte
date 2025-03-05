@@ -3,11 +3,10 @@
   import { positionNodes } from '$lib';
   import {
     type People,
-    type MarriageDistances,
-    type MarriageHeights,
     type Marriages,
     type Positions,
-    type Tree
+    type Tree,
+    type MarriagePositions
   } from '$lib/types';
   import { onMount } from 'svelte';
   import FamilyTreeLines from './FamilyTreeLines.svelte';
@@ -19,9 +18,7 @@
   }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } = $props();
   let positions = $state<Positions>({});
   let treeWidth = $state<number>();
-  let marriageHeights = $state<MarriageHeights>([]);
-  let marriageDistances = $state<MarriageDistances>([]);
-  let marriageOffsets = $state<number[]>([]);
+  let marriagePositions = $state<MarriagePositions>([]);
   let marriages = $state<Marriages>([]);
   let people = $state<People>([]);
   let focus = $state<string>('');
@@ -36,11 +33,8 @@
       focus = tree.focus;
 
       positions = result.positions;
-      $inspect(positions);
+      marriagePositions = result.marriagePositions;
       treeWidth = result.treeWidth;
-      marriageHeights = result.marriageHeights;
-      marriageDistances = result.marriageDistances;
-      marriageOffsets = result.marriageOffsets;
     } else {
       positions = {};
     }
@@ -105,18 +99,10 @@
 <svg id="svg-root" class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
   <g id="zoom-group">
     <g transform="translate({xOffset}, {yOffset}) scale({zoomFactor})">
+      {#each marriagePositions as marriagePosition}
+        <FamilyTreeLines {marriagePosition} {highlightSet} {selectedID} />
+      {/each}
       {#if tree}
-        {#each marriages as marriage, i (`${focus} ${i}`)}
-          <FamilyTreeLines
-            {marriage}
-            {positions}
-            height={marriageHeights[i]!}
-            distance={marriageDistances[i]!}
-            offset={marriageOffsets[i]!}
-            {highlightSet}
-            {selectedID}
-          />
-        {/each}
         {#each people as [id, person, gender] (id)}
           {@const position = positions[id]}
           {#if position}

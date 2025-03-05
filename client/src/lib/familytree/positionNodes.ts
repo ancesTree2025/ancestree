@@ -1,18 +1,23 @@
 import type {
-  MarriageHeights,
   GroupAssignments,
   GroupID,
   Marriages,
   PersonID,
+  Position,
   Positions,
   Tree,
-  MarriageDistances,
-  MarriageOffsets
+  MarriagePositions
 } from './types';
 import sr from 'seedrandom';
 
 const SEED = '1234';
 let rand = sr.alea(SEED);
+
+type MarriageHeights = number[];
+
+type MarriageDistances = number[];
+
+type MarriageOffsets = number[];
 
 /**
  * Assigns a position to each node in the family tree.
@@ -22,9 +27,7 @@ let rand = sr.alea(SEED);
  */
 export function positionNodes(tree: Tree): {
   positions: Positions;
-  marriageHeights: MarriageHeights;
-  marriageDistances: MarriageDistances;
-  marriageOffsets: MarriageOffsets;
+  marriagePositions: MarriagePositions;
   treeWidth: number;
 } {
   rand = sr.alea(SEED, { state: true });
@@ -69,12 +72,20 @@ export function positionNodes(tree: Tree): {
 
   const { positions, treeWidth } = calculatePositions(arrangedLevels, tree.focus);
 
-  return {
+  const marriagePositions = getMarriagePositions(
+    tree,
     positions,
-    treeWidth,
     marriageHeights,
     marriageDistances,
     marriageOffsets
+  );
+
+  console.log('AAAAAAAA', marriagePositions);
+
+  return {
+    positions,
+    treeWidth,
+    marriagePositions
   };
 }
 
@@ -1069,4 +1080,50 @@ function getMarriageOffsets(
     i++;
   }
   return offsets;
+}
+
+function getMarriagePositions(
+  tree: Tree,
+  positions: Positions,
+  heights: MarriageHeights,
+  distances: MarriageDistances,
+  offsets: MarriageOffsets
+): MarriagePositions {
+  const output: MarriagePositions = [];
+  let i = -1;
+  for (const marriage of tree.marriages) {
+    i++;
+    const height = heights[i];
+    const distance = distances[i];
+    const offset = offsets[i];
+
+    const parents = marriage.parents.map((p) => positions[p] as Position | undefined);
+    const children = [];
+    const childrenIDs = [];
+
+    for (const child of marriage.children) {
+      const pos = positions[child];
+      if (pos === undefined) continue;
+      children.push(pos);
+      childrenIDs.push(child);
+    }
+
+    const parent1 = parents[0];
+    const parent2 = parents[1];
+    if (parent1 === undefined || parent2 === undefined) continue;
+
+    output.push({
+      parent1,
+      parent2,
+      children,
+      height,
+      distance,
+      offset,
+      parent1ID: marriage.parents[0],
+      parent2ID: marriage.parents[1],
+      childrenIDs
+    });
+  }
+
+  return output;
 }

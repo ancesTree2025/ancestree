@@ -29,11 +29,19 @@ export type Position = {
 
 export type Positions = Record<PersonID, Position>;
 
-export type MarriageHeights = number[];
+export type MarriagePosition = {
+  parent1: Position;
+  parent2: Position;
+  children: Position[];
+  height: number;
+  distance: number;
+  offset: number;
+  parent1ID: PersonID;
+  parent2ID: PersonID;
+  childrenIDs: PersonID[];
+};
 
-export type MarriageDistances = number[];
-
-export type MarriageOffsets = number[];
+export type MarriagePositions = MarriagePosition[];
 
 export type GroupID = number;
 /**

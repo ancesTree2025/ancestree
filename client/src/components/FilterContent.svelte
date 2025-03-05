@@ -8,7 +8,6 @@
   let spousefamily = $state(true);
   let ancestor = $state(true);
   let descendant = $state(true);
-  let all = $state(true);
 
   $effect(() => {
     setOption('sibling', sibling);
@@ -24,10 +23,6 @@
 
   $effect(() => {
     setOption('descendant', descendant);
-  });
-
-  $effect(() => {
-    setOption('all', all);
   });
 </script>
 
@@ -54,11 +49,6 @@
       <label>
         <input type="checkbox" bind:checked={descendant} />
         Show descendants
-      </label>
-
-      <label>
-        <input type="checkbox" bind:checked={all} />
-        Show all
       </label>
     </div>
   </div>

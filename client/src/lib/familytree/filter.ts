@@ -1,7 +1,6 @@
 import type { FilterOption, PersonID, Tree } from '$lib/types';
 
 export function filterByOption(tree: Tree, options: Record<FilterOption, boolean>): Tree {
-  if (options.all) return tree;
   const personAssignment = new Set<PersonID>();
 
   const focus = tree.focus;

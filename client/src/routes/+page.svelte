@@ -49,8 +49,7 @@
     sibling: true,
     spousefamily: true,
     ancestor: true,
-    descendant: true,
-    all: true
+    descendant: true
   });
 
   function toggleSettings() {
