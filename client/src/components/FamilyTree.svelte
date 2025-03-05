@@ -64,7 +64,7 @@
   let selectedID = $state('');
   const highlightSet = new SvelteSet<string>();
 
-  function handleClick(id: string, name: string) {
+  export function handleClick(id: string, name: string) {
     selectedID = id; // Update selected person ID
     getPersonInfo(id, name); // Fetch person info
 

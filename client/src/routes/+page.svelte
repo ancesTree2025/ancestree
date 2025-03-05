@@ -43,7 +43,6 @@
         const [fetched, error] = result.toTuple();
         if (fetched) {
           tree = fetched;
-          console.log(fetched);
           status = { state: 'idle' };
 
           // Opening the side panel with the focus on search complete
@@ -60,7 +59,7 @@
     if (!newName.length) return;
     const withinTree = tree?.people.find((tup) => tup[1].name === newName);
     if (withinTree) {
-      getPersonInfo(withinTree[0], withinTree[1].name);
+      familyTree?.handleClick(withinTree[0], withinTree[1].name);
     } else {
       name = newName;
     }
