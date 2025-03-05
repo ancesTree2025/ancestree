@@ -14,8 +14,9 @@
     clearSearch?: () => void;
     namesInTree: string[];
     type: 'Search' | 'RelationFinder';
+    value: string;
   }
-  const { status, onSubmit, clearSearch = () => {}, namesInTree, type }: Props = $props();
+  let { status, onSubmit, clearSearch = () => {}, namesInTree, type, value = $bindable() }: Props = $props();
 
   let name = $state('');
 
@@ -86,10 +87,12 @@
   }
 
   function onChange(event: Event) {
-    const { value } = event.target as HTMLInputElement;
+    value = '';
+
+    const { value: inputValue } = event.target as HTMLInputElement;
     clearSearch();
-    name = value;
-    searchQuery = value;
+    name = inputValue;
+    searchQuery = inputValue;
   }
 
   // common tailwind classes for status icons
@@ -104,7 +107,7 @@
   <form onsubmit={() => selectName(name)}>
     <input
       class="flex-1 bg-transparent py-2 outline-none"
-      value={name}
+      value={value ? value : name}
       oninput={onChange}
       placeholder="Enter a name..."
     />

@@ -5,7 +5,7 @@
   import { treeHistory } from '../components/TreeHistory.svelte';
 
   import { fetchTree, fetchInfo } from '$lib';
-  import type { Tree, LoadingStatus, PersonInfo, InfoChecklist } from '$lib/types';
+  import type { Tree, LoadingStatus, PersonInfo, InfoChecklist, Person } from '$lib/types';
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
   import { apiResponseToTree } from '$lib/familytree/fetchTree';
 
@@ -15,7 +15,7 @@
   import IconArrowLeft from '~icons/tabler/arrow-narrow-left';
   import IconArrowRight from '~icons/tabler/arrow-narrow-right';
 
-  let name = $state<string | undefined>();
+  let name = $state<string>('');
   let status = $state<LoadingStatus>({ state: 'idle' });
 
   let tree = $state<Tree | undefined>();
@@ -39,34 +39,38 @@
     showSettings = !showSettings;
   }
 
-  $effect(() => {
-    if (name) {
+  async function onSubmit(newName: string) {
+    if (!newName.length) return;
+
+    const withinTree = tree?.people.find((tup) => tup[1].name === newName);
+    if (withinTree) {
+      familyTree?.handleClick(withinTree[0], withinTree[1].name);
+    } else {
       status = { state: 'loading' };
-      fetchTree(name, useFakeData, maxWidth, maxHeight).then((result) => {
+      fetchTree(newName, useFakeData, maxWidth, maxHeight).then((result) => {
         const [fetched, error] = result.toTuple();
         if (fetched) {
           tree = fetched;
           treeHistory.put(tree!);
+
           status = { state: 'idle' };
 
           // Opening the side panel with the focus on search complete
-          const [qid, personName] = fetched.people.find((p) => p[0] === fetched.focus)!;
+          const [qid, personName] = getFocusQidAndName();
           if (qid && personName) getPersonInfo(qid, personName.name);
         } else if (error) {
           status = { state: 'error', error };
         }
       });
     }
-  });
+  }
 
-  async function onSubmit(newName: string) {
-    if (!newName.length) return;
-    const withinTree = tree?.people.find((tup) => tup[1].name === newName);
-    if (withinTree) {
-      familyTree?.handleClick(withinTree[0], withinTree[1].name);
-    } else {
-      name = newName;
-    }
+  /**
+   * Assumes that tree is defined
+   */
+  function getFocusQidAndName(): [string, Person] {
+    const [qid, personName] = tree!.people.find((p) => p[0] === tree!.focus)!;
+    return [qid, personName];
   }
 
   function searchWithinTree(result: string) {
@@ -96,9 +100,11 @@
 
   function handleUndo() {
     tree = treeHistory.undo();
+    name = getFocusQidAndName()[1].name;
   }
   function handleRedo() {
     tree = treeHistory.redo();
+    name = getFocusQidAndName()[1].name;
   }
 </script>
 
@@ -111,14 +117,14 @@
     <div class="flex flex-1 items-center justify-center gap-4">
       <div class="flex gap-2">
         <button
-          class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:hover:bg-gray"
+          class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
           onclick={() => handleUndo()}
           disabled={!treeHistory.canUndo()}
         >
           <IconArrowLeft />
         </button>
         <button
-          class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:hover:bg-gray"
+          class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
           onclick={() => handleRedo()}
           disabled={!treeHistory.canRedo()}
         >
@@ -130,6 +136,7 @@
         {status}
         namesInTree={tree?.people.map((p) => p[1].name) ?? []}
         type="Search"
+        bind:value={name}
       />
     </div>
     <div class="flex w-48 justify-end">
@@ -194,6 +201,7 @@
           filteredTree = undefined;
         }}
         type="RelationFinder"
+        value={""}
       />
     </div>
   {/if}
