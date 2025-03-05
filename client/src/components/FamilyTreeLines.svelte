@@ -1,65 +1,58 @@
 <script lang="ts">
-  import type { Marriage, PersonID, Position, Positions } from '$lib/types';
+  import type { MarriagePosition, Position } from '$lib/types';
   import type { SvelteSet } from 'svelte/reactivity';
 
   const {
-    marriage,
-    positions,
-    height,
-    distance,
-    offset,
+    marriagePosition,
     highlightSet,
     selectedID
   }: {
-    marriage: Marriage;
-    positions: Positions;
-    height: number;
-    distance: number;
-    offset: number;
+    marriagePosition: MarriagePosition;
     highlightSet: SvelteSet<string>;
     selectedID: string;
   } = $props();
 
-  const rawSpouse1Id = $derived(marriage.parents[0]);
-  const rawSpouse2Id = $derived(marriage.parents[1]);
-  const rawSpouse1 = $derived<Position | undefined>(positions[rawSpouse1Id]);
-  const rawSpouse2 = $derived<Position | undefined>(positions[rawSpouse2Id]);
+  let spouse1 = $state<Position>({ x: 0, y: 0 });
+  let spouse2 = $state<Position>({ x: 0, y: 0 });
+  let spouse1Id = $state<string>('');
+  let spouse2Id = $state<string>('');
 
-  const swap = $derived(
-    rawSpouse1 !== undefined && rawSpouse2 !== undefined && rawSpouse1.x > rawSpouse2.x
-  );
-  const spouse1 = $derived(swap ? rawSpouse2 : rawSpouse1);
-  const spouse2 = $derived(swap ? rawSpouse1 : rawSpouse2);
-  const spouse1Id = $derived(swap ? rawSpouse2Id : rawSpouse1Id);
-  const spouse2Id = $derived(swap ? rawSpouse1Id : rawSpouse2Id);
-  const children = $derived(
-    marriage.children.map<[PersonID, Position | undefined]>((id) => [id, positions[id]])
-  );
+  $effect(() => {
+    const swap = marriagePosition.parent1.x > marriagePosition.parent2.x;
+    spouse1 = swap ? marriagePosition.parent2 : marriagePosition.parent1;
+    spouse2 = swap ? marriagePosition.parent1 : marriagePosition.parent2;
+    spouse1Id = swap ? marriagePosition.parent2ID : marriagePosition.parent1ID;
+    spouse2Id = swap ? marriagePosition.parent1ID : marriagePosition.parent2ID;
+  });
 
   const OVERLAP_OFFSET = 40;
   const HEIGHT_OFFSET = 20;
 
-  const parentsX = $derived(((spouse1?.x ?? NaN) + (spouse2?.x ?? NaN)) / 2 + offset);
-  const rawParentsY = $derived(Math.max(spouse1?.y ?? Infinity, spouse2?.y ?? Infinity));
+  const parentsX = $derived((spouse1.x + spouse2.x) / 2 + marriagePosition.offset);
+  const rawParentsY = $derived(Math.max(spouse1.y, spouse2.y));
   const parentsY = $derived(
-    rawParentsY - (distance === 1 ? 0 : OVERLAP_OFFSET + HEIGHT_OFFSET * (distance - 2))
+    rawParentsY -
+      (marriagePosition.distance === 1
+        ? 0
+        : OVERLAP_OFFSET + HEIGHT_OFFSET * (marriagePosition.distance - 2))
   );
 
   const childrenY = $derived(
-    Math.min(Infinity, ...children.map((child) => child[1]?.y ?? Infinity)) - height * HEIGHT_OFFSET
+    Math.min(Infinity, ...marriagePosition.children.map((child) => child.y)) -
+      marriagePosition.height * HEIGHT_OFFSET
   );
   const midY = $derived((rawParentsY + childrenY) / 2);
   const leftChildX = $derived(
-    Math.min(parentsX, ...children.map((child) => child[1]?.x ?? Infinity))
+    Math.min(parentsX, ...marriagePosition.children.map((child) => child.x))
   );
   const rightChildX = $derived(
-    Math.max(parentsX, ...children.map((child) => child[1]?.x ?? -Infinity))
+    Math.max(parentsX, ...marriagePosition.children.map((child) => child.x))
   );
 </script>
 
 {#if spouse1 && spouse2}
   <!-- Draw marriage line -->
-  {#if distance === 1}
+  {#if marriagePosition.distance === 1}
     <line
       x1={spouse1.x}
       y1={spouse1.y}
@@ -91,7 +84,7 @@
     />
   {/if}
 
-  {#if children.length > 0}
+  {#if marriagePosition.children.length > 0}
     <!-- Draw line between parents and children -->
     <line
       x1={parentsX}
@@ -111,27 +104,24 @@
     />
 
     <!-- Draw line from each child to children line -->
-    {#each children as child}
-      {@const childPos = child[1]}
-      {#if childPos}
-        <line
-          x1={childPos.x}
-          y1={midY}
-          x2={childPos.x}
-          y2={childPos.y}
-          class="stroke-rounded stroke-white stroke-line-border"
-        />
-      {/if}
+    {#each marriagePosition.children as childPos}
+      <line
+        x1={childPos.x}
+        y1={midY}
+        x2={childPos.x}
+        y2={childPos.y}
+        class="stroke-rounded stroke-white stroke-line-border"
+      />
     {/each}
   {/if}
 
   {@const highlightMarriage = highlightSet.has(spouse1Id) && highlightSet.has(spouse2Id)}
-  {@const highlightHalf = !highlightSet.isDisjointFrom(new Set(marriage.children))}
+  {@const highlightHalf = !highlightSet.isDisjointFrom(new Set(marriagePosition.childrenIDs))}
   {@const highlightSpouse1 = highlightMarriage || (spouse1Id === selectedID && highlightHalf)}
   {@const highlightSpouse2 = highlightMarriage || (spouse2Id === selectedID && highlightHalf)}
 
   <!-- Draw marriage line -->
-  {#if distance === 1}
+  {#if marriagePosition.distance === 1}
     <line
       x1={spouse1.x}
       y1={spouse1.y}
@@ -189,7 +179,7 @@
     />
   {/if}
 
-  {#if children.length > 0}
+  {#if marriagePosition.children.length > 0}
     {@const highlightChildren = spouse1Id === selectedID || spouse2Id === selectedID}
     <!-- Draw line between parents and children -->
     <line
@@ -197,7 +187,7 @@
       y1={parentsY}
       x2={parentsX}
       y2={midY}
-      class="{highlightChildren || marriage.children.includes(selectedID)
+      class="{highlightChildren || marriagePosition.childrenIDs.includes(selectedID)
         ? 'stroke-highlight_border'
         : 'stroke-node'} stroke-rounded stroke-line"
     />
@@ -214,7 +204,8 @@
     />
 
     <!-- Draw line from each child to children line -->
-    {#each children as [childId, childPos]}
+    {#each marriagePosition.children as childPos, i}
+      {@const childId = marriagePosition.childrenIDs[i]}
       {#if childPos}
         {@const selectedChild = childId === selectedID}
         {#if selectedChild}

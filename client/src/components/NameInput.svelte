@@ -10,6 +10,7 @@
 
   interface Props {
     status: LoadingStatus;
+    displayAbove?: boolean;
     onSubmit: (name: string) => void;
     clearSearch?: () => void;
     namesInTree: string[];
@@ -18,6 +19,7 @@
   }
   let {
     status,
+    displayAbove,
     onSubmit,
     clearSearch = () => {},
     namesInTree,
@@ -139,7 +141,7 @@
     </div>
   {/if}
   {#if suggestions.length && searchQuery}
-    <div class="absolute left-0 right-0 top-full mx-5">
+    <div class="absolute {displayAbove ? 'bottom-full' : 'top-full'} left-0 right-0 mx-5">
       <div class="rounded-lg bg-white shadow-lg">
         {#each suggestions as result}
           <button

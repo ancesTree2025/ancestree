@@ -14,7 +14,6 @@ class TreeHistory {
     this.history = this.history.slice(0, this.index + 1);
     this.history.push(tree);
     this.index = this.history.length - 1;
-    console.log(this.toString());
   }
 
   /**
@@ -26,9 +25,7 @@ class TreeHistory {
   undo(): Tree {
     if (!this.canUndo()) throw new Error('cannot undo when there is nothing');
 
-    const tree = this.history[--this.index];
-    console.log(this.toString());
-    return tree;
+    return this.history[--this.index];
   }
 
   canUndo(): boolean {
@@ -45,9 +42,7 @@ class TreeHistory {
   redo(): Tree {
     if (!this.canRedo()) throw new Error('cannot redo when there is nothing');
 
-    const tree = this.history[++this.index];
-    console.log(this.toString());
-    return tree;
+    return this.history[++this.index];
   }
 
   canRedo(): boolean {
