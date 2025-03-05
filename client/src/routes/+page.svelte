@@ -31,6 +31,9 @@
 
   let name = $state<string>('');
   let status = $state<LoadingStatus>({ state: 'idle' });
+  let currentName = '';
+  let currentWidth = 4;
+  let currentHeight = 4;
 
   let rawTree = $state<Tree | undefined>();
   let tree = $state<Tree | undefined>();
@@ -66,11 +69,17 @@
     showSettings = !showSettings;
   }
 
+  function closeSettings() {
+    toggleSettings();
+    onSubmit(currentName);
+  }
+
   async function onSubmit(newName: string) {
     if (!newName.length) return;
+    currentName = newName;
 
     const withinTree = tree?.people.find((tup) => tup[1].name === newName);
-    if (withinTree) {
+    if (withinTree && currentWidth === maxWidth && currentHeight === maxHeight) {
       familyTree?.handleClick(withinTree[0], withinTree[1].name);
     } else {
       status = { state: 'loading' };
@@ -90,6 +99,9 @@
         }
       });
     }
+
+    currentWidth = maxWidth;
+    currentHeight = maxHeight;
   }
 
   $effect(() => {
@@ -226,7 +238,7 @@
             </div>
           {/each}
         </div>
-        <button class="bg-blue-500 mt-4 rounded p-2 text-black" onclick={toggleSettings}
+        <button class="bg-blue-500 mt-4 rounded p-2 text-black" onclick={closeSettings}
           >Close</button
         >
       </div>
