@@ -23,5 +23,6 @@
     namesInTree={people.map((p) => p[1].name)}
     clearSearch={clearFilter}
     type="RelationFinder"
+    value={""}
   />
 </div>
