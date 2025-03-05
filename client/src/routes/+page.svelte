@@ -3,13 +3,20 @@
   import NameInput from '../components/NameInput.svelte';
   import PersonSearchIcon from '~icons/tabler/user-search';
   import FilterIcon from '~icons/tabler/filter';
-  import IconSettings from '~icons/tabler/settings';
   import SidePanel from '../components/SidePanel.svelte';
   import { treeHistory } from '../components/TreeHistory.svelte';
-  
+
   import { fetchTree, fetchInfo, filterByOption } from '$lib';
-  import type { Tree, LoadingStatus, PersonInfo, InfoChecklist, Person, PopupStatus, FilterOption } from '$lib/types';
-  
+  import type {
+    Tree,
+    LoadingStatus,
+    PersonInfo,
+    InfoChecklist,
+    Person,
+    PopupStatus,
+    FilterOption
+  } from '$lib/types';
+
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
   import { apiResponseToTree } from '$lib/familytree/fetchTree';
   import RelationFinder from '../components/RelationFinder.svelte';
@@ -87,15 +94,6 @@
     tree = rawTree && filterByOption(rawTree, filterOptions);
   });
 
-  async function onSubmit(newName: string) {
-    if (!newName.length) return;
-    const withinTree = tree?.people.find((tup) => tup[1].name === newName);
-    if (withinTree) {
-      familyTree?.handleClick(withinTree[0], withinTree[1].name);
-    } else {
-      name = newName;
-    }
-  }
   /**
    * Assumes that tree is defined
    */
@@ -132,7 +130,7 @@
   function switchPopup(to: PopupStatus) {
     popupStatus = popupStatus === to ? null : to;
   }
-    
+
   function handleUndo() {
     tree = treeHistory.undo();
 
@@ -158,14 +156,14 @@
     <div class="flex flex-1 items-center justify-center gap-4">
       <div class="flex gap-2">
         <button
-          class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
+          class="hover:bg-cream rounded-lg p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           onclick={() => handleUndo()}
           disabled={!treeHistory.canUndo()}
         >
           <IconArrowLeft />
         </button>
         <button
-          class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
+          class="hover:bg-cream rounded-lg p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           onclick={() => handleRedo()}
           disabled={!treeHistory.canRedo()}
         >
