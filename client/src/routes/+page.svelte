@@ -9,7 +9,6 @@
 
   import { page } from '$app/state';
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
-  import TreeSearchInput from '../components/TreeSearchInput.svelte';
   import { apiResponseToTree } from '$lib/familytree/fetchTree';
 
   let name = $state<string | undefined>();
@@ -95,7 +94,7 @@
   <nav class="flex items-center gap-12 px-8 py-4 shadow-lg">
     <h1 class="w-48 text-lg">Ancestree</h1>
     <div class="flex flex-1 justify-center">
-      <NameInput {onSubmit} {status} namesInTree={tree?.people.map((p) => p[1].name) ?? []} />
+      <NameInput {onSubmit} {status} namesInTree={tree?.people.map((p) => p[1].name) ?? []} type='Search' />
     </div>
     <div class="flex w-48 justify-end">
       <button class="p-2" onclick={toggleSettings}>
@@ -151,12 +150,14 @@
   {/if}
   {#if tree}
     <div class="flex justify-center pb-60">
-      <TreeSearchInput
-        names={tree.people.map((p) => p[1].name)}
+      <NameInput
         onSubmit={searchWithinTree}
+        status={{state: 'idle'}}
+        namesInTree={tree.people.map((p) => p[1].name)}
         clearSearch={() => {
           filteredTree = undefined;
         }}
+        type='RelationFinder'
       />
     </div>
   {/if}

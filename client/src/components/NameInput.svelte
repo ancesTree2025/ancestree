@@ -13,8 +13,9 @@
     onSubmit: (name: string) => void;
     clearSearch?: () => void;
     namesInTree: string[];
+    type: 'Search' | 'RelationFinder';
   }
-  const { status, onSubmit, clearSearch = () => {}, namesInTree }: Props = $props();
+  const { status, onSubmit, clearSearch = () => {}, namesInTree, type }: Props = $props();
 
   let name = $state('');
 
@@ -86,6 +87,7 @@
 
   function onChange(event: Event) {
     const { value } = event.target as HTMLInputElement;
+    clearSearch();
     name = value;
     searchQuery = value;
   }
@@ -95,7 +97,9 @@
   const HOVER_CLASS = 'scale-100 hover:scale-125 transition-transform duration-150';
 </script>
 
-<div class="bg-input relative flex w-80 items-center gap-3 rounded-full pl-4">
+<div
+  class={`bg-input relative flex items-center gap-3 rounded-full pl-4 ${type === 'Search' ? 'w-80' : 'w-60'}`}
+>
   <IconSearch class="text-black opacity-50" />
   <form onsubmit={() => selectName(name)}>
     <input
