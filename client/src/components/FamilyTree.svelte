@@ -78,6 +78,20 @@
     });
   }
 
+
+
+  export function recenter() {
+    const svg = d3.select('#svg-root');
+    const zoomGroup = d3.select('#zoom-group');
+
+    const initialTransform = d3.zoomIdentity
+      .translate(0, 0)
+      .scale(1);
+
+    svg.transition().duration(500).call(d3.zoom().transform as any, initialTransform);
+    zoomGroup.attr('transform', initialTransform as any);
+  }
+
   function closeSidePanel() {
     highlightSet.clear();
     selectedID = '';
