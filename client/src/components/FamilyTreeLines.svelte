@@ -12,13 +12,6 @@
     selectedID: string;
   } = $props();
 
-  $effect(() => {
-    console.log('_______');
-    console.log(marriagePosition);
-    console.log(spouse1);
-    console.log(spouse2);
-  });
-
   let spouse1 = $state<Position>({ x: 0, y: 0 });
   let spouse2 = $state<Position>({ x: 0, y: 0 });
   let spouse1Id = $state<string>('');

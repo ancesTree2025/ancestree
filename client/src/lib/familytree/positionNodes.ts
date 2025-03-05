@@ -80,8 +80,6 @@ export function positionNodes(tree: Tree): {
     marriageOffsets
   );
 
-  console.log('AAAAAAAA', marriagePositions);
-
   return {
     positions,
     treeWidth,

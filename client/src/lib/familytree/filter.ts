@@ -10,8 +10,6 @@ export function filterByOption(tree: Tree, options: Record<FilterOption, boolean
   assignAncestors(tree, personAssignment, focus, ascVisited, descVisited, options);
   assignDescendants(tree, personAssignment, focus, ascVisited, descVisited, options);
 
-  console.log(personAssignment);
-
   return {
     ...tree,
     people: tree.people.filter((person) => personAssignment.has(person[0]))
