@@ -17,6 +17,7 @@ export default {
       red: '#f44',
       blue: '#b5e2ff',
       highlight: '#e8bf8b',
+      orange: 'oklch(0.705 0.213 47.604)',
       cream: '#f5ebda',
       'dark-gray': '#423d3d',
       highlight_border: '#2D2D2D',

@@ -1,15 +1,26 @@
 <script lang="ts">
   import FamilyTree from '../components/FamilyTree.svelte';
   import NameInput from '../components/NameInput.svelte';
+  import PersonSearchIcon from '~icons/tabler/user-search';
+  import FilterIcon from '~icons/tabler/filter';
   import IconSettings from '~icons/tabler/settings';
   import SidePanel from '../components/SidePanel.svelte';
 
   import { fetchTree, fetchInfo } from '$lib';
-  import type { Tree, LoadingStatus, PersonInfo, InfoChecklist } from '$lib/types';
+  import {
+    type Tree,
+    type LoadingStatus,
+    type PersonInfo,
+    type InfoChecklist,
+    type PopupStatus
+  } from '$lib/types';
 
   import { page } from '$app/state';
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
   import { apiResponseToTree } from '$lib/familytree/fetchTree';
+  import RelationFinder from '../components/RelationFinder.svelte';
+  import FilterPopup from '../components/FilterPopup.svelte';
+  import FilterContent from '../components/FilterContent.svelte';
 
   let name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
@@ -19,6 +30,7 @@
   const useFakeData = page.url.searchParams.get('useFakeData') === 'true';
 
   let familyTree: FamilyTree | null = $state(null);
+  let popupStatus = $state<PopupStatus>(null);
 
   let showSettings = $state(false);
   let maxWidth = $state(4);
@@ -88,6 +100,10 @@
       sidePanelName = name;
     }
   }
+
+  function switchPopup(to: PopupStatus) {
+    popupStatus = popupStatus === to ? null : to;
+  }
 </script>
 
 <div class="flex h-full flex-col overflow-x-hidden">
@@ -104,7 +120,7 @@
         type="Search"
       />
     </div>
-    <div class="flex w-48 justify-end">
+    <div class="flex justify-end text-xl">
       <button class="p-2" onclick={toggleSettings}>
         <IconSettings />
       </button>
@@ -157,16 +173,33 @@
     </div>
   {/if}
   {#if tree}
-    <div class="flex justify-center pb-60">
-      <NameInput
-        onSubmit={searchWithinTree}
-        status={{ state: 'idle' }}
-        namesInTree={tree.people.map((p) => p[1].name)}
-        clearSearch={() => {
-          filteredTree = undefined;
-        }}
-        type="RelationFinder"
-      />
+    <div class="absolute bottom-8 left-8 flex flex-col items-start gap-4">
+      <FilterPopup show={popupStatus === 'relationfinder'}>
+        <RelationFinder
+          people={tree.people}
+          {searchWithinTree}
+          clearFilter={() => {
+            filteredTree = undefined;
+          }}
+        />
+      </FilterPopup>
+      <FilterPopup show={popupStatus === 'filter'}>
+        <FilterContent />
+      </FilterPopup>
+      <div class="z-50 flex rounded-xl bg-white text-xl shadow-lg">
+        <button
+          class="p-3 {popupStatus === 'relationfinder' ? 'text-orange' : ''}"
+          onclick={() => switchPopup('relationfinder')}
+        >
+          <PersonSearchIcon />
+        </button>
+        <button
+          class="p-3 {popupStatus === 'filter' ? 'text-orange' : ''}"
+          onclick={() => switchPopup('filter')}
+        >
+          <FilterIcon />
+        </button>
+      </div>
     </div>
   {/if}
 </div>
