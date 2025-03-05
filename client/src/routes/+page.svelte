@@ -112,7 +112,7 @@
    * Assumes that tree is defined
    */
   function getFocusQidAndName(): [string, Person] {
-    const [qid, personName] = rawTree!.people.find((p) => p[0] === tree!.focus)!;
+    const [qid, personName] = rawTree!.people.find((p) => p[0] === rawTree!.focus)!;
     return [qid, personName];
   }
 
@@ -120,9 +120,10 @@
     fetchRelationship(tree!.focus, tree!.people.find((tup) => tup[1].name === result)![0]!).then(
       (result) => {
         const response = result.getOrNull();
-        if (response != null) {
-          filteredTree = apiResponseToTree(response?.links);
-        }
+        if (response === null) return;
+
+        filteredTree = apiResponseToTree(response?.links);
+        treeHistory.put(filteredTree);
       }
     );
   }
@@ -146,6 +147,7 @@
   }
 
   function handleUndo() {
+    filteredTree = undefined;
     tree = treeHistory.undo();
 
     const [qid, personName] = getFocusQidAndName();
@@ -153,6 +155,7 @@
     getPersonInfo(qid, personName.name);
   }
   function handleRedo() {
+    filteredTree = undefined;
     tree = treeHistory.redo();
 
     const [qid, personName] = getFocusQidAndName();
