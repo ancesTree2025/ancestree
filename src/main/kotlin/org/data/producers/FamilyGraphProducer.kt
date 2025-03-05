@@ -57,7 +57,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
    * @param b The other spouse.
    * @returns None.
    */
-  private fun addSpousalEdges(a: String, b: String) {
+  private fun addSpousalEdges(a: String, b: String, married: Boolean = true) {
     edges.add(Edge(a, b))
     edges.add(Edge(b, a))
   }
@@ -187,7 +187,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
       if (parents.size >= 2) {
         for (i in parents.indices) {
           for (j in i + 1 until parents.size) {
-            addSpousalEdges(parents[i], parents[j])
+            addSpousalEdges(parents[i], parents[j], married = false)
           }
         }
       }

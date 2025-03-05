@@ -10,6 +10,7 @@
   import { page } from '$app/state';
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
   import TreeSearchInput from '../components/TreeSearchInput.svelte';
+  import { apiResponseToTree } from '$lib/familytree/fetchTree';
 
   let name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
@@ -61,47 +62,14 @@
   }
 
   function searchWithinTree(result: string) {
-    fetchRelationship(
-      tree!.focus,
-      tree!.people.find((tup) => tup[1].name === result)![0]!,
-      useFakeData
-    ).then((result) => {
-      const newRelationship = result.getOrNull();
-      if (newRelationship != null) {
-        filteredTree = {
-          ...tree!,
-          marriages: tree!.marriages.flatMap((marriage) => {
-            if (newRelationship.links.some((person) => marriage.parents.includes(person))) {
-              const filteredChildren = marriage.children.filter((p) =>
-                newRelationship.links.includes(p)
-              );
-              return filteredChildren.length === 0 &&
-                marriage.parents.some((p) => !newRelationship.links.includes(p))
-                ? []
-                : [
-                    {
-                      parents: marriage.parents,
-                      children: filteredChildren
-                    }
-                  ];
-            } else if (newRelationship.links.some((person) => marriage.children.includes(person))) {
-              const filteredParents = marriage.parents.filter((p) =>
-                newRelationship.links.includes(p)
-              );
-              return filteredParents.length === 0
-                ? []
-                : [
-                    {
-                      parents: filteredParents,
-                      children: marriage.children.filter((p) => newRelationship.links.includes(p))
-                    }
-                  ];
-            }
-            return [];
-          })
-        };
+    fetchRelationship(tree!.focus, tree!.people.find((tup) => tup[1].name === result)![0]!).then(
+      (result) => {
+        const response = result.getOrNull();
+        if (response != null) {
+          filteredTree = apiResponseToTree(response?.links);
+        }
       }
-    });
+    );
   }
 
   let sidePanelName = $state<string | undefined>(undefined);

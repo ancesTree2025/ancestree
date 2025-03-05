@@ -10,7 +10,6 @@ object WikidataProperties {
       "P25" to "Mother",
       "P451" to "Spouse(s)",
       "P40" to "Child(ren)",
-      "P3373" to "Sibling(s)",
     )
 
   // Personal Info Properties

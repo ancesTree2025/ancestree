@@ -6,6 +6,7 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.data.models.Person
+import org.data.services.GraphTrawlService
 import org.data.services.InfoQueryBuilder
 import org.data.services.WikiLookupService
 import org.domain.models.AutocompleteResponse
@@ -99,8 +100,8 @@ fun Application.configureRouting() {
             "Dest is required. Nothing was passed",
           )
 
-      val wikiLookupService = WikiLookupService()
-      val linkInfo = wikiLookupService.getRelation(orig, dest)
+      val graphTrawlService = GraphTrawlService()
+      val linkInfo = graphTrawlService.getRelation(orig, dest)
       call.respond(linkInfo)
     }
   }

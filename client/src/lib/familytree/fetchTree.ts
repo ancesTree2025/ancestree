@@ -16,7 +16,7 @@ const personSchema = z.object({
   depth: z.number()
 });
 
-const apiResponseSchema = z.object({
+export const treeSchema = z.object({
   root: personSchema,
   nodes: z.array(personSchema),
   edges: z.array(
@@ -27,7 +27,7 @@ const apiResponseSchema = z.object({
   )
 });
 
-type ApiResponse = z.infer<typeof apiResponseSchema>;
+type ApiResponse = z.infer<typeof treeSchema>;
 
 export function apiResponseToTree(res: ApiResponse): Tree {
   // Create mappings from people ids to their info and depths
@@ -120,7 +120,7 @@ export async function fetchTree(
     () => 'Could not parse server response'
   );
   return parsed.mapCatching(
-    (json) => apiResponseToTree(apiResponseSchema.parse(json)),
+    (json) => apiResponseToTree(treeSchema.parse(json)),
     () => 'Server data in wrong format'
   );
 }
