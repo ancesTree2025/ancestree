@@ -1,7 +1,6 @@
 package org.data.producers
 
 import kotlin.math.abs
-import org.data.caches.WikiCacheManager.putGraphs
 import org.data.models.Label
 import org.data.models.Person
 import org.data.models.QID
@@ -31,6 +30,7 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     Child,
     Spouse,
     Root,
+    Partner,
   }
 
   /**
@@ -58,8 +58,13 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
    * @returns None.
    */
   private fun addSpousalEdges(a: String, b: String, married: Boolean = true) {
-    edges.add(Edge(a, b))
-    edges.add(Edge(b, a))
+    var tag = ""
+    if (married == false) {
+      tag = "UN"
+    }
+
+    edges.add(Edge(a, b, tag))
+    edges.add(Edge(b, a, tag))
   }
 
   /**
@@ -75,6 +80,8 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     visited.clear()
     nodes.clear()
     edges.clear()
+    childToParents.clear()
+    genders.clear()
 
     /*TODO(Extremely bizarre bug, needs DESPERATE fixing.)
      * As of the latest push, I don't understand why this is happening, but after some debugging,
@@ -144,6 +151,9 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
           RelationType.Spouse -> {
             addSpousalEdges(item.parentId, person.id)
           }
+          RelationType.Partner -> {
+            addSpousalEdges(item.parentId, person.id, false)
+          }
           RelationType.Root -> {}
         }
 
@@ -167,6 +177,14 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
             }
           }
 
+          if (abs(item.depth) <= depth) {
+            for (spouse in relation.Partners) {
+              if (spouse.isNotBlank()) {
+                queue.add(QueueItem(spouse, item.depth, person.id, RelationType.Partner))
+              }
+            }
+          }
+
           if (abs(item.depth + 1) <= depth) {
             for (child in relation.Children) {
               if (child.isNotBlank()) {
@@ -179,18 +197,6 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
       }
 
       queue.removeAll { batchItems.contains(it) }
-    }
-
-    /** Connecting unmarried people with children */
-    for ((_, parentSet) in childToParents) {
-      val parents = parentSet.toList()
-      if (parents.size >= 2) {
-        for (i in parents.indices) {
-          for (j in i + 1 until parents.size) {
-            addSpousalEdges(parents[i], parents[j], married = false)
-          }
-        }
-      }
     }
 
     /** Re-labelling nodes with name and gender, from QID */
@@ -214,8 +220,6 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     val final = Graph(rootNode, nodes.values.toSet(), edges.toSet())
 
     print("Caching final graph: $final")
-
-    nodes.forEach { putGraphs(it.key, final) }
 
     return final
   }
