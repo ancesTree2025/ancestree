@@ -1,6 +1,7 @@
 <script lang="ts">
   import { fly } from 'svelte/transition';
 
+  /* eslint-disable  @typescript-eslint/no-explicit-any */
   const { show, children }: { show: boolean; children: any } = $props();
 </script>
 

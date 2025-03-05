@@ -21,7 +21,6 @@
   let marriagePositions = $state<MarriagePositions>([]);
   let marriages = $state<Marriages>([]);
   let people = $state<People>([]);
-  let focus = $state<string>('');
 
   $effect(() => {
     if (tree) {
@@ -30,7 +29,6 @@
       // to make sure marriage lines update after new positions calculated
       people = tree.people;
       marriages = tree.marriages;
-      focus = tree.focus;
 
       positions = result.positions;
       marriagePositions = result.marriagePositions;

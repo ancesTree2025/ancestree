@@ -35,24 +35,24 @@
   const OVERLAP_OFFSET = 40;
   const HEIGHT_OFFSET = 20;
 
-  let parentsX = $derived((spouse1.x + spouse2.x) / 2 + marriagePosition.offset);
-  let rawParentsY = $derived(Math.max(spouse1.y, spouse2.y));
-  let parentsY = $derived(
+  const parentsX = $derived((spouse1.x + spouse2.x) / 2 + marriagePosition.offset);
+  const rawParentsY = $derived(Math.max(spouse1.y, spouse2.y));
+  const parentsY = $derived(
     rawParentsY -
       (marriagePosition.distance === 1
         ? 0
         : OVERLAP_OFFSET + HEIGHT_OFFSET * (marriagePosition.distance - 2))
   );
 
-  let childrenY = $derived(
+  const childrenY = $derived(
     Math.min(Infinity, ...marriagePosition.children.map((child) => child.y)) -
       marriagePosition.height * HEIGHT_OFFSET
   );
-  let midY = $derived((rawParentsY + childrenY) / 2);
-  let leftChildX = $derived(
+  const midY = $derived((rawParentsY + childrenY) / 2);
+  const leftChildX = $derived(
     Math.min(parentsX, ...marriagePosition.children.map((child) => child.x))
   );
-  let rightChildX = $derived(
+  const rightChildX = $derived(
     Math.max(parentsX, ...marriagePosition.children.map((child) => child.x))
   );
 </script>
@@ -65,7 +65,7 @@
       y1={spouse1.y}
       x2={spouse2.x}
       y2={spouse2.y}
-      class="stroke-rounded stroke-white stroke-line-border"
+      class="stroke-rounded stroke-line-border stroke-white"
     />
   {:else}
     <line
@@ -73,21 +73,21 @@
       y1={spouse1.y}
       x2={spouse1.x + spouse1.y - parentsY}
       y2={parentsY}
-      class="stroke-rounded stroke-white stroke-line-border"
+      class="stroke-rounded stroke-line-border stroke-white"
     />
     <line
       x1={spouse1.x + spouse1.y - parentsY}
       y1={parentsY}
       x2={spouse2.x - spouse2.y + parentsY}
       y2={parentsY}
-      class="stroke-rounded stroke-white stroke-line-border"
+      class="stroke-rounded stroke-line-border stroke-white"
     />
     <line
       x1={spouse2.x - spouse2.y + parentsY}
       y1={parentsY}
       x2={spouse2.x}
       y2={spouse2.y}
-      class="stroke-rounded stroke-white stroke-line-border"
+      class="stroke-rounded stroke-line-border stroke-white"
     />
   {/if}
 
@@ -98,7 +98,7 @@
       y1={parentsY}
       x2={parentsX}
       y2={midY}
-      class="stroke-rounded stroke-white stroke-line-border"
+      class="stroke-rounded stroke-line-border stroke-white"
     />
 
     <!-- Draw children line -->
@@ -107,7 +107,7 @@
       y1={midY}
       x2={rightChildX}
       y2={midY}
-      class="stroke-rounded stroke-white stroke-line-border"
+      class="stroke-rounded stroke-line-border stroke-white"
     />
 
     <!-- Draw line from each child to children line -->
@@ -117,7 +117,7 @@
         y1={midY}
         x2={childPos.x}
         y2={childPos.y}
-        class="stroke-rounded stroke-white stroke-line-border"
+        class="stroke-rounded stroke-line-border stroke-white"
       />
     {/each}
   {/if}
