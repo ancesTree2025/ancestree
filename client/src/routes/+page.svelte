@@ -58,7 +58,12 @@
 
   async function onSubmit(newName: string) {
     if (!newName.length) return;
-    name = newName;
+    const withinTree = tree?.people.find((tup) => tup[1].name === newName);
+    if (withinTree) {
+      getPersonInfo(withinTree[0], withinTree[1].name);
+    } else {
+      name = newName;
+    }
   }
 
   function searchWithinTree(result: string) {
@@ -91,7 +96,7 @@
   <nav class="flex items-center gap-12 px-8 py-4 shadow-lg">
     <h1 class="w-48 text-lg">Ancestree</h1>
     <div class="flex flex-1 justify-center">
-      <NameInput {onSubmit} {status} />
+      <NameInput {onSubmit} {status} namesInTree={tree?.people.map((p) => p[1].name) ?? []} />
     </div>
     <div class="flex w-48 justify-end">
       <button class="p-2" onclick={toggleSettings}>

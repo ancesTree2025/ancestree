@@ -45,7 +45,6 @@
             class="block w-full cursor-pointer p-2 text-left hover:bg-gray"
             onclick={() => onSearchSubmit(result)}
           >
-            {result}
           </button>
         {/each}
       </div>
