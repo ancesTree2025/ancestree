@@ -1,15 +1,19 @@
 <script lang="ts">
   import FamilyTree from '../components/FamilyTree.svelte';
   import NameInput from '../components/NameInput.svelte';
-  import IconSettings from '~icons/tabler/settings';
   import SidePanel from '../components/SidePanel.svelte';
+  import { treeHistory } from '../components/TreeHistory.svelte';
 
   import { fetchTree, fetchInfo } from '$lib';
   import type { Tree, LoadingStatus, PersonInfo, InfoChecklist } from '$lib/types';
-
-  import { page } from '$app/state';
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
   import { apiResponseToTree } from '$lib/familytree/fetchTree';
+
+  import { page } from '$app/state';
+
+  import IconSettings from '~icons/tabler/settings';
+  import IconArrowLeft from '~icons/tabler/arrow-narrow-left';
+  import IconArrowRight from '~icons/tabler/arrow-narrow-right';
 
   let name = $state<string | undefined>();
   let status = $state<LoadingStatus>({ state: 'idle' });
@@ -42,6 +46,7 @@
         const [fetched, error] = result.toTuple();
         if (fetched) {
           tree = fetched;
+          treeHistory.put(tree!);
           status = { state: 'idle' };
 
           // Opening the side panel with the focus on search complete
@@ -88,6 +93,13 @@
       sidePanelName = name;
     }
   }
+
+  function handleUndo() {
+    tree = treeHistory.undo();
+  }
+  function handleRedo() {
+    tree = treeHistory.redo();
+  }
 </script>
 
 <div class="flex h-full flex-col overflow-x-hidden">
@@ -96,7 +108,23 @@
       <img src="/logo.png" alt="Ancestree" class="size-8" />
       <h1 class="text-xl font-semibold text-dark-gray">Ancestree</h1>
     </a>
-    <div class="flex flex-1 justify-center">
+    <div class="flex flex-1 items-center justify-center gap-4">
+      <div class="flex gap-2">
+        <button
+          class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:hover:bg-gray"
+          onclick={() => handleUndo()}
+          disabled={!treeHistory.canUndo()}
+        >
+          <IconArrowLeft />
+        </button>
+        <button
+          class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:hover:bg-gray"
+          onclick={() => handleRedo()}
+          disabled={!treeHistory.canRedo()}
+        >
+          <IconArrowRight />
+        </button>
+      </div>
       <NameInput
         {onSubmit}
         {status}
@@ -122,7 +150,7 @@
     />
   </div>
   {#if showSettings}
-    <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50">
       <div class="w-96 rounded bg-white p-6 shadow-lg">
         <h2 class="mb-4 text-lg font-bold">Settings</h2>
         <label class="mb-2 block"
