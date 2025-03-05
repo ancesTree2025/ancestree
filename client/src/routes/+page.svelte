@@ -33,6 +33,8 @@
     { key: 'bcoords', label: 'Show Birth Location', checked: true },
     { key: 'death', label: 'Show Death Date', checked: true },
     { key: 'dcoords', label: 'Show Death Location', checked: true },
+    { key: 'residence', label: 'Show Residence', checked: true },
+    { key: 'rcoords', label: 'Show Map Location of Residence', checked: true },
     { key: 'description', label: 'Show Description', checked: true },
     { key: 'wikiLink', label: 'Show Wikipedia Link', checked: true }
   ];

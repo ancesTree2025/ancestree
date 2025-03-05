@@ -25,7 +25,7 @@
       {#if data.image}
         <img alt={name} class="mx-8 mb-4 aspect-square rounded-xl object-cover" src={data.image} />
       {/if}
-      {@const ignoreKeys = new Set(['image', 'wikiLink', 'description', 'bcoords', 'dcoords'])}
+      {@const ignoreKeys = new Set(['image', 'wikiLink', 'description', 'bcoords', 'dcoords', 'rcoords'])}
       {#each Object.entries(data) as [key, value]}
         {#if !ignoreKeys.has(key)}
           <div class="flex">
@@ -35,7 +35,7 @@
         {/if}
       {/each}
 
-      {#if data.bcoords || data.dcoords}
+      {#if data.bcoords || data.dcoords || data.rcoords}
         <div class="mt-4 space-y-4">
           {#if data.bcoords && data.dcoords !== 'Unknown'}
             <div>
@@ -70,6 +70,28 @@
               >
                 <iframe
                   src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(data.dcoords.split(',')[1]) - 0.01},${Number(data.dcoords.split(',')[0]) - 0.01},${Number(data.dcoords.split(',')[1]) + 0.01},${Number(data.dcoords.split(',')[0]) + 0.01}&layer=mapnik&marker=${data.dcoords.split(',')[0]},${data.dcoords.split(',')[1]}`}
+                  width="100%"
+                  height="200"
+                  class="border-gray-300 pointer-events-none rounded-lg border"
+                  allowfullscreen
+                  loading="lazy"
+                  title="Deathplace map"
+                ></iframe>
+              </a>
+            </div>
+          {/if}
+
+          {#if data.rcoords && data.rcoords !== 'Unknown'}
+            <div>
+              <p><strong>Residence</strong></p>
+              <a
+                href={`https://www.google.com/maps?q=${data.rcoords}`}
+                target="_blank"
+                class="block"
+                aria-label="Link to Death place coordinates"
+              >
+                <iframe
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(data.rcoords.split(',')[1]) - 0.01},${Number(data.rcoords.split(',')[0]) - 0.01},${Number(data.rcoords.split(',')[1]) + 0.01},${Number(data.rcoords.split(',')[0]) + 0.01}&layer=mapnik&marker=${data.rcoords.split(',')[0]},${data.rcoords.split(',')[1]}`}
                   width="100%"
                   height="200"
                   class="border-gray-300 pointer-events-none rounded-lg border"
