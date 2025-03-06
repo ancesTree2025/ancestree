@@ -48,8 +48,11 @@ class GraphTrawlService {
   fun deltaForRelation(rel: String): Int {
     return when {
       rel.startsWith("Father") || rel.startsWith("Mother") -> -1
-      rel.startsWith("Son") || rel.startsWith("Daughter") -> 1
-      rel.startsWith("Wife") || rel.startsWith("Husband") -> 0
+      rel.startsWith("Son") || rel.startsWith("Daughter") || rel.startsWith("Child") -> 1
+      rel.startsWith("Wife") ||
+        rel.startsWith("Husband") ||
+        rel.startsWith("Spouse") ||
+        rel.startsWith("Partner") -> 0
       else -> 0
     }
   }
@@ -183,7 +186,7 @@ class GraphTrawlService {
         val currentQID = path.qids.last()
         val propMap = WikiCacheManager.getProps(currentQID) ?: emptyMap()
         propMap.forEach { (prop, qidList) ->
-          if (prop in listOf("Spouse(s)", "Child(ren)")) {
+          if (prop in listOf("Spouse(s)", "Child(ren)", "Partner(s)")) {
             qidList.forEach { neighbor ->
               if (WikiCacheManager.getProps(neighbor)?.get("Gender") == null) {
                 missingGenderNeighbors.add(neighbor)
@@ -213,6 +216,7 @@ class GraphTrawlService {
               when (prop) {
                 "Father" -> "Father's"
                 "Mother" -> "Mother's"
+                "Partner(s)" -> "Partner's"
                 "Spouse(s)" -> {
                   val gender =
                     WikiCacheManager.getProps(neighbor)?.get("Gender")?.firstOrNull() ?: "unknown"
@@ -265,9 +269,6 @@ class GraphTrawlService {
                 }
 
                 val edges = mutableSetOf<Edge>()
-                for (i in 0 until chain.size - 1) {
-                  edges.add(Edge(chain[i], chain[i + 1]))
-                }
 
                 for (i in 0 until rawRels.size) {
                   val rel = rawRels[i]
@@ -275,7 +276,8 @@ class GraphTrawlService {
                     rel.startsWith("Father") ||
                       rel.startsWith("Mother") ||
                       rel.startsWith("Son") ||
-                      rel.startsWith("Daughter")
+                      rel.startsWith("Daughter") ||
+                      rel.startsWith("Child")
                   ) {
                     val nodeA = nodes[chain[i]]!!
                     val nodeB = nodes[chain[i + 1]]!!
@@ -312,6 +314,17 @@ class GraphTrawlService {
                         }
                       }
                     }
+                  } else if (rel.startsWith("Partner")) {
+                    val nodeA = nodes[chain[i]]!!
+                    val nodeB = nodes[chain[i + 1]]!!
+                    edges.add(Edge(nodeB.id, nodeA.id, "UN"))
+                    edges.add(Edge(nodeA.id, nodeB.id, "UN"))
+                  }
+                }
+
+                for (i in 0 until chain.size - 1) {
+                  if (!edges.contains(Edge(chain[i], chain[i + 1], "UN"))) {
+                    edges.add(Edge(chain[i], chain[i + 1]))
                   }
                 }
 

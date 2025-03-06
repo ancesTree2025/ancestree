@@ -98,7 +98,7 @@
 
   export { closeSidePanel };
 
-  const zoomFactor = $derived(Math.min(1, treeWidth ? width / treeWidth : 1));
+  const zoomFactor = $derived(1);
 
   const xOffset = $derived(
     treeWidth !== undefined && treeWidth < width ? (width - treeWidth) / 2 : width / 2
