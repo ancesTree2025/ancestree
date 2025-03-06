@@ -242,6 +242,10 @@ class GraphTrawlService {
                 val chain = newPath.qids
                 val rawRels = newPath.rels
 
+                println("Targ found")
+                println(chain)
+                println(rawRels)
+
                 val depths = mutableListOf<Int>()
                 var currentDepth = 0
                 depths.add(currentDepth)
@@ -283,7 +287,7 @@ class GraphTrawlService {
 
                     listOf("Father", "Mother").forEach { parentType ->
                       val parentQID = childProps[parentType]?.firstOrNull()
-                      if (parentQID != null && parentQID !in nodes && parentQID != parentNode.id) {
+                      if (parentQID != null && parentQID != parentNode.id) {
                         val missingQuery = service.queryQIDS(listOf(parentQID))
                         val missingParentPerson =
                           if (missingQuery.isNotEmpty()) missingQuery.first().first else Person()
