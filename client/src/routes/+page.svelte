@@ -187,8 +187,8 @@
     while (allMarriages.length > 0) {
       const marriage = allMarriages[0];
 
-      let children = new Set<string>();
-      let focuses = new Set<string>();
+      const children = new Set<string>();
+      const focuses = new Set<string>();
       for (let i = allMarriages.length - 1; i >= 0; i--) {
         const m = allMarriages[i];
         if (m.parents.every((p) => marriage.parents.includes(p))) {

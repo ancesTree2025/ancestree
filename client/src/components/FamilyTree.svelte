@@ -14,7 +14,7 @@
   import { SvelteSet } from 'svelte/reactivity';
   import { scale } from 'svelte/transition';
 
-  let {
+  const {
     tree,
     getPersonInfo,
     expandNode,
