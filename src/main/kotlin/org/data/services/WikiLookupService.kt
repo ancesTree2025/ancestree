@@ -283,8 +283,6 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
       val locReq = ComplexRequester.getInfo(listOf(locQID))
       val locInfo = WikiRequestParser.parseWikidataClaims(locReq, propertyQIDMapPersonal)
       WikiCacheManager.putProps(locQID, locInfo[locQID]!!)
-      println(locQID)
-      println(locInfo)
       val coords = locInfo[locQID]!!["Coords"]
       return coords!![0]
     } else {
