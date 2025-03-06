@@ -764,17 +764,26 @@ function arrangeNodes(
     handled.clear();
     parentGroupIds.clear();
 
+    let lastPos = 0;
+
     // allocate positions to each node by group position
     for (const node of nodes) {
-      const groupId = childrenMember
-        .get(node)!
-        .sort((a, b) => childrenGroups.get(b)!.length - childrenGroups.get(a)!.length)[0];
+      const nodeChildrenGroups = childrenMember.get(node);
+      if (nodeChildrenGroups === undefined) {
+        arrangement.set(node, lastPos);
+        lastPos += 2;
+        continue;
+      }
+      const groupId = nodeChildrenGroups.sort(
+        (a, b) => childrenGroups.get(b)!.length - childrenGroups.get(a)!.length
+      )[0];
       const count = groupCounts.get(groupId) ?? 0;
 
       const left = childrenGroupLeft.get(groupId)!;
       const pos = left + count * 2;
       groupCounts.set(groupId, count + 1);
       arrangement.set(node, pos);
+      lastPos = pos;
 
       handled.add(node);
       parentGroupIds.add(groups.members[node]);

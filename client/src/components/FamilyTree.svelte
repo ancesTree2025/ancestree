@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as d3 from 'd3';
-  import { positionNodes, fetchTree } from '$lib';
+  import { positionNodes } from '$lib';
   import {
     type People,
     type Marriages,
@@ -8,13 +8,20 @@
     type Tree,
     type MarriagePositions
   } from '$lib/types';
-  import { scale } from 'svelte/transition';
   import { onMount } from 'svelte';
   import FamilyTreeLines from './FamilyTreeLines.svelte';
   import { SvelteSet } from 'svelte/reactivity';
+  import { scale } from 'svelte/transition';
 
-  let { tree, getPersonInfo }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } =
-    $props();
+  let {
+    tree,
+    getPersonInfo,
+    expandNode
+  }: {
+    tree?: Tree;
+    getPersonInfo: (qid: string, name: string) => void;
+    expandNode: (name: string) => Promise<void>;
+  } = $props();
   let positions = $state<Positions>({});
   let treeWidth = $state<number>();
   let marriagePositions = $state<MarriagePositions>([]);
@@ -112,14 +119,7 @@
 
   async function onExpandNode(id: string, name: string) {
     loadingStatusOnNode = [...loadingStatusOnNode, id];
-    const result = await fetchTree(name, false);
-    const childTree = result.getOrThrow();
-
-    tree = {
-      focus: tree!.focus,
-      people: Array.from(new Set([...tree!.people, ...childTree.people])),
-      marriages: Array.from(new Set([...tree!.marriages, ...childTree.marriages]))
-    };
+    await expandNode(name);
     loadingStatusOnNode = loadingStatusOnNode.filter((_id) => id !== _id);
   }
 </script>
@@ -175,13 +175,13 @@
                     +
                   </span>
 
-                  <!--{#if loadingStatusOnNode.includes(id)}-->
-                  <!--  <span class="absolute grid h-full w-full place-items-center bg-gray opacity-70">-->
-                  <!--    <div class="absolute right-1 top-2" transition:scale={{ duration: 150 }}>-->
-                  <!--      <div class="loader h-5 w-5 bg-black p-1 opacity-50"></div>-->
-                  <!--    </div>-->
-                  <!--  </span>-->
-                  <!--{/if}-->
+                  {#if loadingStatusOnNode.includes(id)}
+                    <span class="absolute grid h-full w-full place-items-center bg-gray opacity-70">
+                      <div class="absolute right-1 top-2" transition:scale={{ duration: 150 }}>
+                        <div class="loader h-5 w-5 bg-black p-1 opacity-50"></div>
+                      </div>
+                    </span>
+                  {/if}
                 </button>
               </foreignObject>
             </g>

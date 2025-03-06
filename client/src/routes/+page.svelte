@@ -171,25 +171,48 @@
     name = personName.name;
     getPersonInfo(qid, personName.name);
   }
+
+  async function expandNode(name: string) {
+    const result = await fetchTree(name, false);
+    const childTree = result.getOrThrow();
+
+    const oldPeople = rawTree!.people;
+    const oldMarriages = rawTree!.marriages;
+
+    const newPeople = childTree.people.filter((p) => !oldPeople.some((op) => op[0] === p[0]));
+    const newMarriages = childTree.marriages.filter(
+      (m) =>
+        m.parents.some((p) => newPeople.some((np) => np[0] === p)) ||
+        m.children.some((c) => newPeople.some((np) => np[0] === c))
+    );
+
+    rawTree = {
+      focus: rawTree!.focus,
+      people: [...oldPeople, ...newPeople],
+      marriages: [...oldMarriages, ...newMarriages]
+    };
+
+    console.log(rawTree);
+  }
 </script>
 
 <div class="flex h-full flex-col overflow-x-hidden">
   <nav class="flex items-center gap-12 px-8 py-4 shadow-lg">
     <a href="/" class="flex items-center gap-2">
       <img src="/logo.png" alt="Ancestree" class="size-8" />
-      <h1 class="text-xl font-semibold text-dark-gray">Ancestree</h1>
+      <h1 class="text-dark-gray text-xl font-semibold">Ancestree</h1>
     </a>
     <div class="flex flex-1 items-center justify-center gap-4">
       <div class="flex gap-2">
         <button
-          class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
+          class="hover:bg-cream rounded-lg p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           onclick={() => handleUndo()}
           disabled={!treeHistory.canUndo()}
         >
           <IconArrowLeft />
         </button>
         <button
-          class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
+          class="hover:bg-cream rounded-lg p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           onclick={() => handleRedo()}
           disabled={!treeHistory.canRedo()}
         >
@@ -212,9 +235,14 @@
       </Tooltip>
     </div>
   </nav>
-  <div class="flex flex-1">
+  <div class="flex min-h-0 flex-1">
     <div class="flex-1">
-      <FamilyTree bind:this={familyTree} {getPersonInfo} tree={relation?.tree ?? tree} />
+      <FamilyTree
+        bind:this={familyTree}
+        {getPersonInfo}
+        tree={relation?.tree ?? tree}
+        {expandNode}
+      />
     </div>
     <SidePanel
       name={sidePanelName}
@@ -229,7 +257,7 @@
         <h2 class="mb-4 text-lg font-bold">Settings</h2>
         <label class="mb-2 block"
           >Maximum Tree Width
-          <div class="border-gray-400 flex h-8 w-12 items-center justify-center rounded border">
+          <div class="flex h-8 w-12 items-center justify-center rounded border border-gray-400">
             {maxWidth}
           </div>
           <input type="range" min="1" max="10" bind:value={maxWidth} class="w-full" />
@@ -237,7 +265,7 @@
 
         <label class="mb-2 block"
           >Maximum Tree Height
-          <div class="border-gray-400 flex h-8 w-12 items-center justify-center rounded border">
+          <div class="flex h-8 w-12 items-center justify-center rounded border border-gray-400">
             {maxHeight}
           </div>
           <input type="range" min="1" max="10" bind:value={maxHeight} class="w-full" />
@@ -252,7 +280,7 @@
             </div>
           {/each}
         </div>
-        <button class="bg-blue-500 mt-4 rounded p-2 text-black" onclick={closeSettings}
+        <button class="mt-4 rounded bg-blue-500 p-2 text-black" onclick={closeSettings}
           >Close</button
         >
       </div>

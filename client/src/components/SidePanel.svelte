@@ -10,25 +10,15 @@
     showImage: boolean;
   }
   const { name, data, show, showImage }: Props = $props();
-
-  let panelParentDiv = $state<HTMLDivElement | null>(null);
-  $effect(() => {
-    if (panelParentDiv) {
-      panelParentDiv.style.height = `calc(100vh - ${panelParentDiv.offsetTop}px)`;
-    }
-  });
 </script>
 
-<div
-  class={`${show ? 'w-96' : 'w-0'} h-screen overflow-y-scroll shadow-lg transition-all duration-500`}
-  bind:this={panelParentDiv}
->
+<div class={`${show ? 'w-96' : 'w-0'} overflow-y-auto shadow-lg transition-all duration-500`}>
   <div class="flex w-96 flex-col gap-6 px-8 py-6">
     <div class="flex items-center justify-between">
       {#if data}
         <div class="text-xl font-semibold">{name}</div>
       {:else}
-        <div class="h-8 w-3/4 animate-pulse rounded-lg bg-gray"></div>
+        <div class="bg-gray h-8 w-3/4 animate-pulse rounded-lg"></div>
       {/if}
     </div>
     {#if data}
@@ -74,7 +64,7 @@
                   src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(data.bcoords.split(',')[1]) - 0.01},${Number(data.bcoords.split(',')[0]) - 0.01},${Number(data.bcoords.split(',')[1]) + 0.01},${Number(data.bcoords.split(',')[0]) + 0.01}&layer=mapnik&marker=${data.bcoords.split(',')[0]},${data.bcoords.split(',')[1]}`}
                   width="100%"
                   height="200"
-                  class="border-gray-300 pointer-events-none rounded-lg border"
+                  class="pointer-events-none rounded-lg border border-gray-300"
                   allowfullscreen
                   loading="lazy"
                   title="Birthplace Map"
@@ -96,7 +86,7 @@
                   src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(data.dcoords.split(',')[1]) - 0.01},${Number(data.dcoords.split(',')[0]) - 0.01},${Number(data.dcoords.split(',')[1]) + 0.01},${Number(data.dcoords.split(',')[0]) + 0.01}&layer=mapnik&marker=${data.dcoords.split(',')[0]},${data.dcoords.split(',')[1]}`}
                   width="100%"
                   height="200"
-                  class="border-gray-300 pointer-events-none rounded-lg border"
+                  class="pointer-events-none rounded-lg border border-gray-300"
                   allowfullscreen
                   loading="lazy"
                   title="Deathplace map"
@@ -118,7 +108,7 @@
                   src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(data.rcoords.split(',')[1]) - 0.01},${Number(data.rcoords.split(',')[0]) - 0.01},${Number(data.rcoords.split(',')[1]) + 0.01},${Number(data.rcoords.split(',')[0]) + 0.01}&layer=mapnik&marker=${data.rcoords.split(',')[0]},${data.rcoords.split(',')[1]}`}
                   width="100%"
                   height="200"
-                  class="border-gray-300 pointer-events-none rounded-lg border"
+                  class="pointer-events-none rounded-lg border border-gray-300"
                   allowfullscreen
                   loading="lazy"
                   title="Deathplace map"
@@ -138,9 +128,9 @@
       {#if showImage}
         <img alt={name} class="mx-8 mb-4 aspect-square rounded-xl object-cover" src={defaultPfp} />
       {/if}
-      <div class="h-4 w-3/4 animate-pulse rounded-lg bg-gray"></div>
-      <div class="h-4 w-1/2 animate-pulse rounded-lg bg-gray"></div>
-      <div class="w-100 h-40 animate-pulse rounded-lg bg-gray"></div>
+      <div class="bg-gray h-4 w-3/4 animate-pulse rounded-lg"></div>
+      <div class="bg-gray h-4 w-1/2 animate-pulse rounded-lg"></div>
+      <div class="w-100 bg-gray h-40 animate-pulse rounded-lg"></div>
     {/if}
   </div>
 </div>
