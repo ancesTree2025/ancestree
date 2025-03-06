@@ -119,15 +119,13 @@
   }
 
   function searchWithinTree(result: string) {
-    fetchRelationship(tree!.focus, result).then(
-      (result) => {
-        const response = result.getOrNull();
-        if (response === null) return;
+    fetchRelationship(tree!.focus, result).then((result) => {
+      const response = result.getOrNull();
+      if (response === null) return;
 
-        filteredTree = apiResponseToTree(response?.links);
-        treeHistory.put(filteredTree);
-      }
-    );
+      filteredTree = apiResponseToTree(response?.links);
+      treeHistory.put(filteredTree);
+    });
   }
 
   let sidePanelName = $state<string | undefined>(undefined);
