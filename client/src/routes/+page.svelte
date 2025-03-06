@@ -3,6 +3,7 @@
   import NameInput from '../components/NameInput.svelte';
   import PersonSearchIcon from '~icons/tabler/user-search';
   import FilterIcon from '~icons/tabler/filter';
+  import AlignCenterIcon from '~icons/tabler/keyframe-align-center';
   import SidePanel from '../components/SidePanel.svelte';
   import { treeHistory } from '../components/TreeHistory.svelte';
 
@@ -273,6 +274,9 @@
           onclick={() => switchPopup('filter')}
         >
           <FilterIcon />
+        </button>
+        <button class="p-3" onclick={() => familyTree?.recenter()}>
+          <AlignCenterIcon />
         </button>
       </div>
     </div>
