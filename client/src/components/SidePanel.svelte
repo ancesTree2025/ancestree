@@ -128,7 +128,7 @@
 
       {#if data.wikiLink}
         <p class="mt-4">
-          <a href={data.wikiLink}>Wikipedia</a>
+          <a href={data.wikiLink} target="_blank">Wikipedia</a>
         </p>
       {/if}
     {:else}
