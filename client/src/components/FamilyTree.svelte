@@ -54,7 +54,9 @@
 
   onMount(() => {
     /* eslint-disable  @typescript-eslint/no-explicit-any */
-    d3.select('#svg-root').call(d3.zoom().on('zoom', zoomed) as any);
+    d3.select('#svg-root')
+      .call(d3.zoom().on('zoom', zoomed) as any)
+      .on('dblclick.zoom', null);
 
     /* eslint-disable  @typescript-eslint/no-explicit-any */
     function zoomed(event: any) {
@@ -171,6 +173,7 @@
               >
                 <button
                   onclick={() => handleClick(id, person.name)}
+                  ondblclick={() => onExpandNode(id, person.name)}
                   class="relative flex h-full w-full cursor-pointer items-center justify-center text-center text-sm {tree.secondary.includes(
                     id
                   )
@@ -178,16 +181,6 @@
                     : 'text-black'}"
                 >
                   {person.name}
-                  <span
-                    class="absolute right-0 top-0 rounded-lg border border-black px-1 text-xs"
-                    role="button"
-                    tabindex="0"
-                    onclick={() => onExpandNode(id, person.name)}
-                    onkeypress={() => onExpandNode(id, person.name)}
-                  >
-                    +
-                  </span>
-
                   {#if loadingStatusOnNode.includes(id)}
                     <span class="bg-gray absolute grid h-full w-full place-items-center opacity-70">
                       <div class="absolute right-1 top-2" transition:scale={{ duration: 150 }}>

@@ -205,12 +205,6 @@
       });
     }
 
-    console.log(id);
-    console.log(childTree.people.map((p) => p[0]).sort((a, b) => a.localeCompare(b)));
-    console.log(newPeople.map((p) => p[0]).sort((a, b) => a.localeCompare(b)));
-    console.log(childTree.marriages.filter((m) => m.parents.includes(id)));
-    console.log(newMarriages.filter((m) => m.parents.includes(id)));
-
     rawTree = {
       focus: rawTree!.focus,
       people: [...oldPeople, ...newPeople],
@@ -220,8 +214,6 @@
       pivotPosition: position
     };
     treeHistory.put(rawTree);
-
-    console.log(rawTree);
   }
 
   function collapseNode(id: string) {
