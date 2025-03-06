@@ -6,9 +6,14 @@
   const {
     searchWithinTree,
     people,
+    relationDescriptor,
     clearFilter
-  }: { clearFilter: () => void; people: People; searchWithinTree: (result: string) => void } =
-    $props();
+  }: {
+    clearFilter: () => void;
+    people: People;
+    relationDescriptor?: string;
+    searchWithinTree: (result: string) => void;
+  } = $props();
 </script>
 
 <div class="flex flex-col gap-4">
@@ -25,4 +30,7 @@
     type="RelationFinder"
     value={''}
   />
+  {#if relationDescriptor}
+    <div>{relationDescriptor}</div>
+  {/if}
 </div>
