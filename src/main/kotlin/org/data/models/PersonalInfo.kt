@@ -14,4 +14,5 @@ data class PersonalInfo(
   var dcoords: String? = null,
   var rcoords: String? = null,
   var residence: String? = null,
+  var office: String? = null,
 )

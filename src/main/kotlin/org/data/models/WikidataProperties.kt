@@ -23,5 +23,6 @@ object WikidataProperties {
       "P20" to "PoD",
       "P625" to "Coords",
       "P551" to "Residence",
+      "P39" to "Office Held",
     )
 }

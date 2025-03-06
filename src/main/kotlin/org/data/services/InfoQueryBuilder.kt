@@ -12,6 +12,7 @@ class InfoQueryBuilder(
   var end: Boolean = false,
   var residence: Boolean = false,
   var rcoords: Boolean = false,
+  var office: Boolean = false,
 ) {
 
   // For testing purposes
@@ -27,11 +28,17 @@ class InfoQueryBuilder(
     this.end = true
     this.residence = true
     this.rcoords = true
+    this.office = true
     return this
   }
 
   fun withImage(): InfoQueryBuilder {
     this.image = true
+    return this
+  }
+
+  fun withOffice(): InfoQueryBuilder {
+    this.office = true
     return this
   }
 
