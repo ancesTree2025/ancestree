@@ -77,11 +77,6 @@
     showSettings = !showSettings;
   }
 
-  function closeSettings() {
-    toggleSettings();
-    onSubmit(currentName);
-  }
-
   async function onSubmit(newName: string) {
     if (!newName.length) return;
     currentName = newName;
@@ -213,8 +208,47 @@
     </div>
   </nav>
   <div class="flex flex-1">
-    <div class="flex-1">
+    <div class="relative flex-1">
       <FamilyTree bind:this={familyTree} {getPersonInfo} tree={relation?.tree ?? tree} />
+      <div class="absolute bottom-8 right-8 flex flex-col items-start gap-4">
+        <div class="z-50 flex rounded-xl bg-white text-xl shadow-lg">
+          <div class="w-96 rounded bg-white p-6 shadow-lg">
+            <label class="mb-2 block"
+              >Maximum Tree Width
+              <div class="flex gap-5">
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  bind:value={maxWidth}
+                  class="flex-1"
+                  onclick={() => onSubmit(currentName)}
+                />
+                <div>
+                  {maxWidth}
+                </div>
+              </div>
+            </label>
+
+            <label class="mb-2 block"
+              >Maximum Tree Height
+              <div class="flex gap-5">
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  bind:value={maxHeight}
+                  class="flex-1"
+                  onclick={() => onSubmit(currentName)}
+                />
+                <div>
+                  {maxHeight}
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
     </div>
     <SidePanel
       name={sidePanelName}
@@ -227,21 +261,6 @@
     <div class="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50">
       <div class="w-96 rounded bg-white p-6 shadow-lg">
         <h2 class="mb-4 text-lg font-bold">Settings</h2>
-        <label class="mb-2 block"
-          >Maximum Tree Width
-          <div class="border-gray-400 flex h-8 w-12 items-center justify-center rounded border">
-            {maxWidth}
-          </div>
-          <input type="range" min="1" max="10" bind:value={maxWidth} class="w-full" />
-        </label>
-
-        <label class="mb-2 block"
-          >Maximum Tree Height
-          <div class="border-gray-400 flex h-8 w-12 items-center justify-center rounded border">
-            {maxHeight}
-          </div>
-          <input type="range" min="1" max="10" bind:value={maxHeight} class="w-full" />
-        </label>
         <div class="mb-4">
           {#each checkboxOptions as option}
             <div class="mb-1 flex items-center gap-2">
@@ -252,7 +271,7 @@
             </div>
           {/each}
         </div>
-        <button class="bg-blue-500 mt-4 rounded p-2 text-black" onclick={closeSettings}
+        <button class="bg-blue-500 mt-4 rounded p-2 text-black" onclick={toggleSettings}
           >Close</button
         >
       </div>
