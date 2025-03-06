@@ -119,7 +119,7 @@
   }
 
   function searchWithinTree(result: string) {
-    fetchRelationship(tree!.focus, tree!.people.find((tup) => tup[1].name === result)![0]!).then(
+    fetchRelationship(tree!.focus, result).then(
       (result) => {
         const response = result.getOrNull();
         if (response === null) return;
