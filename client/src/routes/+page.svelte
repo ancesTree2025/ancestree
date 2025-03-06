@@ -172,7 +172,7 @@
     getPersonInfo(qid, personName.name);
   }
 
-  async function expandNode(name: string) {
+  async function expandNode(id: string, name: string) {
     const result = await fetchTree(name, false);
     const childTree = result.getOrThrow();
 
@@ -180,17 +180,39 @@
     const oldMarriages = rawTree!.marriages;
 
     const newPeople = childTree.people.filter((p) => !oldPeople.some((op) => op[0] === p[0]));
-    const newMarriages = childTree.marriages.filter(
-      (m) =>
-        m.parents.some((p) => newPeople.some((np) => np[0] === p)) ||
-        m.children.some((c) => newPeople.some((np) => np[0] === c))
-    );
+
+    const allMarriages = [...oldMarriages, ...childTree.marriages];
+    const newMarriages = [];
+    while (allMarriages.length > 0) {
+      const marriage = allMarriages[0];
+
+      let children = new Set<string>();
+      for (let i = allMarriages.length - 1; i >= 0; i--) {
+        const m = allMarriages[i];
+        if (m.parents.every((p) => marriage.parents.includes(p))) {
+          allMarriages.splice(i, 1);
+          m.children.forEach((c) => children.add(c));
+        }
+      }
+
+      newMarriages.push({
+        parents: marriage.parents,
+        children: Array.from(children)
+      });
+    }
+
+    console.log(id);
+    console.log(childTree.people.map((p) => p[0]).sort((a, b) => a.localeCompare(b)));
+    console.log(newPeople.map((p) => p[0]).sort((a, b) => a.localeCompare(b)));
+    console.log(childTree.marriages.filter((m) => m.parents.includes(id)));
+    console.log(newMarriages.filter((m) => m.parents.includes(id)));
 
     rawTree = {
       focus: rawTree!.focus,
       people: [...oldPeople, ...newPeople],
-      marriages: [...oldMarriages, ...newMarriages]
+      marriages: newMarriages
     };
+    treeHistory.put(rawTree);
 
     console.log(rawTree);
   }

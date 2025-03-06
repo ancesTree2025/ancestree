@@ -713,7 +713,7 @@ function arrangeNodes(
 }
 
 function shuntOverlapping(level: PersonID[], assignments: Map<PersonID, number>) {
-  let iters = 1000;
+  let iters = 10000;
   let happy = false;
   while (!happy) {
     iters--;

@@ -20,7 +20,7 @@
   }: {
     tree?: Tree;
     getPersonInfo: (qid: string, name: string) => void;
-    expandNode: (name: string) => Promise<void>;
+    expandNode: (id: string, name: string) => Promise<void>;
   } = $props();
   let positions = $state<Positions>({});
   let treeWidth = $state<number>();
@@ -119,7 +119,7 @@
 
   async function onExpandNode(id: string, name: string) {
     loadingStatusOnNode = [...loadingStatusOnNode, id];
-    await expandNode(name);
+    await expandNode(id, name);
     loadingStatusOnNode = loadingStatusOnNode.filter((_id) => id !== _id);
   }
 </script>
