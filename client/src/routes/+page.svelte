@@ -210,7 +210,6 @@
           <IconSettings />
         </button>
       </Tooltip>
-      
     </div>
   </nav>
   <div class="flex flex-1">

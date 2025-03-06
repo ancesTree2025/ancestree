@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { apiResponseToTree, treeSchema } from './fetchTree';
+import { treeSchema } from './fetchTree';
 import { Result } from 'typescript-result';
 import type { PersonID } from './types';
 import { env } from '$env/dynamic/public';
@@ -27,7 +27,6 @@ export async function fetchRelationship(
   );
   return parsed.mapCatching(
     (json) => {
-      console.log(apiResponseToTree(relationshipSchema.parse(json).links));
       return Result.ok(relationshipSchema.parse(json));
     },
     () => {
