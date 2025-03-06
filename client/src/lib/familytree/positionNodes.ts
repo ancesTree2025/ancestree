@@ -8,10 +8,6 @@ import type {
   Tree,
   MarriagePositions
 } from './types';
-import sr from 'seedrandom';
-
-const SEED = '1234';
-let rand = sr.alea(SEED);
 
 type MarriageHeights = number[];
 
@@ -30,7 +26,6 @@ export function positionNodes(tree: Tree): {
   marriagePositions: MarriagePositions;
   treeWidth: number;
 } {
-  rand = sr.alea(SEED, { state: true });
   // for efficiency, keep mapping from person to marriages and from person to parents' marriage
   const personMarriages: Record<PersonID, Marriages> = Object.fromEntries(
     tree.people.map(([id]) => [id, tree.marriages.filter((m) => m.parents.includes(id))])
@@ -395,7 +390,7 @@ function sortDepths(
   return { sortedLevels: outputDepths, positions };
 }
 
-const UNORDERED_WEIGHT = 2;
+const UNORDERED_WEIGHT = 40;
 
 /**
  * Sorts an array of elements with respect to weights and constraints.
@@ -413,130 +408,50 @@ function sortByWeights<T>(
   weights: Map<T, Map<T, number>>,
   constraints: [T, T][]
 ): T[] {
-  function randomNumber(start: number, end: number) {
-    return start + Math.floor(rand.double() * (1 + end - start));
-  }
+  const newElements = [...elements];
 
-  function mutate(solution: T[]): T[] {
-    const result = [...solution];
-    const i = randomNumber(0, solution.length - 1);
-    let j = randomNumber(0, solution.length - 2);
-    if (i === j) {
-      j++;
-    }
-    [result[i], result[j]] = [result[j], result[i]];
-    return result;
-  }
-
-  function crossover(solution1: T[], solution2: T[]): T[] {
-    const i = randomNumber(0, solution1.length - 1);
-    const result1: T[] = [];
-    for (let j = 0; j <= i; j++) {
-      result1.push(solution1[j]);
-    }
-    const result2 = solution2.filter((x) => !result1.includes(x));
-    Array.prototype.push.apply(result1, result2);
-    return result1;
-  }
-
-  function evaluate(solution: T[]) {
+  function evaluate(): number {
     let total = 0;
-    for (const [a, b] of constraints) {
-      const aPos = solution.indexOf(a);
-      const bPos = solution.indexOf(b);
-      if (aPos !== -1 && bPos !== -1 && aPos > bPos) {
-        total += UNORDERED_WEIGHT;
+    for (const constraint of constraints) {
+      const a = newElements.indexOf(constraint[0]);
+      const b = newElements.indexOf(constraint[1]);
+      if (a === -1 || b === -1) continue;
+      if (b <= a) total += UNORDERED_WEIGHT;
+    }
+
+    for (let i = 0; i < newElements.length; i++) {
+      for (let j = i + 1; j < newElements.length; j++) {
+        const a = newElements[i];
+        const b = newElements[j];
+        const weight = weights.get(a)?.get(b) ?? 0;
+        total += weight * (j - i) ** 2;
       }
     }
 
-    for (let x = 0; x < solution.length - 1; x++) {
-      for (let y = x + 1; y < solution.length; y++) {
-        // score is weight times (distance squared)
-        const w = weights.get(solution[x])?.get(solution[y]) ?? 0;
-        const d = y - x;
-        total += w * d * d;
-      }
-    }
     return total;
   }
 
-  function geneticAlgorithm() {
-    const GENERATION_SIZE = 8;
-    let solutions = generateRandomPermutations(elements, GENERATION_SIZE);
-    for (let epoch = 0; epoch < 1000; epoch++) {
-      const parents = [];
-      while (solutions.length > 1) {
-        const elem1 = solutions.splice(randomNumber(0, solutions.length - 1), 1)[0];
-        const elem2 = solutions.splice(randomNumber(0, solutions.length - 1), 1)[0];
-        if (evaluate(elem1) < evaluate(elem2)) {
-          parents.push(elem1);
-        } else {
-          parents.push(elem2);
-        }
-      }
-      solutions = [...parents];
-      for (let i = 0; i < parents.length; i += 1) {
-        const parent1 = parents[i];
-        const parent2 = parents[(i + 1) % parents.length];
-        solutions.push(mutate(crossover(parent1, parent2)));
-      }
-    }
-    return solutions;
-  }
-
-  let minimum = Infinity;
-  let minimumPermutation: T[] = [];
-
-  const perms = elements.length > 1 ? geneticAlgorithm() : permutations(elements);
-  for (const permutation of perms) {
-    // if it violates any constraints then increase total
-    const total = evaluate(permutation);
-    if (total < minimum) {
-      minimum = total;
-      minimumPermutation = permutation;
-    }
-  }
-
-  return minimumPermutation;
-}
-
-function factorial(n: number): number {
-  let result = 1;
-  for (let i = 2; i <= n; i++) {
-    result *= i;
-  }
-  return result;
-}
-
-const MAX_PERMUTATIONS = 100000;
-
-function permutations<T>(xs: T[]): T[][] {
-  if (factorial(xs.length) > MAX_PERMUTATIONS) {
-    return generateRandomPermutations(xs, MAX_PERMUTATIONS);
-  }
-  if (xs.length === 0) return [[]];
-  const result: T[][] = [];
-  for (let i = 0; i < xs.length; i++) {
-    const rest = xs.slice(0, i).concat(xs.slice(i + 1));
-    const restPermutations = permutations(rest);
-    for (const perm of restPermutations) {
-      result.push([xs[i], ...perm]);
-    }
-  }
-  return result;
-}
-
-function generateRandomPermutations<T>(elements: T[], count: number): T[][] {
-  const permutations: T[][] = [];
-  for (let i = 0; i < count; i++) {
-    const shuffled = [...elements];
+  for (let i = 0; i < elements.length; i++) {
     for (let j = 0; j < elements.length; j++) {
-      const k = Math.floor(rand.double() * elements.length);
-      [shuffled[j], shuffled[k]] = [shuffled[k], shuffled[j]];
+      let minK: number | null = null;
+      let min = Infinity;
+      for (let k = 0; k < elements.length; k++) {
+        [newElements[j], newElements[k]] = [newElements[k], newElements[j]];
+        const score = evaluate();
+        if (score < min) {
+          min = score;
+          minK = k;
+        }
+        [newElements[j], newElements[k]] = [newElements[k], newElements[j]];
+      }
+
+      if (minK !== null) {
+        [newElements[j], newElements[minK]] = [newElements[minK], newElements[j]];
+      }
     }
-    permutations.push(shuffled);
   }
-  return permutations;
+
+  return newElements;
 }
 
 /**
@@ -822,7 +737,7 @@ function shuntOverlapping(level: PersonID[], assignments: Map<PersonID, number>)
 }
 
 const NODE_WIDTH = 100;
-const NODE_HEIGHT = 200;
+const NODE_HEIGHT = 300;
 
 function calculatePositions(
   levels: Map<number, Map<PersonID, number>>,
