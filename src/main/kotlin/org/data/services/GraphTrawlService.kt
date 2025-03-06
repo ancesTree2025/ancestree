@@ -81,7 +81,9 @@ class GraphTrawlService {
         val type = token.replaceFirstChar { it.uppercaseChar() }
         var count = 1
         while (
-          i + count < inputTokens.size && inputTokens[i + count].equals(token, ignoreCase = true)
+          i + count < inputTokens.size &&
+            (inputTokens[i + count].equals("mother", ignoreCase = true) ||
+              inputTokens[i + count].equals("father", ignoreCase = true))
         ) {
           count++
         }
@@ -100,7 +102,9 @@ class GraphTrawlService {
         val type = token.replaceFirstChar { it.uppercaseChar() }
         var count = 1
         while (
-          i + count < inputTokens.size && inputTokens[i + count].equals(token, ignoreCase = true)
+          i + count < inputTokens.size &&
+            (inputTokens[i + count].equals("son", ignoreCase = true) ||
+              inputTokens[i + count].equals("daughter", ignoreCase = true))
         ) {
           count++
         }
@@ -241,10 +245,6 @@ class GraphTrawlService {
               if (neighbor == dest) {
                 val chain = newPath.qids
                 val rawRels = newPath.rels
-
-                println("Targ found")
-                println(chain)
-                println(rawRels)
 
                 val depths = mutableListOf<Int>()
                 var currentDepth = 0
