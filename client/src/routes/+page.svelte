@@ -208,15 +208,29 @@
               <div class="border-gray-400 flex h-8 w-12 items-center justify-center rounded border">
                 {maxWidth}
               </div>
-              <input type="range" min="1" max="10" bind:value={maxWidth} class="w-full" onclick={() => onSubmit(currentName)} />
+              <input
+                type="range"
+                min="1"
+                max="10"
+                bind:value={maxWidth}
+                class="w-full"
+                onclick={() => onSubmit(currentName)}
+              />
             </label>
-    
+
             <label class="mb-2 block"
               >Maximum Tree Height
               <div class="border-gray-400 flex h-8 w-12 items-center justify-center rounded border">
                 {maxHeight}
               </div>
-              <input type="range" min="1" max="10" bind:value={maxHeight} class="w-full" onclick={() => onSubmit(currentName)} />
+              <input
+                type="range"
+                min="1"
+                max="10"
+                bind:value={maxHeight}
+                class="w-full"
+                onclick={() => onSubmit(currentName)}
+              />
             </label>
           </div>
         </div>
