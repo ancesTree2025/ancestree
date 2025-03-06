@@ -69,11 +69,21 @@ object WikiRequestParser {
     val roleId =
       claim.mainsnak?.datavalue?.value?.let { parseDataValue(it).firstOrNull() } ?: "Unknown Role"
     var p108 = qualifiers["P108"]?.firstOrNull()?.let { getQualifierValue(it) } ?: ""
+    var p2389 = qualifiers["P2389"]?.firstOrNull()?.let { getQualifierValue(it) } ?: ""
     var p580 = qualifiers["P580"]?.firstOrNull()?.let { getQualifierValue(it) } ?: ""
     var p582 = qualifiers["P582"]?.firstOrNull()?.let { getQualifierValue(it) } ?: ""
+    val p585 = qualifiers["P585"]?.firstOrNull()?.let { getQualifierValue(it) } ?: ""
 
     if (p108.isNotBlank()) {
       p108 = ", $p108"
+    }
+
+    if (p2389.isNotBlank()) {
+      if (p2389 != p108) {
+        p2389 = ", $p2389"
+      } else {
+        p2389 = ""
+      }
     }
 
     p580 =
@@ -90,7 +100,11 @@ object WikiRequestParser {
         "Unknown"
       }
 
-    return "$roleId$p108. $p580 - $p582"
+    if (p580 == "Unknown" && p582 == "Unknown" && p585.isNotBlank()) {
+      return "$roleId$p108$p2389. ${parseTime(p585)}"
+    } else {
+      return "$roleId$p108$p2389. $p580 - $p582"
+    }
   }
 
   suspend fun parseWikidataClaims(
