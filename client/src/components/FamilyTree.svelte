@@ -145,11 +145,11 @@
                 height={RECT_HEIGHT}
                 rx={RECT_RADIUS}
                 class="{gender === 'male'
-                  ? people[0][0] === id
+                  ? tree.secondary.includes(id)
                     ? 'fill-dark-blue'
                     : 'fill-blue'
                   : gender === 'female'
-                    ? people[0][0] === id
+                    ? tree.secondary.includes(id)
                       ? 'fill-dark-pink'
                       : 'fill-pink'
                     : 'fill-node'} {highlightSet.has(id)
@@ -164,8 +164,9 @@
               >
                 <button
                   onclick={() => handleClick(id, person.name)}
-                  class="relative flex h-full w-full cursor-pointer items-center justify-center text-center text-sm {people[0][0] ===
-                  id
+                  class="relative flex h-full w-full cursor-pointer items-center justify-center text-center text-sm {tree.secondary.includes(
+                    id
+                  )
                     ? 'text-white'
                     : 'text-black'}"
                 >

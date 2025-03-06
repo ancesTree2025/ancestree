@@ -93,6 +93,7 @@ export function apiResponseToTree(res: ApiResponse): Tree {
 
   return {
     focus: res.root.id,
+    secondary: [res.root.id],
     people,
     marriages
   };

@@ -210,7 +210,8 @@
     rawTree = {
       focus: rawTree!.focus,
       people: [...oldPeople, ...newPeople],
-      marriages: newMarriages
+      marriages: newMarriages,
+      secondary: [...rawTree!.secondary, id]
     };
     treeHistory.put(rawTree);
 

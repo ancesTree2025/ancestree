@@ -18,6 +18,7 @@ export type Marriages = Marriage[];
 
 export type Tree = {
   focus: PersonID;
+  secondary: PersonID[];
   people: People;
   marriages: Marriages;
 };
