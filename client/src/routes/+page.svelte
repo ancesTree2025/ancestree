@@ -16,7 +16,8 @@
     InfoChecklist,
     Person,
     PopupStatus,
-    FilterOption
+    FilterOption,
+    Position
   } from '$lib/types';
 
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
@@ -172,7 +173,7 @@
     getPersonInfo(qid, personName.name);
   }
 
-  async function expandNode(id: string, name: string) {
+  async function expandNode(id: string, name: string, position: Position) {
     const result = await fetchTree(name, false);
     const childTree = result.getOrThrow();
 
@@ -187,17 +188,20 @@
       const marriage = allMarriages[0];
 
       let children = new Set<string>();
+      let focuses = new Set<string>();
       for (let i = allMarriages.length - 1; i >= 0; i--) {
         const m = allMarriages[i];
         if (m.parents.every((p) => marriage.parents.includes(p))) {
           allMarriages.splice(i, 1);
           m.children.forEach((c) => children.add(c));
+          m.focuses.forEach((f) => focuses.add(f));
         }
       }
 
       newMarriages.push({
         parents: marriage.parents,
-        children: Array.from(children)
+        children: Array.from(children),
+        focuses: Array.from(focuses)
       });
     }
 
@@ -211,11 +215,38 @@
       focus: rawTree!.focus,
       people: [...oldPeople, ...newPeople],
       marriages: newMarriages,
-      secondary: [...rawTree!.secondary, id]
+      secondary: [...rawTree!.secondary, id],
+      pivot: id,
+      pivotPosition: position
     };
     treeHistory.put(rawTree);
 
     console.log(rawTree);
+  }
+
+  function collapseNode(id: string) {
+    const marriages = [];
+    for (const marriage of rawTree!.marriages) {
+      const newFocuses = marriage.focuses.filter((f) => f !== id);
+      if (newFocuses.length === 0) {
+        continue;
+      }
+      marriages.push({
+        parents: marriage.parents,
+        children: marriage.children,
+        focuses: newFocuses
+      });
+    }
+
+    rawTree = {
+      focus: rawTree!.focus,
+      people: rawTree!.people,
+      marriages,
+      secondary: rawTree!.secondary.filter((s) => s !== id),
+      pivot: rawTree!.pivot,
+      pivotPosition: rawTree!.pivotPosition
+    };
+    treeHistory.put(rawTree);
   }
 </script>
 
@@ -265,6 +296,7 @@
         {getPersonInfo}
         tree={relation?.tree ?? tree}
         {expandNode}
+        {collapseNode}
       />
     </div>
     <SidePanel

@@ -65,7 +65,11 @@ export function positionNodes(tree: Tree): {
 
   const marriageHeights = getMarriageHeights(tree, arrangedLevels);
 
-  const { positions, treeWidth } = calculatePositions(arrangedLevels, tree.focus);
+  const { positions, treeWidth } = calculatePositions(
+    arrangedLevels,
+    tree.pivot,
+    tree.pivotPosition
+  );
 
   const marriagePositions = getMarriagePositions(
     tree,
@@ -156,7 +160,7 @@ function assignDepths(
   const unfound: Set<GroupID> = new Set(groups.groups.keys());
 
   // give the focused node's group a min and max depth of zero
-  const focusGroupId = groups.members[tree.focus];
+  const focusGroupId = groups.members[tree.secondary[0]];
   maxDepths.set(focusGroupId, 0);
   minDepths.set(focusGroupId, 0);
 
@@ -741,7 +745,8 @@ const NODE_HEIGHT = 300;
 
 function calculatePositions(
   levels: Map<number, Map<PersonID, number>>,
-  focus: PersonID
+  pivot: PersonID,
+  pivotPosition: Position
 ): {
   positions: Positions;
   treeWidth: number;
@@ -758,12 +763,15 @@ function calculatePositions(
       minX = Math.min(minX, actualX);
       maxX = Math.max(maxX, actualX);
       positions[person] = { x: actualX, y: depth * NODE_HEIGHT };
-      if (person === focus) {
+      if (person === pivot) {
         shiftX = actualX;
         shiftY = depth * NODE_HEIGHT;
       }
     }
   }
+
+  shiftX -= pivotPosition.x;
+  shiftY -= pivotPosition.y;
 
   for (const id in positions) {
     positions[id].x -= shiftX;

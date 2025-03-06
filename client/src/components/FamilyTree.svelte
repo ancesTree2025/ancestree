@@ -6,7 +6,8 @@
     type Marriages,
     type Positions,
     type Tree,
-    type MarriagePositions
+    type MarriagePositions,
+    type Position
   } from '$lib/types';
   import { onMount } from 'svelte';
   import FamilyTreeLines from './FamilyTreeLines.svelte';
@@ -16,11 +17,13 @@
   let {
     tree,
     getPersonInfo,
-    expandNode
+    expandNode,
+    collapseNode
   }: {
     tree?: Tree;
     getPersonInfo: (qid: string, name: string) => void;
-    expandNode: (id: string, name: string) => Promise<void>;
+    expandNode: (id: string, name: string, position: Position) => Promise<void>;
+    collapseNode: (id: string) => void;
   } = $props();
   let positions = $state<Positions>({});
   let treeWidth = $state<number>();
@@ -119,7 +122,11 @@
 
   async function onExpandNode(id: string, name: string) {
     loadingStatusOnNode = [...loadingStatusOnNode, id];
-    await expandNode(id, name);
+    if (tree?.secondary.includes(id)) {
+      collapseNode(id);
+    } else {
+      await expandNode(id, name, positions[id]);
+    }
     loadingStatusOnNode = loadingStatusOnNode.filter((_id) => id !== _id);
   }
 </script>
