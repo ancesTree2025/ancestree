@@ -241,19 +241,19 @@
   <nav class="flex items-center gap-12 px-8 py-4 shadow-lg">
     <a href="/" class="flex items-center gap-2">
       <img src="/logo.png" alt="Ancestree" class="size-8" />
-      <h1 class="text-dark-gray text-xl font-semibold">Ancestree</h1>
+      <h1 class="text-xl font-semibold text-dark-gray">Ancestree</h1>
     </a>
     <div class="flex flex-1 items-center justify-center gap-4">
       <div class="flex gap-2">
         <button
-          class="hover:bg-cream rounded-lg p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
           onclick={() => handleUndo()}
           disabled={!treeHistory.canUndo()}
         >
           <IconArrowLeft />
         </button>
         <button
-          class="hover:bg-cream rounded-lg p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
           onclick={() => handleRedo()}
           disabled={!treeHistory.canRedo()}
         >
@@ -346,7 +346,7 @@
             </div>
           {/each}
         </div>
-        <button class="mt-4 rounded bg-blue-500 p-2 text-black" onclick={toggleSettings}
+        <button class="bg-blue-500 mt-4 rounded p-2 text-black" onclick={toggleSettings}
           >Close</button
         >
       </div>
