@@ -245,7 +245,7 @@
     </a>
     <div class="flex flex-1 items-center justify-center gap-4">
       <div class="flex gap-2">
-        <Tooltip title="Undo Tree">
+        <Tooltip title="Undo Tree" position="bottom">
           <button
             class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
             onclick={() => handleUndo()}
@@ -254,7 +254,7 @@
             <IconArrowLeft />
           </button>
         </Tooltip>
-        <Tooltip title="Redo Tree">
+        <Tooltip title="Redo Tree" position="bottom">
           <button
             class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
             onclick={() => handleRedo()}
