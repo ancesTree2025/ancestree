@@ -27,7 +27,7 @@ export async function fetchRelationship(
   );
   return parsed.mapCatching(
     (json) => {
-      console.log(apiResponseToTree(relationshipSchema.parse(json).links))
+      console.log(apiResponseToTree(relationshipSchema.parse(json).links));
       return Result.ok(relationshipSchema.parse(json));
     },
     () => {
