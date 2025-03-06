@@ -39,7 +39,13 @@
 
   let rawTree = $state<Tree | undefined>();
   let tree = $state<Tree | undefined>();
-  let filteredTree = $state<Tree | undefined>();
+  let relation = $state<
+    | {
+        relationDescriptor: string;
+        tree: Tree;
+      }
+    | undefined
+  >();
   const useFakeData = page.url.searchParams.get('useFakeData') === 'true';
 
   let familyTree: FamilyTree | null = $state(null);
@@ -118,16 +124,17 @@
     return [qid, personName];
   }
 
-  function searchWithinTree(result: string) {
-    fetchRelationship(tree!.focus, tree!.people.find((tup) => tup[1].name === result)![0]!).then(
-      (result) => {
-        const response = result.getOrNull();
-        if (response === null) return;
+  function searchWithinTree(query: string) {
+    fetchRelationship(tree!.focus, query).then((result) => {
+      const response = result.getOrNull();
+      if (response === null) return;
 
-        filteredTree = apiResponseToTree(response?.links);
-        treeHistory.put(filteredTree);
-      }
-    );
+      relation = {
+        relationDescriptor: response.relation,
+        tree: apiResponseToTree(response?.links)
+      };
+      treeHistory.put(relation.tree);
+    });
   }
 
   let sidePanelName = $state<string | undefined>(undefined);
@@ -149,7 +156,7 @@
   }
 
   function handleUndo() {
-    filteredTree = undefined;
+    relation = undefined;
     tree = treeHistory.undo();
 
     const [qid, personName] = getFocusQidAndName();
@@ -157,7 +164,7 @@
     getPersonInfo(qid, personName.name);
   }
   function handleRedo() {
-    filteredTree = undefined;
+    relation = undefined;
     tree = treeHistory.redo();
 
     const [qid, personName] = getFocusQidAndName();
@@ -203,12 +210,11 @@
           <IconSettings />
         </button>
       </Tooltip>
-      
     </div>
   </nav>
   <div class="flex flex-1">
     <div class="flex-1">
-      <FamilyTree bind:this={familyTree} {getPersonInfo} tree={filteredTree ?? tree} />
+      <FamilyTree bind:this={familyTree} {getPersonInfo} tree={relation?.tree ?? tree} />
     </div>
     <SidePanel
       name={sidePanelName}
@@ -258,8 +264,9 @@
         <RelationFinder
           people={tree.people}
           {searchWithinTree}
+          relationDescriptor={relation?.relationDescriptor}
           clearFilter={() => {
-            filteredTree = undefined;
+            relation = undefined;
           }}
         />
       </FilterPopup>
