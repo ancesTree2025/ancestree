@@ -10,19 +10,9 @@
     showImage: boolean;
   }
   const { name, data, show, showImage }: Props = $props();
-
-  let panelParentDiv = $state<HTMLDivElement | null>(null);
-  $effect(() => {
-    if (panelParentDiv) {
-      panelParentDiv.style.height = `calc(100vh - ${panelParentDiv.offsetTop}px)`;
-    }
-  });
 </script>
 
-<div
-  class={`${show ? 'w-96' : 'w-0'} h-screen overflow-y-scroll shadow-lg transition-all duration-500`}
-  bind:this={panelParentDiv}
->
+<div class={`${show ? 'w-96' : 'w-0'} overflow-y-auto shadow-lg transition-all duration-500`}>
   <div class="flex w-96 flex-col gap-6 px-8 py-6">
     <div class="flex items-center justify-between">
       {#if data}

@@ -6,21 +6,35 @@
     type Marriages,
     type Positions,
     type Tree,
-    type MarriagePositions
+    type MarriagePositions,
+    type Position
   } from '$lib/types';
   import { onMount } from 'svelte';
   import FamilyTreeLines from './FamilyTreeLines.svelte';
   import { SvelteSet } from 'svelte/reactivity';
+  import { scale } from 'svelte/transition';
 
   const {
     tree,
-    getPersonInfo
-  }: { tree?: Tree; getPersonInfo: (qid: string, name: string) => void } = $props();
+    getPersonInfo,
+    expandNode,
+    collapseNode
+  }: {
+    tree?: Tree;
+    getPersonInfo: (qid: string, name: string) => void;
+    expandNode: (id: string, name: string, position: Position) => Promise<void>;
+    collapseNode: (id: string) => void;
+  } = $props();
   let positions = $state<Positions>({});
   let treeWidth = $state<number>();
   let marriagePositions = $state<MarriagePositions>([]);
   let marriages = $state<Marriages>([]);
   let people = $state<People>([]);
+
+  /**
+   * list of nodes where the loading must be shown.
+   */
+  let loadingStatusOnNode = $state<string[]>([]);
 
   $effect(() => {
     if (tree) {
@@ -40,7 +54,9 @@
 
   onMount(() => {
     /* eslint-disable  @typescript-eslint/no-explicit-any */
-    d3.select('#svg-root').call(d3.zoom().on('zoom', zoomed) as any);
+    d3.select('#svg-root')
+      .call(d3.zoom().on('zoom', zoomed) as any)
+      .on('dblclick.zoom', null);
 
     /* eslint-disable  @typescript-eslint/no-explicit-any */
     function zoomed(event: any) {
@@ -105,6 +121,16 @@
   );
 
   const yOffset = $derived(height / 2);
+
+  async function onExpandNode(id: string, name: string) {
+    loadingStatusOnNode = [...loadingStatusOnNode, id];
+    if (tree?.secondary.includes(id)) {
+      collapseNode(id);
+    } else {
+      await expandNode(id, name, positions[id]);
+    }
+    loadingStatusOnNode = loadingStatusOnNode.filter((_id) => id !== _id);
+  }
 </script>
 
 <svg id="svg-root" class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
@@ -127,13 +153,15 @@
                 width={RECT_WIDTH}
                 height={RECT_HEIGHT}
                 rx={RECT_RADIUS}
-                class="{people[0][0] === id
-                  ? 'fill-highlight'
-                  : gender === 'male'
-                    ? 'fill-blue'
-                    : gender === 'female'
-                      ? 'fill-pink'
-                      : 'fill-node'} {highlightSet.has(id)
+                class="{gender === 'male'
+                  ? tree.secondary.includes(id)
+                    ? 'fill-dark-blue'
+                    : 'fill-blue'
+                  : gender === 'female'
+                    ? tree.secondary.includes(id)
+                      ? 'fill-dark-pink'
+                      : 'fill-pink'
+                    : 'fill-node'} {highlightSet.has(id)
                   ? 'stroke-highlight_border stroke-line'
                   : ''}"
               ></rect>
@@ -145,9 +173,21 @@
               >
                 <button
                   onclick={() => handleClick(id, person.name)}
-                  class="flex h-full w-full cursor-pointer items-center justify-center text-center text-sm"
+                  ondblclick={() => onExpandNode(id, person.name)}
+                  class="relative flex h-full w-full cursor-pointer items-center justify-center text-center text-sm {tree.secondary.includes(
+                    id
+                  )
+                    ? 'text-white'
+                    : 'text-black'}"
                 >
                   {person.name}
+                  {#if loadingStatusOnNode.includes(id)}
+                    <span class="absolute grid h-full w-full place-items-center bg-gray opacity-70">
+                      <div class="absolute right-1 top-2" transition:scale={{ duration: 150 }}>
+                        <div class="loader h-5 w-5 bg-black p-1 opacity-50"></div>
+                      </div>
+                    </span>
+                  {/if}
                 </button>
               </foreignObject>
             </g>

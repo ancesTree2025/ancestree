@@ -16,7 +16,8 @@
     InfoChecklist,
     Person,
     PopupStatus,
-    FilterOption
+    FilterOption,
+    Position
   } from '$lib/types';
 
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
@@ -166,6 +167,74 @@
     name = personName.name;
     getPersonInfo(qid, personName.name);
   }
+
+  async function expandNode(id: string, name: string, position: Position) {
+    const result = await fetchTree(name, false);
+    const childTree = result.getOrThrow();
+
+    const oldPeople = rawTree!.people;
+    const oldMarriages = rawTree!.marriages;
+
+    const newPeople = childTree.people.filter((p) => !oldPeople.some((op) => op[0] === p[0]));
+
+    const allMarriages = [...oldMarriages, ...childTree.marriages];
+    const newMarriages = [];
+    while (allMarriages.length > 0) {
+      const marriage = allMarriages[0];
+
+      const children = new Set<string>();
+      const focuses = new Set<string>();
+      for (let i = allMarriages.length - 1; i >= 0; i--) {
+        const m = allMarriages[i];
+        if (m.parents.every((p) => marriage.parents.includes(p))) {
+          allMarriages.splice(i, 1);
+          m.children.forEach((c) => children.add(c));
+          m.focuses.forEach((f) => focuses.add(f));
+        }
+      }
+
+      newMarriages.push({
+        parents: marriage.parents,
+        children: Array.from(children),
+        focuses: Array.from(focuses)
+      });
+    }
+
+    rawTree = {
+      focus: rawTree!.focus,
+      people: [...oldPeople, ...newPeople],
+      marriages: newMarriages,
+      secondary: [...rawTree!.secondary, id],
+      pivot: id,
+      pivotPosition: position
+    };
+    treeHistory.put(rawTree);
+  }
+
+  function collapseNode(id: string) {
+    const marriages = [];
+    for (const marriage of rawTree!.marriages) {
+      const newFocuses = marriage.focuses.filter((f) => f !== id);
+      if (newFocuses.length === 0) {
+        continue;
+      }
+      marriages.push({
+        parents: marriage.parents,
+        children: marriage.children,
+        focuses: newFocuses
+      });
+    }
+
+    rawTree = {
+      focus: rawTree!.focus,
+      people: rawTree!.people,
+      marriages,
+      secondary: rawTree!.secondary.filter((s) => s !== id),
+      pivot: rawTree!.pivot,
+      pivotPosition: rawTree!.pivotPosition
+    };
+    treeHistory.put(rawTree);
+  }
 </script>
 
 <div class="flex h-full flex-col overflow-x-hidden">
@@ -207,9 +276,15 @@
       </Tooltip>
     </div>
   </nav>
-  <div class="flex flex-1">
+  <div class="flex min-h-0 flex-1">
     <div class="relative flex-1">
-      <FamilyTree bind:this={familyTree} {getPersonInfo} tree={relation?.tree ?? tree} />
+      <FamilyTree
+        bind:this={familyTree}
+        {getPersonInfo}
+        tree={relation?.tree ?? tree}
+        {expandNode}
+        {collapseNode}
+      />
       <div class="absolute bottom-8 right-8 flex flex-col items-start gap-4">
         <div class="z-50 flex rounded-xl bg-white text-xl shadow-lg">
           <div class="w-96 rounded bg-white p-6 shadow-lg">

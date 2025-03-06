@@ -12,12 +12,16 @@ export type Gender = string;
 export type Marriage = {
   parents: PersonID[];
   children: PersonID[];
+  focuses: PersonID[];
 };
 
 export type Marriages = Marriage[];
 
 export type Tree = {
   focus: PersonID;
+  secondary: PersonID[];
+  pivot: PersonID;
+  pivotPosition: Position;
   people: People;
   marriages: Marriages;
 };

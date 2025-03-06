@@ -3,12 +3,13 @@ import type { FilterOption, PersonID, Tree } from '$lib/types';
 export function filterByOption(tree: Tree, options: Record<FilterOption, boolean>): Tree {
   const personAssignment = new Set<PersonID>();
 
-  const focus = tree.focus;
-  personAssignment.add(focus);
-  const ascVisited = new Set<PersonID>();
-  const descVisited = new Set<PersonID>();
-  assignAncestors(tree, personAssignment, focus, ascVisited, descVisited, options);
-  assignDescendants(tree, personAssignment, focus, ascVisited, descVisited, options);
+  for (const focus of tree.secondary) {
+    personAssignment.add(focus);
+    const ascVisited = new Set<PersonID>();
+    const descVisited = new Set<PersonID>();
+    assignAncestors(tree, personAssignment, focus, ascVisited, descVisited, options);
+    assignDescendants(tree, personAssignment, focus, ascVisited, descVisited, options);
+  }
 
   return {
     ...tree,
