@@ -6,6 +6,7 @@
   import AlignCenterIcon from '~icons/tabler/keyframe-align-center';
   import SidePanel from '../components/SidePanel.svelte';
   import { treeHistory } from '../components/TreeHistory.svelte';
+  import Tooltip from '../components/Tooltip.svelte';
 
   import { fetchTree, fetchInfo, filterByOption } from '$lib';
   import type {
@@ -197,9 +198,12 @@
       />
     </div>
     <div class="flex justify-end text-xl">
-      <button class="p-2" onclick={toggleSettings}>
-        <IconSettings />
-      </button>
+      <Tooltip title="Settings" position="bottom">
+        <button class="p-2" onclick={toggleSettings}>
+          <IconSettings />
+        </button>
+      </Tooltip>
+      
     </div>
   </nav>
   <div class="flex flex-1">
@@ -263,21 +267,27 @@
         <FilterContent setOption={(option, to) => (filterOptions[option] = to)} />
       </FilterPopup>
       <div class="z-50 flex rounded-xl bg-white text-xl shadow-lg">
-        <button
-          class="p-3 {popupStatus === 'relationfinder' ? 'text-orange' : ''}"
-          onclick={() => switchPopup('relationfinder')}
-        >
-          <PersonSearchIcon />
-        </button>
-        <button
-          class="p-3 {popupStatus === 'filter' ? 'text-orange' : ''}"
-          onclick={() => switchPopup('filter')}
-        >
-          <FilterIcon />
-        </button>
-        <button class="p-3" onclick={() => familyTree?.recenter()}>
-          <AlignCenterIcon />
-        </button>
+        <Tooltip title="Relationship Finder">
+          <button
+            class="p-3 {popupStatus === 'relationfinder' ? 'text-orange' : ''}"
+            onclick={() => switchPopup('relationfinder')}
+          >
+            <PersonSearchIcon />
+          </button>
+        </Tooltip>
+        <Tooltip title="Filter Tree">
+          <button
+            class="p-3 {popupStatus === 'filter' ? 'text-orange' : ''}"
+            onclick={() => switchPopup('filter')}
+          >
+            <FilterIcon />
+          </button>
+        </Tooltip>
+        <Tooltip title="Recenter Tree">
+          <button class="p-3" onclick={() => familyTree?.recenter()}>
+            <AlignCenterIcon />
+          </button>
+        </Tooltip>
       </div>
     </div>
   {/if}
