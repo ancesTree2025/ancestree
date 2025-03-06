@@ -12,11 +12,11 @@ const relationshipSchema = z.object({
 export type Relationship = z.infer<typeof relationshipSchema>;
 
 export async function fetchRelationship(
-  from: PersonID,
-  to: PersonID
+  fromId: PersonID,
+  toName: string
 ): Promise<Result<Relationship, string>> {
   const response = await Result.fromAsyncCatching(
-    fetch(`${env.PUBLIC_API_BASE_URL}/relation?orig=${from}&dest=${to}`)
+    fetch(`${env.PUBLIC_API_BASE_URL}/relation?orig=${fromId}&dest=${toName}`)
   ).mapError(() => 'Could not connect to server');
   if (response.getOrNull()?.status === 404) {
     return Result.error('Person not found');

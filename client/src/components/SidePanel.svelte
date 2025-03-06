@@ -129,7 +129,7 @@
         </div>
       {/if}
 
-      {#if data.wikiLink}
+      {#if data.wikiLink && data.wikiLink !== 'Unknown'}
         <p class="mt-4">
           <a href={data.wikiLink} target="_blank">Wikipedia</a>
         </p>
