@@ -961,8 +961,7 @@ function getMarriageOffsets(
       happy = true;
       for (let d = 1; d < distance; d++) {
         const depthBounds = bounds.get(depth)!;
-
-        const minMaxes = depthBounds.get(d)!;
+        const minMaxes = depthBounds.get(d)! ?? [];
 
         for (const [min, max] of minMaxes) {
           if (max < leftParent) continue;
@@ -979,7 +978,10 @@ function getMarriageOffsets(
     while (!happy) {
       happy = true;
       for (let d = 1; d < distance; d++) {
-        for (const [min, max] of bounds.get(depth)!.get(d)!) {
+        const depthBounds = bounds.get(depth)!;
+        const minMaxes = depthBounds.get(d)! ?? [];
+
+        for (const [min, max] of minMaxes) {
           if (min < leftParent) continue;
           if (min <= right && right <= max) {
             happy = false;

@@ -144,13 +144,15 @@
                 width={RECT_WIDTH}
                 height={RECT_HEIGHT}
                 rx={RECT_RADIUS}
-                class="{people[0][0] === id
-                  ? 'fill-highlight'
-                  : gender === 'male'
-                    ? 'fill-blue'
-                    : gender === 'female'
-                      ? 'fill-pink'
-                      : 'fill-node'} {highlightSet.has(id)
+                class="{gender === 'male'
+                  ? people[0][0] === id
+                    ? 'fill-dark-blue'
+                    : 'fill-blue'
+                  : gender === 'female'
+                    ? people[0][0] === id
+                      ? 'fill-dark-pink'
+                      : 'fill-pink'
+                    : 'fill-node'} {highlightSet.has(id)
                   ? 'stroke-highlight_border stroke-line'
                   : ''}"
               ></rect>
@@ -162,7 +164,10 @@
               >
                 <button
                   onclick={() => handleClick(id, person.name)}
-                  class="relative flex h-full w-full cursor-pointer items-center justify-center text-center text-sm"
+                  class="relative flex h-full w-full cursor-pointer items-center justify-center text-center text-sm {people[0][0] ===
+                  id
+                    ? 'text-white'
+                    : 'text-black'}"
                 >
                   {person.name}
                   <span
@@ -176,7 +181,7 @@
                   </span>
 
                   {#if loadingStatusOnNode.includes(id)}
-                    <span class="absolute grid h-full w-full place-items-center bg-gray opacity-70">
+                    <span class="bg-gray absolute grid h-full w-full place-items-center opacity-70">
                       <div class="absolute right-1 top-2" transition:scale={{ duration: 150 }}>
                         <div class="loader h-5 w-5 bg-black p-1 opacity-50"></div>
                       </div>
