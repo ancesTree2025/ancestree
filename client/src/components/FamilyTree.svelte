@@ -182,7 +182,7 @@
                 >
                   {person.name}
                   {#if loadingStatusOnNode.includes(id)}
-                    <span class="bg-gray absolute grid h-full w-full place-items-center opacity-70">
+                    <span class="absolute grid h-full w-full place-items-center bg-gray opacity-70">
                       <div class="absolute right-1 top-2" transition:scale={{ duration: 150 }}>
                         <div class="loader h-5 w-5 bg-black p-1 opacity-50"></div>
                       </div>
