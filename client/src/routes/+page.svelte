@@ -39,10 +39,13 @@
 
   let rawTree = $state<Tree | undefined>();
   let tree = $state<Tree | undefined>();
-  let relation = $state<{
-    relationDescriptor: string;
-    tree: Tree;
-  } | undefined>();
+  let relation = $state<
+    | {
+        relationDescriptor: string;
+        tree: Tree;
+      }
+    | undefined
+  >();
   const useFakeData = page.url.searchParams.get('useFakeData') === 'true';
 
   let familyTree: FamilyTree | null = $state(null);
