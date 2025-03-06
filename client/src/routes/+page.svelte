@@ -209,7 +209,7 @@
   </nav>
   <div class="flex flex-1">
     <div class="relative flex-1">
-      <FamilyTree bind:this={familyTree} {getPersonInfo} tree={relation?.tree ?? tree}  />
+      <FamilyTree bind:this={familyTree} {getPersonInfo} tree={relation?.tree ?? tree} />
       <div class="absolute bottom-8 right-8 flex flex-col items-start gap-4">
         <div class="z-50 flex rounded-xl bg-white text-xl shadow-lg">
           <div class="w-96 rounded bg-white p-6 shadow-lg">
