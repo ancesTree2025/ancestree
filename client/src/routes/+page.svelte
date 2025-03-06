@@ -118,8 +118,8 @@
     return [qid, personName];
   }
 
-  function searchWithinTree(result: string) {
-    fetchRelationship(tree!.focus, result).then((result) => {
+  function searchWithinTree(query: string) {
+    fetchRelationship(tree!.focus, query).then((result) => {
       const response = result.getOrNull();
       if (response === null) return;
 
