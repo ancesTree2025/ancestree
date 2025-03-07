@@ -85,7 +85,7 @@
 
     const withinTree = tree?.people.find((tup) => tup[1].name === newName);
     if (withinTree && currentWidth === maxWidth && currentHeight === maxHeight) {
-      familyTree?.handleClick(withinTree[0], withinTree[1].name);
+      familyTree?.handleClick(withinTree[0], withinTree[1].name, null);
     } else {
       status = { state: 'loading' };
       fetchTree(newName, useFakeData, maxWidth, maxHeight).then((result) => {
