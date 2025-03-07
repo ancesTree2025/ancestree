@@ -47,27 +47,33 @@ test('Handles two marriages with different children', () => {
     edges: [
       {
         node1: 'Focus',
-        node2: 'Wife 1'
+        node2: 'Wife 1',
+        tag: ''
       },
       {
         node1: 'Focus',
-        node2: 'Wife 2'
+        node2: 'Wife 2',
+        tag: 'UN'
       },
       {
         node1: 'Focus',
-        node2: 'Child 1'
+        node2: 'Child 1',
+        tag: ''
       },
       {
         node1: 'Wife 1',
-        node2: 'Child 1'
+        node2: 'Child 1',
+        tag: ''
       },
       {
         node1: 'Focus',
-        node2: 'Child 2'
+        node2: 'Child 2',
+        tag: ''
       },
       {
         node1: 'Wife 2',
-        node2: 'Child 2'
+        node2: 'Child 2',
+        tag: ''
       }
     ]
   });
@@ -78,8 +84,8 @@ test('Handles two marriages with different children', () => {
   );
   expect(new Set(result.marriages)).toStrictEqual(
     new Set([
-      { parents: ['Focus', 'Wife 1'], children: ['Child 1'] },
-      { parents: ['Focus', 'Wife 2'], children: ['Child 2'] }
+      { parents: ['Focus', 'Wife 1'], children: ['Child 1'], type: '' },
+      { parents: ['Focus', 'Wife 2'], children: ['Child 2'], type: 'unmarried' }
     ])
   );
 });
