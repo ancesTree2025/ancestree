@@ -246,7 +246,7 @@
     </a>
     <div class="flex flex-1 items-center justify-center gap-4">
       <div class="flex gap-2">
-        <Tooltip title="Undo Tree" position="bottom">
+        <Tooltip title="Undo Tree" position="bm">
           <button
             class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
             onclick={() => handleUndo()}
@@ -255,7 +255,7 @@
             <IconArrowLeft />
           </button>
         </Tooltip>
-        <Tooltip title="Redo Tree" position="bottom">
+        <Tooltip title="Redo Tree" position="bm">
           <button
             class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
             onclick={() => handleRedo()}
@@ -274,7 +274,7 @@
       />
     </div>
     <div class="flex justify-end text-xl">
-      <Tooltip title="Settings" position="bottom">
+      <Tooltip title="Settings" position="bl">
         <button class="p-2" onclick={toggleSettings}>
           <IconSettings />
         </button>
@@ -373,7 +373,7 @@
         <FilterContent setOption={(option, to) => (filterOptions[option] = to)} />
       </FilterPopup>
       <div class="z-50 flex rounded-xl bg-white text-xl shadow-lg">
-        <Tooltip title="Relationship Finder">
+        <Tooltip title="Relationship Finder" position="tr">
           <button
             class="p-3 {popupStatus === 'relationfinder' ? 'text-orange' : ''}"
             onclick={() => switchPopup('relationfinder')}
@@ -381,7 +381,7 @@
             <PersonSearchIcon />
           </button>
         </Tooltip>
-        <Tooltip title="Filter Tree">
+        <Tooltip title="Filter Tree" position="tm">
           <button
             class="p-3 {popupStatus === 'filter' ? 'text-orange' : ''}"
             onclick={() => switchPopup('filter')}
@@ -389,7 +389,7 @@
             <FilterIcon />
           </button>
         </Tooltip>
-        <Tooltip title="Recenter Tree">
+        <Tooltip title="Recenter Tree" position="tm">
           <button class="p-3" onclick={() => familyTree?.recenter()}>
             <AlignCenterIcon />
           </button>
