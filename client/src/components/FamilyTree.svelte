@@ -109,6 +109,7 @@
     zoomGroup.attr('transform', initialTransform as any);
   }
 
+  // svelte-ignore non_reactive_update
   function closeSidePanel() {
     highlightSet.clear();
     selectedID = '';
@@ -141,6 +142,9 @@
   bind:clientWidth={width}
   bind:clientHeight={height}
   onclick={closeSidePanel}
+  role="tree"
+  tabindex="0"
+  onkeydown={() => {}}
 >
   <g id="zoom-group">
     <g transform="translate({xOffset}, {yOffset}) scale({zoomFactor})">
@@ -193,7 +197,7 @@
                 >
                   {person.name}
                   {#if loadingStatusOnNode.includes(id)}
-                    <span class="bg-gray absolute grid h-full w-full place-items-center opacity-70">
+                    <span class="absolute grid h-full w-full place-items-center bg-gray opacity-70">
                       <div class="absolute right-1 top-2" transition:scale={{ duration: 150 }}>
                         <div class="loader h-5 w-5 bg-black p-1 opacity-50"></div>
                       </div>
