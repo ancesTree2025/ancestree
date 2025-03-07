@@ -44,7 +44,6 @@
   let relation = $state<
     | {
         relationDescriptor: string;
-        tree: Tree;
       }
     | undefined
   >();
@@ -52,6 +51,8 @@
 
   let familyTree: FamilyTree | null = $state(null);
   let popupStatus = $state<PopupStatus>(null);
+
+  let relationFinder = $state<RelationFinder>();
 
   let showSettings = $state(false);
   let maxWidth = $state(4);
@@ -82,6 +83,7 @@
 
   async function onSubmit(newName: string) {
     if (!newName.length) return;
+    relationFinder?.clear();
     currentName = newName;
 
     const withinTree = tree?.people.find((tup) => tup[1].name === newName);
@@ -130,9 +132,9 @@
 
       relation = {
         relationDescriptor: response.relation,
-        tree: apiResponseToTree(response?.links)
       };
-      treeHistory.put(relation.tree);
+      tree = apiResponseToTree(response?.links)
+      treeHistory.put(tree);
     });
   }
 
@@ -159,6 +161,7 @@
 
   function handleUndo() {
     relation = undefined;
+    relationFinder?.clear();
     tree = treeHistory.undo();
 
     const [qid, personName] = getFocusQidAndName();
@@ -167,6 +170,7 @@
   }
   function handleRedo() {
     relation = undefined;
+    relationFinder?.clear();
     tree = treeHistory.redo();
 
     const [qid, personName] = getFocusQidAndName();
@@ -293,7 +297,7 @@
       <FamilyTree
         bind:this={familyTree}
         {getPersonInfo}
-        tree={relation?.tree ?? tree}
+        {tree}
         {expandNode}
         {collapseNode}
       />
@@ -368,6 +372,7 @@
     <div class="absolute bottom-8 left-8 flex flex-col items-start gap-4">
       <FilterPopup show={popupStatus === 'relationfinder'}>
         <RelationFinder
+          bind:this={relationFinder}
           people={tree.people}
           {searchWithinTree}
           relationDescriptor={relation?.relationDescriptor}

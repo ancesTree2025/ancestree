@@ -108,6 +108,11 @@
     searchQuery = inputValue;
   }
 
+  export function clear() {
+    value = '';
+    name = '';
+  }
+
   // common tailwind classes for status icons
   const ICON_CLASS = 'absolute right-3 flex h-full w-5 items-center';
   const HOVER_CLASS = 'scale-100 hover:scale-125 transition-transform duration-150';
