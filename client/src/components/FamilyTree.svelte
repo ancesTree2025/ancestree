@@ -21,7 +21,7 @@
     collapseNode
   }: {
     tree?: Tree;
-    getPersonInfo: (qid: string, name: string) => void;
+    getPersonInfo: (qid: string, name: string, position: Position) => void;
     expandNode: (id: string, name: string, position: Position) => Promise<void>;
     collapseNode: (id: string) => void;
   } = $props();
@@ -73,9 +73,16 @@
   let selectedID = $state('');
   const highlightSet = new SvelteSet<string>();
 
-  export function handleClick(id: string, name: string) {
+  export function handleClick(id: string, name: string, position: Position | null) {
+    if (position) {
+      recenter(position.x * -1, position.y * -1);
+      position = { x: position.x * -1, y: position.y * -1 };
+    } else {
+      position = { x: 0, y: 0 };
+    }
+
     selectedID = id; // Update selected person ID
-    getPersonInfo(id, name); // Fetch person info
+    getPersonInfo(id, name, position); // Fetch person info
 
     highlightSet.clear();
     highlightSet.add(id);
@@ -94,11 +101,11 @@
     });
   }
 
-  export function recenter() {
+  export function recenter(x: number = 0, y: number = 0) {
     const svg = d3.select('#svg-root');
     const zoomGroup = d3.select('#zoom-group');
 
-    const initialTransform = d3.zoomIdentity.translate(0, 0).scale(1);
+    const initialTransform = d3.zoomIdentity.translate(x, y).scale(1);
 
     svg
       .transition()
@@ -107,6 +114,7 @@
     zoomGroup.attr('transform', initialTransform as any);
   }
 
+  // svelte-ignore non_reactive_update
   function closeSidePanel() {
     highlightSet.clear();
     selectedID = '';
@@ -133,7 +141,16 @@
   }
 </script>
 
-<svg id="svg-root" class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
+<svg
+  id="svg-root"
+  class="h-full w-full"
+  bind:clientWidth={width}
+  bind:clientHeight={height}
+  onclick={closeSidePanel}
+  role="tree"
+  tabindex="0"
+  onkeydown={() => {}}
+>
   <g id="zoom-group">
     <g transform="translate({xOffset}, {yOffset}) scale({zoomFactor})">
       {#each marriagePositions as marriagePosition}
@@ -172,7 +189,10 @@
                 height={RECT_HEIGHT}
               >
                 <button
-                  onclick={() => handleClick(id, person.name)}
+                  onclick={(e) => {
+                    handleClick(id, person.name, position);
+                    e.stopPropagation();
+                  }}
                   ondblclick={() => onExpandNode(id, person.name)}
                   class="relative flex h-full w-full cursor-pointer items-center justify-center text-center text-sm {tree.secondary.includes(
                     id
