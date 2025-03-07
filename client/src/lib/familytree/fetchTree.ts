@@ -130,7 +130,7 @@ export async function fetchTree(
     (json) => apiResponseToTree(treeSchema.parse(json)),
     (err) => {
       console.error(err);
-      return 'Server data in wrong format'
+      return 'Server data in wrong format';
     }
   );
 }
