@@ -97,9 +97,10 @@
         const [fetched, error] = result.toTuple();
         if (fetched) {
           rawTree = fetched;
+          relation = undefined;
           treeHistory.put({
             tree: rawTree,
-            relation: undefined,
+            relation,
             sidePanel: {
               name: sidePanelName ?? '',
               qid: sidePanelQid ?? ''
