@@ -197,7 +197,8 @@
       newMarriages.push({
         parents: marriage.parents,
         children: Array.from(children),
-        focuses: Array.from(focuses)
+        focuses: Array.from(focuses),
+        type: marriage.type
       });
     }
 
@@ -222,7 +223,8 @@
       marriages.push({
         parents: marriage.parents,
         children: marriage.children,
-        focuses: newFocuses
+        focuses: newFocuses,
+        type: marriage.type
       });
     }
 
