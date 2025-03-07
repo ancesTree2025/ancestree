@@ -48,6 +48,9 @@
   const rightChildX = $derived(
     Math.max(parentsX, ...marriagePosition.children.map((child) => child.x))
   );
+
+  const dasharray =
+    marriagePosition.type === 'married' ? 'stroke-rounded' : '[stroke-dasharray:10,10]';
 </script>
 
 {#if spouse1 && spouse2}
@@ -127,18 +130,14 @@
       y1={spouse1.y}
       x2={parentsX}
       y2={parentsY}
-      class="{highlightSpouse1
-        ? 'stroke-highlight_border'
-        : 'stroke-node'} stroke-rounded stroke-line"
+      class="{highlightSpouse1 ? 'stroke-highlight_border' : 'stroke-node'} stroke-line {dasharray}"
     />
     <line
       x1={spouse2.x}
       y1={spouse2.y}
       x2={parentsX}
       y2={parentsY}
-      class="{highlightSpouse2
-        ? 'stroke-highlight_border'
-        : 'stroke-node'} stroke-rounded stroke-line"
+      class="{highlightSpouse2 ? 'stroke-highlight_border' : 'stroke-node'} stroke-line {dasharray}"
     />
   {:else}
     <line
@@ -146,36 +145,28 @@
       y1={spouse1.y}
       x2={spouse1.x + spouse1.y - parentsY}
       y2={parentsY}
-      class="{highlightSpouse1
-        ? 'stroke-highlight_border'
-        : 'stroke-node'} stroke-rounded stroke-line"
+      class="{highlightSpouse1 ? 'stroke-highlight_border' : 'stroke-node'} stroke-line {dasharray}"
     />
     <line
       x1={spouse1.x + spouse1.y - parentsY}
       y1={parentsY}
       x2={parentsX}
       y2={parentsY}
-      class="{highlightSpouse1
-        ? 'stroke-highlight_border'
-        : 'stroke-node'} stroke-rounded stroke-line"
+      class="{highlightSpouse1 ? 'stroke-highlight_border' : 'stroke-node'} stroke-line {dasharray}"
     />
     <line
       x1={spouse2.x - spouse2.y + parentsY}
       y1={parentsY}
       x2={parentsX}
       y2={parentsY}
-      class="{highlightSpouse2
-        ? 'stroke-highlight_border'
-        : 'stroke-node'} stroke-rounded stroke-line"
+      class="{highlightSpouse2 ? 'stroke-highlight_border' : 'stroke-node'} stroke-line {dasharray}"
     />
     <line
       x1={spouse2.x - spouse2.y + parentsY}
       y1={parentsY}
       x2={spouse2.x}
       y2={spouse2.y}
-      class="{highlightSpouse2
-        ? 'stroke-highlight_border'
-        : 'stroke-node'} stroke-rounded stroke-line"
+      class="{highlightSpouse2 ? 'stroke-highlight_border' : 'stroke-node'} stroke-line {dasharray}"
     />
   {/if}
 
