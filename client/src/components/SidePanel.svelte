@@ -18,7 +18,7 @@
       {#if data}
         <div class="text-xl font-semibold">{name}</div>
       {:else}
-        <div class="h-8 w-3/4 animate-pulse rounded-lg bg-gray"></div>
+        <div class="bg-gray h-8 w-3/4 animate-pulse rounded-lg"></div>
       {/if}
     </div>
     {#if data}
@@ -53,7 +53,7 @@
       {#if data.office}
         <div class="flex">
           <p class="mr-4 font-bold">Offices Held</p>
-          <div class="flex max-h-52 flex-col gap-4 overflow-y-scroll rounded-lg bg-gray p-4">
+          <div class="bg-gray flex max-h-52 flex-col gap-4 overflow-y-scroll rounded-lg p-4">
             {#each data.office.split('|') as office}
               <p>{office}</p>
             {/each}
@@ -65,7 +65,7 @@
         <div class="mt-4 space-y-4">
           {#if data.bcoords && data.dcoords !== 'Unknown'}
             <div>
-              <p><strong>Birthplace:</strong></p>
+              <p class="mb-2"><strong>Birthplace</strong></p>
               <a
                 href={`https://www.google.com/maps?q=${data.bcoords}`}
                 target="_blank"
@@ -76,7 +76,7 @@
                   src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(data.bcoords.split(',')[1]) - 0.01},${Number(data.bcoords.split(',')[0]) - 0.01},${Number(data.bcoords.split(',')[1]) + 0.01},${Number(data.bcoords.split(',')[0]) + 0.01}&layer=mapnik&marker=${data.bcoords.split(',')[0]},${data.bcoords.split(',')[1]}`}
                   width="100%"
                   height="200"
-                  class="border-gray-300 pointer-events-none rounded-lg border"
+                  class="pointer-events-none rounded-lg border border-gray-300"
                   allowfullscreen
                   loading="lazy"
                   title="Birthplace Map"
@@ -87,7 +87,7 @@
 
           {#if data.dcoords && data.dcoords !== 'Unknown'}
             <div>
-              <p><strong>Death Place:</strong></p>
+              <p class="mb-2"><strong>Deathplace</strong></p>
               <a
                 href={`https://www.google.com/maps?q=${data.dcoords}`}
                 target="_blank"
@@ -98,7 +98,7 @@
                   src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(data.dcoords.split(',')[1]) - 0.01},${Number(data.dcoords.split(',')[0]) - 0.01},${Number(data.dcoords.split(',')[1]) + 0.01},${Number(data.dcoords.split(',')[0]) + 0.01}&layer=mapnik&marker=${data.dcoords.split(',')[0]},${data.dcoords.split(',')[1]}`}
                   width="100%"
                   height="200"
-                  class="border-gray-300 pointer-events-none rounded-lg border"
+                  class="pointer-events-none rounded-lg border border-gray-300"
                   allowfullscreen
                   loading="lazy"
                   title="Deathplace map"
@@ -109,7 +109,7 @@
 
           {#if data.rcoords && data.rcoords !== 'Unknown'}
             <div>
-              <p><strong>Residence</strong></p>
+              <p class="mb-2"><strong>Residence</strong></p>
               <a
                 href={`https://www.google.com/maps?q=${data.rcoords}`}
                 target="_blank"
@@ -120,7 +120,7 @@
                   src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(data.rcoords.split(',')[1]) - 0.01},${Number(data.rcoords.split(',')[0]) - 0.01},${Number(data.rcoords.split(',')[1]) + 0.01},${Number(data.rcoords.split(',')[0]) + 0.01}&layer=mapnik&marker=${data.rcoords.split(',')[0]},${data.rcoords.split(',')[1]}`}
                   width="100%"
                   height="200"
-                  class="border-gray-300 pointer-events-none rounded-lg border"
+                  class="pointer-events-none rounded-lg border border-gray-300"
                   allowfullscreen
                   loading="lazy"
                   title="Deathplace map"
@@ -140,9 +140,9 @@
       {#if showImage}
         <img alt={name} class="mx-8 mb-4 aspect-square rounded-xl object-cover" src={defaultPfp} />
       {/if}
-      <div class="h-4 w-3/4 animate-pulse rounded-lg bg-gray"></div>
-      <div class="h-4 w-1/2 animate-pulse rounded-lg bg-gray"></div>
-      <div class="w-100 h-40 animate-pulse rounded-lg bg-gray"></div>
+      <div class="bg-gray h-4 w-3/4 animate-pulse rounded-lg"></div>
+      <div class="bg-gray h-4 w-1/2 animate-pulse rounded-lg"></div>
+      <div class="w-100 bg-gray h-40 animate-pulse rounded-lg"></div>
     {/if}
   </div>
 </div>
