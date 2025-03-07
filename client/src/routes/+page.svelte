@@ -16,7 +16,8 @@
     InfoChecklist,
     Person,
     PopupStatus,
-    Position
+    Position,
+    PersonID
   } from '$lib/types';
 
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
@@ -33,6 +34,7 @@
 
   let name = $state<string>('');
   let status = $state<LoadingStatus>({ state: 'idle' });
+  let relationFinderStatus = $state<LoadingStatus>({ state: 'idle' });
   let currentName = '';
   let currentWidth = 4;
   let currentHeight = 4;
@@ -41,8 +43,8 @@
   let tree = $state<Tree | undefined>();
   let relation = $state<
     | {
-        relationDescriptor: string;
         tree: Tree;
+        relationDescriptor: string;
       }
     | undefined
   >();
@@ -50,6 +52,8 @@
 
   let familyTree: FamilyTree | null = $state(null);
   let popupStatus = $state<PopupStatus>(null);
+
+  let relationFinder = $state<RelationFinder>();
 
   let showSettings = $state(false);
   let maxWidth = $state(4);
@@ -79,6 +83,7 @@
 
   async function onSubmit(newName: string) {
     if (!newName.length) return;
+    relationFinder?.clear();
     currentName = newName;
 
     const withinTree = tree?.people.find((tup) => tup[1].name === newName);
@@ -90,7 +95,15 @@
         const [fetched, error] = result.toTuple();
         if (fetched) {
           rawTree = fetched;
-          treeHistory.put(rawTree!);
+          relation = undefined;
+          treeHistory.put({
+            tree: rawTree,
+            relation,
+            sidePanel: {
+              name: sidePanelName ?? '',
+              qid: sidePanelQid ?? ''
+            }
+          });
 
           status = { state: 'idle' };
 
@@ -127,7 +140,13 @@
   }
 
   function searchWithinTree(query: string) {
-    fetchRelationship(tree!.focus, query).then((result) => {
+    if (!sidePanelQid) return;
+    relationFinderStatus = { state: 'loading' };
+    fetchRelationship(sidePanelQid, query).then((result) => {
+      if (!tree) return;
+      if (result.isError()) {
+        relationFinderStatus = { state: 'error', error: result.errorOrNull() };
+      }
       const response = result.getOrNull();
       if (response === null) return;
 
@@ -135,22 +154,37 @@
         relationDescriptor: response.relation,
         tree: apiResponseToTree(response?.links)
       };
-      treeHistory.put(relation.tree);
+      treeHistory.put({
+        tree,
+        relation,
+        sidePanel: {
+          name: sidePanelName ?? '',
+          qid: sidePanelQid ?? ''
+        }
+      });
+      relationFinderStatus = { state: 'idle' };
     });
   }
 
+  let sidePanelQid = $state<PersonID | undefined>();
   let sidePanelName = $state<string | undefined>(undefined);
   let sidePanelData = $state<PersonInfo | undefined>(undefined);
 
   async function getPersonInfo(qid: string, name: string, position: Position) {
+    sidePanelQid = undefined;
     sidePanelData = undefined;
     sidePanelName = undefined;
     currentCenter = position;
     const [fetched] = (await fetchInfo(qid, useFakeData, checkboxOptions)).toTuple();
 
     if (fetched) {
+      sidePanelQid = qid;
       sidePanelData = fetched;
       sidePanelName = name;
+      treeHistory.updateSidePanel({
+        qid: sidePanelQid,
+        name: sidePanelName
+      });
     }
   }
 
@@ -160,19 +194,23 @@
 
   function handleUndo() {
     relation = undefined;
-    tree = treeHistory.undo();
-
-    const [qid, personName] = getFocusQidAndName();
-    name = personName.name;
-    getPersonInfo(qid, personName.name, { x: 0, y: 0 });
+    relationFinder?.clear();
+    const historyElem = treeHistory.undo();
+    tree = historyElem.tree;
+    relation = historyElem.relation;
+    sidePanelName = historyElem.sidePanel.name;
+    sidePanelQid = historyElem.sidePanel.qid;
+    getPersonInfo(sidePanelQid, sidePanelName, { x: 0, y: 0 });
   }
   function handleRedo() {
     relation = undefined;
-    tree = treeHistory.redo();
-
-    const [qid, personName] = getFocusQidAndName();
-    name = personName.name;
-    getPersonInfo(qid, personName.name, { x: 0, y: 0 });
+    relationFinder?.clear();
+    const historyElem = treeHistory.redo();
+    tree = historyElem.tree;
+    relation = historyElem.relation;
+    sidePanelName = historyElem.sidePanel.name;
+    sidePanelQid = historyElem.sidePanel.qid;
+    getPersonInfo(sidePanelQid, sidePanelName, { x: 0, y: 0 });
   }
 
   async function expandNode(id: string, name: string, position: Position) {
@@ -216,7 +254,14 @@
       pivot: id,
       pivotPosition: position
     };
-    treeHistory.put(rawTree);
+    treeHistory.put({
+      tree: rawTree,
+      relation: undefined,
+      sidePanel: {
+        name: sidePanelName ?? '',
+        qid: sidePanelQid ?? ''
+      }
+    });
   }
 
   function collapseNode(id: string) {
@@ -242,7 +287,14 @@
       pivot: rawTree!.pivot,
       pivotPosition: rawTree!.pivotPosition
     };
-    treeHistory.put(rawTree);
+    treeHistory.put({
+      tree: rawTree,
+      relation: undefined,
+      sidePanel: {
+        name: sidePanelName ?? '',
+        qid: sidePanelQid ?? ''
+      }
+    });
   }
 </script>
 
@@ -368,12 +420,12 @@
     <div class="absolute bottom-8 left-8 flex flex-col items-start gap-4">
       <FilterPopup show={popupStatus === 'relationfinder'}>
         <RelationFinder
+          bind:this={relationFinder}
+          status={relationFinderStatus}
           people={tree.people}
           {searchWithinTree}
           relationDescriptor={relation?.relationDescriptor}
-          clearFilter={() => {
-            relation = undefined;
-          }}
+          clearFilter={() => {}}
         />
       </FilterPopup>
       <FilterPopup show={popupStatus === 'filter'}>
