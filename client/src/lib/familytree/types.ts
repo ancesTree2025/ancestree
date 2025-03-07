@@ -12,6 +12,7 @@ export type Gender = string;
 export type Marriage = {
   parents: PersonID[];
   children: PersonID[];
+  type: 'married' | 'unmarried';
 };
 
 export type Marriages = Marriage[];
@@ -39,6 +40,7 @@ export type MarriagePosition = {
   parent1ID: PersonID;
   parent2ID: PersonID;
   childrenIDs: PersonID[];
+  type: 'married' | 'unmarried';
 };
 
 export type MarriagePositions = MarriagePosition[];

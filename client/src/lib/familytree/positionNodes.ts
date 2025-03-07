@@ -1119,7 +1119,8 @@ function getMarriagePositions(
       offset,
       parent1ID: marriage.parents[0],
       parent2ID: marriage.parents[1],
-      childrenIDs
+      childrenIDs,
+      type: marriage.type
     });
   }
 
