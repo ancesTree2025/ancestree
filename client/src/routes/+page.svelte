@@ -17,9 +17,7 @@
     Person,
     PopupStatus,
     Position,
-
     PersonID
-
   } from '$lib/types';
 
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
