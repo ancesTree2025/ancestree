@@ -64,6 +64,7 @@
     { key: 'residence', label: 'Show Residence', checked: true },
     { key: 'rcoords', label: 'Show Map Location of Residence', checked: true },
     { key: 'description', label: 'Show Description', checked: true },
+    { key: 'office', label: 'Show Offices Held', checked: true },
     { key: 'wikiLink', label: 'Show Wikipedia Link', checked: true }
   ];
 
