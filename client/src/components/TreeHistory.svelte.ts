@@ -1,4 +1,4 @@
-import type { Tree } from '$lib/types';
+import type { PersonID, PersonInfo, Tree } from '$lib/types';
 
 export type TreeHistoryElem = {
   tree: Tree;
@@ -6,6 +6,10 @@ export type TreeHistoryElem = {
     tree: Tree;
     relationDescriptor: string;
   };
+  sidePanel: {
+    qid: PersonID;
+    name: string;
+  }
 };
 
 class TreeHistory {
@@ -24,6 +28,15 @@ class TreeHistory {
     this.index = this.history.length - 1;
   }
 
+  updateSidePanel(sidePanel: {
+    qid: PersonID;
+    name: string;
+  }) {
+    this.history[this.index] = {
+      ...this.history[this.index],
+      sidePanel
+    };
+  }
   /**
    * Successive calls will keep undo-ing until no more.
    * Assumes that {@link canUndo} returns true.

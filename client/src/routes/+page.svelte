@@ -97,7 +97,10 @@
         const [fetched, error] = result.toTuple();
         if (fetched) {
           rawTree = fetched;
-          treeHistory.put({ tree: rawTree, relation: undefined });
+          treeHistory.put({ tree: rawTree, relation: undefined, sidePanel: {
+            name: sidePanelName ?? '',
+            qid: sidePanelQid ?? ''
+          }});
 
           status = { state: 'idle' };
 
@@ -143,7 +146,10 @@
       };
       treeHistory.put({
         tree,
-        relation
+        relation, sidePanel: {
+            name: sidePanelName ?? '',
+            qid: sidePanelQid ?? ''
+          }
       });
       relationFinderStatus = { state: 'idle' };
     });
@@ -163,6 +169,12 @@
       sidePanelQid = qid;
       sidePanelData = fetched;
       sidePanelName = name;
+      treeHistory.updateSidePanel(
+        {
+          qid: sidePanelQid,
+          name: sidePanelName,
+        }
+      )
     }
   }
 
@@ -176,10 +188,12 @@
     const historyElem = treeHistory.undo();
     tree = historyElem.tree;
     relation = historyElem.relation;
+    sidePanelName = historyElem.sidePanel.name;
+    sidePanelQid = historyElem.sidePanel.qid;
 
-    const [qid, personName] = getFocusQidAndName();
-    name = personName.name;
-    getPersonInfo(qid, personName.name);
+    // const [qid, personName] = getFocusQidAndName();
+    // name = personName.name;
+    getPersonInfo(sidePanelQid, sidePanelName);
   }
   function handleRedo() {
     relation = undefined;
@@ -187,10 +201,12 @@
     const historyElem = treeHistory.redo();
     tree = historyElem.tree;
     relation = historyElem.relation;
+    sidePanelName = historyElem.sidePanel.name;
+    sidePanelQid = historyElem.sidePanel.qid;
 
-    const [qid, personName] = getFocusQidAndName();
-    name = personName.name;
-    getPersonInfo(qid, personName.name);
+    // const [qid, personName] = getFocusQidAndName();
+    // name = personName.name;
+    getPersonInfo(sidePanelQid, sidePanelName);
   }
 
   async function expandNode(id: string, name: string, position: Position) {
@@ -234,7 +250,10 @@
       pivot: id,
       pivotPosition: position
     };
-    treeHistory.put({ tree: rawTree, relation: undefined });
+    treeHistory.put({ tree: rawTree, relation: undefined, sidePanel: {
+            name: sidePanelName ?? '',
+            qid: sidePanelQid ?? ''
+          } });
   }
 
   function collapseNode(id: string) {
@@ -260,7 +279,10 @@
       pivot: rawTree!.pivot,
       pivotPosition: rawTree!.pivotPosition
     };
-    treeHistory.put({ tree: rawTree, relation: undefined });
+    treeHistory.put({ tree: rawTree, relation: undefined, sidePanel: {
+            name: sidePanelName ?? '',
+            qid: sidePanelQid ?? ''
+          } });
   }
 </script>
 
