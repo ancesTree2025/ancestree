@@ -5,7 +5,7 @@ export type TreeHistoryElem = {
   relation?: {
     tree: Tree;
     relationDescriptor: string;
-  }
+  };
 };
 
 class TreeHistory {

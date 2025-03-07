@@ -150,11 +150,11 @@
     </div>
   {/if}
   {#if suggestions.length && searchQuery}
-    <div class="absolute {displayAbove ? 'bottom-full' : 'top-full'} left-0 right-0 mx-5 z-10">
-      <div class="rounded-lg bg-white shadow-lg z-10">
+    <div class="absolute {displayAbove ? 'bottom-full' : 'top-full'} left-0 right-0 z-10 mx-5">
+      <div class="z-10 rounded-lg bg-white shadow-lg">
         {#each suggestions as result}
           <button
-            class="block w-full cursor-pointer p-2 text-left hover:bg-gray z-10"
+            class="z-10 block w-full cursor-pointer p-2 text-left hover:bg-gray"
             onclick={() => selectName(result.name)}
           >
             <div class="flex items-center gap-3">
