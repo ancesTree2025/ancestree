@@ -295,7 +295,7 @@
         {expandNode}
         {collapseNode}
       />
-      <div class="absolute bottom-8 right-8 z-50 flex flex-col items-start gap-4">
+      <div class="absolute bottom-8 right-8 flex flex-col items-start gap-4">
         <div class="w-80 rounded-xl bg-white p-6 text-base shadow-lg">
           <label class="mb-2 flex flex-col gap-2 font-medium"
             >Maximum Tree Width
@@ -342,8 +342,8 @@
   </div>
   {#if showSettings}
     <div class="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50">
-      <div class="w-96 rounded bg-white p-6 shadow-lg">
-        <h2 class="mb-4 text-lg font-bold">Settings</h2>
+      <div class="w-96 rounded-xl bg-white p-6 shadow-lg">
+        <h2 class="mb-4 text-lg font-semibold">Settings</h2>
         <div class="mb-4">
           {#each checkboxOptions as option}
             <div class="mb-1 flex items-center gap-2">
@@ -354,8 +354,9 @@
             </div>
           {/each}
         </div>
-        <button class="mt-4 rounded bg-blue-500 p-2 text-black" onclick={toggleSettings}
-          >Close</button
+        <button
+          class="bg-orange mt-4 rounded-lg px-4 py-2 font-semibold text-white"
+          onclick={toggleSettings}>Close</button
         >
       </div>
     </div>

@@ -133,7 +133,13 @@
   }
 </script>
 
-<svg id="svg-root" class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
+<svg
+  id="svg-root"
+  class="h-full w-full"
+  bind:clientWidth={width}
+  bind:clientHeight={height}
+  onclick={closeSidePanel}
+>
   <g id="zoom-group">
     <g transform="translate({xOffset}, {yOffset}) scale({zoomFactor})">
       {#each marriagePositions as marriagePosition}
@@ -172,7 +178,10 @@
                 height={RECT_HEIGHT}
               >
                 <button
-                  onclick={() => handleClick(id, person.name)}
+                  onclick={(e) => {
+                    handleClick(id, person.name);
+                    e.stopPropagation();
+                  }}
                   ondblclick={() => onExpandNode(id, person.name)}
                   class="relative flex h-full w-full cursor-pointer items-center justify-center text-center text-sm {tree.secondary.includes(
                     id
@@ -182,7 +191,7 @@
                 >
                   {person.name}
                   {#if loadingStatusOnNode.includes(id)}
-                    <span class="absolute grid h-full w-full place-items-center bg-gray opacity-70">
+                    <span class="bg-gray absolute grid h-full w-full place-items-center opacity-70">
                       <div class="absolute right-1 top-2" transition:scale={{ duration: 150 }}>
                         <div class="loader h-5 w-5 bg-black p-1 opacity-50"></div>
                       </div>
