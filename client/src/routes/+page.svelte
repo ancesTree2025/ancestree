@@ -16,7 +16,8 @@
     InfoChecklist,
     Person,
     PopupStatus,
-    FilterOption
+    FilterOption,
+    Position
   } from '$lib/types';
 
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
@@ -63,6 +64,7 @@
     { key: 'residence', label: 'Show Residence', checked: true },
     { key: 'rcoords', label: 'Show Map Location of Residence', checked: true },
     { key: 'description', label: 'Show Description', checked: true },
+    { key: 'office', label: 'Show Offices Held', checked: true },
     { key: 'wikiLink', label: 'Show Wikipedia Link', checked: true }
   ];
 
@@ -75,11 +77,6 @@
 
   function toggleSettings() {
     showSettings = !showSettings;
-  }
-
-  function closeSettings() {
-    toggleSettings();
-    onSubmit(currentName);
   }
 
   async function onSubmit(newName: string) {
@@ -171,6 +168,74 @@
     name = personName.name;
     getPersonInfo(qid, personName.name);
   }
+
+  async function expandNode(id: string, name: string, position: Position) {
+    const result = await fetchTree(name, false);
+    const childTree = result.getOrThrow();
+
+    const oldPeople = rawTree!.people;
+    const oldMarriages = rawTree!.marriages;
+
+    const newPeople = childTree.people.filter((p) => !oldPeople.some((op) => op[0] === p[0]));
+
+    const allMarriages = [...oldMarriages, ...childTree.marriages];
+    const newMarriages = [];
+    while (allMarriages.length > 0) {
+      const marriage = allMarriages[0];
+
+      const children = new Set<string>();
+      const focuses = new Set<string>();
+      for (let i = allMarriages.length - 1; i >= 0; i--) {
+        const m = allMarriages[i];
+        if (m.parents.every((p) => marriage.parents.includes(p))) {
+          allMarriages.splice(i, 1);
+          m.children.forEach((c) => children.add(c));
+          m.focuses.forEach((f) => focuses.add(f));
+        }
+      }
+
+      newMarriages.push({
+        parents: marriage.parents,
+        children: Array.from(children),
+        focuses: Array.from(focuses)
+      });
+    }
+
+    rawTree = {
+      focus: rawTree!.focus,
+      people: [...oldPeople, ...newPeople],
+      marriages: newMarriages,
+      secondary: [...rawTree!.secondary, id],
+      pivot: id,
+      pivotPosition: position
+    };
+    treeHistory.put(rawTree);
+  }
+
+  function collapseNode(id: string) {
+    const marriages = [];
+    for (const marriage of rawTree!.marriages) {
+      const newFocuses = marriage.focuses.filter((f) => f !== id);
+      if (newFocuses.length === 0) {
+        continue;
+      }
+      marriages.push({
+        parents: marriage.parents,
+        children: marriage.children,
+        focuses: newFocuses
+      });
+    }
+
+    rawTree = {
+      focus: rawTree!.focus,
+      people: rawTree!.people,
+      marriages,
+      secondary: rawTree!.secondary.filter((s) => s !== id),
+      pivot: rawTree!.pivot,
+      pivotPosition: rawTree!.pivotPosition
+    };
+    treeHistory.put(rawTree);
+  }
 </script>
 
 <div class="flex h-full flex-col overflow-x-hidden">
@@ -181,20 +246,24 @@
     </a>
     <div class="flex flex-1 items-center justify-center gap-4">
       <div class="flex gap-2">
-        <button
-          class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
-          onclick={() => handleUndo()}
-          disabled={!treeHistory.canUndo()}
-        >
-          <IconArrowLeft />
-        </button>
-        <button
-          class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
-          onclick={() => handleRedo()}
-          disabled={!treeHistory.canRedo()}
-        >
-          <IconArrowRight />
-        </button>
+        <Tooltip title="Undo Tree" position="bm">
+          <button
+            class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
+            onclick={() => handleUndo()}
+            disabled={!treeHistory.canUndo()}
+          >
+            <IconArrowLeft />
+          </button>
+        </Tooltip>
+        <Tooltip title="Redo Tree" position="bm">
+          <button
+            class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
+            onclick={() => handleRedo()}
+            disabled={!treeHistory.canRedo()}
+          >
+            <IconArrowRight />
+          </button>
+        </Tooltip>
       </div>
       <NameInput
         {onSubmit}
@@ -205,16 +274,61 @@
       />
     </div>
     <div class="flex justify-end text-xl">
-      <Tooltip title="Settings" position="bottom">
+      <Tooltip title="Settings" position="bl">
         <button class="p-2" onclick={toggleSettings}>
           <IconSettings />
         </button>
       </Tooltip>
     </div>
   </nav>
-  <div class="flex flex-1">
-    <div class="flex-1">
-      <FamilyTree bind:this={familyTree} {getPersonInfo} tree={relation?.tree ?? tree} />
+  <div class="flex min-h-0 flex-1">
+    <div class="relative flex-1">
+      <FamilyTree
+        bind:this={familyTree}
+        {getPersonInfo}
+        tree={relation?.tree ?? tree}
+        {expandNode}
+        {collapseNode}
+      />
+      <div class="absolute bottom-8 right-8 flex flex-col items-start gap-4">
+        <div class="z-50 flex rounded-xl bg-white text-xl shadow-lg">
+          <div class="w-96 rounded bg-white p-6 shadow-lg">
+            <label class="mb-2 block"
+              >Maximum Tree Width
+              <div class="flex gap-5">
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  bind:value={maxWidth}
+                  class="flex-1"
+                  onclick={() => onSubmit(currentName)}
+                />
+                <div>
+                  {maxWidth}
+                </div>
+              </div>
+            </label>
+
+            <label class="mb-2 block"
+              >Maximum Tree Height
+              <div class="flex gap-5">
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  bind:value={maxHeight}
+                  class="flex-1"
+                  onclick={() => onSubmit(currentName)}
+                />
+                <div>
+                  {maxHeight}
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
     </div>
     <SidePanel
       name={sidePanelName}
@@ -227,21 +341,6 @@
     <div class="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50">
       <div class="w-96 rounded bg-white p-6 shadow-lg">
         <h2 class="mb-4 text-lg font-bold">Settings</h2>
-        <label class="mb-2 block"
-          >Maximum Tree Width
-          <div class="border-gray-400 flex h-8 w-12 items-center justify-center rounded border">
-            {maxWidth}
-          </div>
-          <input type="range" min="1" max="10" bind:value={maxWidth} class="w-full" />
-        </label>
-
-        <label class="mb-2 block"
-          >Maximum Tree Height
-          <div class="border-gray-400 flex h-8 w-12 items-center justify-center rounded border">
-            {maxHeight}
-          </div>
-          <input type="range" min="1" max="10" bind:value={maxHeight} class="w-full" />
-        </label>
         <div class="mb-4">
           {#each checkboxOptions as option}
             <div class="mb-1 flex items-center gap-2">
@@ -252,7 +351,7 @@
             </div>
           {/each}
         </div>
-        <button class="bg-blue-500 mt-4 rounded p-2 text-black" onclick={closeSettings}
+        <button class="bg-blue-500 mt-4 rounded p-2 text-black" onclick={toggleSettings}
           >Close</button
         >
       </div>
@@ -274,7 +373,7 @@
         <FilterContent setOption={(option, to) => (filterOptions[option] = to)} />
       </FilterPopup>
       <div class="z-50 flex rounded-xl bg-white text-xl shadow-lg">
-        <Tooltip title="Relationship Finder">
+        <Tooltip title="Relationship Finder" position="tr">
           <button
             class="p-3 {popupStatus === 'relationfinder' ? 'text-orange' : ''}"
             onclick={() => switchPopup('relationfinder')}
@@ -282,7 +381,7 @@
             <PersonSearchIcon />
           </button>
         </Tooltip>
-        <Tooltip title="Filter Tree">
+        <Tooltip title="Filter Tree" position="tm">
           <button
             class="p-3 {popupStatus === 'filter' ? 'text-orange' : ''}"
             onclick={() => switchPopup('filter')}
@@ -290,7 +389,7 @@
             <FilterIcon />
           </button>
         </Tooltip>
-        <Tooltip title="Recenter Tree">
+        <Tooltip title="Recenter Tree" position="tm">
           <button class="p-3" onclick={() => familyTree?.recenter()}>
             <AlignCenterIcon />
           </button>

@@ -4,6 +4,7 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.data.caches.WikiCacheManager
@@ -154,6 +155,33 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
     if (queryParams.description) {
       val desc = WikiRequestParser.parseWikiDescriptions(response)
       info.description = desc[qid]
+    }
+
+    if (queryParams.office) {
+
+      if (infoMap["Office Held"]!!.isNotEmpty()) {
+
+        val strings = infoMap["Office Held"]!!
+
+        val qidRegex = Regex("Q\\d+")
+
+        val qidList = strings.flatMap { str -> qidRegex.findAll(str).map { it.value } }.distinct()
+
+        val labelMap: Map<QID, Label> = getAllLabels(qidList)
+
+        val res =
+          strings.map { str ->
+            qidRegex.replace(str) { matchResult ->
+              val oQid = matchResult.value
+              val newVal = labelMap[oQid] ?: oQid
+              newVal.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+              }
+            }
+          }
+
+        info.office = res.joinToString(separator = "|")
+      }
     }
 
     if (queryParams.wikiLink) {

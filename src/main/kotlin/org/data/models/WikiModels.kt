@@ -28,7 +28,12 @@ data class EntityInfo(
 
 @Serializable data class WikiLink(val url: String)
 
-@Serializable data class WikiClaim(val mainsnak: MainSnak)
+@Serializable
+data class WikiClaim(
+  val mainsnak: MainSnak? = null,
+  val qualifiers: Map<String, List<WikiClaim>>? = null,
+  val datavalue: DataValue? = null,
+)
 
 @Serializable
 data class MainSnak(val snaktype: String, val datatype: String, val datavalue: DataValue? = null)

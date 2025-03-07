@@ -90,16 +90,20 @@ export function apiResponseToTree(res: ApiResponse): Tree {
 
   for (const parents of simpleMarriages) {
     marriages.push({
-      parents: [parents.person1, parents.person2],
-      children: (children.get(parents.person1) ?? []).filter((child) =>
-        (children.get(parents.person2) ?? []).includes(child)
+      parents: parents,
+      children: (children.get(parents[0]) ?? []).filter((child) =>
+        (children.get(parents[1]) ?? []).includes(child)
       ),
+      focuses: [res.root.id],
       type: parents.type
     });
   }
 
   return {
     focus: res.root.id,
+    secondary: [res.root.id],
+    pivot: res.root.id,
+    pivotPosition: { x: 0, y: 0 },
     people,
     marriages
   };
