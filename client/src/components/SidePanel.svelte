@@ -36,6 +36,7 @@
         'image',
         'wikiLink',
         'description',
+        'office',
         'bcoords',
         'dcoords',
         'rcoords'
@@ -48,6 +49,17 @@
           </div>
         {/if}
       {/each}
+
+      {#if data.office}
+        <div class="flex">
+          <p class="mr-4 font-bold">Offices Held</p>
+          <div class="flex max-h-52 flex-col gap-4 overflow-y-scroll rounded-lg bg-gray p-4">
+            {#each data.office.split('|') as office}
+              <p>{office}</p>
+            {/each}
+          </div>
+        </div>
+      {/if}
 
       {#if data.bcoords || data.dcoords || data.rcoords}
         <div class="mt-4 space-y-4">

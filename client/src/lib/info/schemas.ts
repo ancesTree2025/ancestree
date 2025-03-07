@@ -6,6 +6,7 @@ export const personInfoSchema = z.object({
   death: z.string().optional(),
   residence: z.string().optional(),
   description: z.string().optional(),
+  office: z.string().optional(),
   wikiLink: z.string().optional(),
   bcoords: z.string().optional(),
   dcoords: z.string().optional(),
