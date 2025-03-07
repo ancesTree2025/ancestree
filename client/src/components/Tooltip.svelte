@@ -14,7 +14,7 @@
   const { title, children, position = 'mm' }: Props = $props();
 
   function positionClass(): string {
-    let clazz = [];
+    const clazz = [];
     const vertical = position.charAt(0) as Vertical;
     const horizontal = position.charAt(1) as Horizontal;
 
@@ -46,7 +46,7 @@
         break;
     }
 
-    return clazz.join(" ");
+    return clazz.join(' ');
   }
 </script>
 
