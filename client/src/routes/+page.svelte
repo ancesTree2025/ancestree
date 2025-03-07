@@ -9,15 +9,16 @@
   import Tooltip from '../components/Tooltip.svelte';
 
   import { fetchTree, fetchInfo, filterByOption } from '$lib';
-  import type {
-    Tree,
-    LoadingStatus,
-    PersonInfo,
-    InfoChecklist,
-    Person,
-    PopupStatus,
-    FilterOption,
-    Position
+  import {
+    type Tree,
+    type LoadingStatus,
+    type PersonInfo,
+    type InfoChecklist,
+    type Person,
+    type PopupStatus,
+    type FilterOption,
+    type Position,
+    type PersonID
   } from '$lib/types';
 
   import { fetchRelationship } from '$lib/familytree/fetchRelationship';
@@ -122,7 +123,8 @@
   }
 
   function searchWithinTree(query: string) {
-    fetchRelationship(tree!.focus, query).then((result) => {
+    if (!sidePanelQid) return;
+    fetchRelationship(sidePanelQid, query).then((result) => {
       const response = result.getOrNull();
       if (response === null) return;
 
@@ -134,15 +136,18 @@
     });
   }
 
+  let sidePanelQid = $state<PersonID | undefined>();
   let sidePanelName = $state<string | undefined>(undefined);
   let sidePanelData = $state<PersonInfo | undefined>(undefined);
 
   async function getPersonInfo(qid: string, name: string) {
+    sidePanelQid = undefined;
     sidePanelData = undefined;
     sidePanelName = undefined;
     const [fetched] = (await fetchInfo(qid, useFakeData, checkboxOptions)).toTuple();
 
     if (fetched) {
+      sidePanelQid = qid;
       sidePanelData = fetched;
       sidePanelName = name;
     }
