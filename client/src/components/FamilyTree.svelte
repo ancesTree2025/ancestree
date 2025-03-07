@@ -21,7 +21,7 @@
     collapseNode
   }: {
     tree?: Tree;
-    getPersonInfo: (qid: string, name: string) => void;
+    getPersonInfo: (qid: string, name: string, position: Position) => void;
     expandNode: (id: string, name: string, position: Position) => Promise<void>;
     collapseNode: (id: string) => void;
   } = $props();
@@ -74,10 +74,15 @@
   const highlightSet = new SvelteSet<string>();
 
   export function handleClick(id: string, name: string, position: Position | null) {
-    if (position) recenter(position.x * -1, position.y * -1);
+    if (position) {
+      recenter(position.x * -1, position.y * -1);
+      position = { x: position.x * -1, y: position.y * -1 };
+    } else {
+      position = { x: 0, y: 0 };
+    }
 
     selectedID = id; // Update selected person ID
-    getPersonInfo(id, name); // Fetch person info
+    getPersonInfo(id, name, position); // Fetch person info
 
     highlightSet.clear();
     highlightSet.add(id);
