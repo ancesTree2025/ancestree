@@ -84,7 +84,7 @@ test('Handles two marriages with different children', () => {
   );
   expect(new Set(result.marriages)).toStrictEqual(
     new Set([
-      { parents: ['Focus', 'Wife 1'], children: ['Child 1'], type: '' },
+      { parents: ['Focus', 'Wife 1'], children: ['Child 1'], type: 'married' },
       { parents: ['Focus', 'Wife 2'], children: ['Child 2'], type: 'unmarried' }
     ])
   );
