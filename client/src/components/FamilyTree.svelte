@@ -73,7 +73,9 @@
   let selectedID = $state('');
   const highlightSet = new SvelteSet<string>();
 
-  export function handleClick(id: string, name: string) {
+  export function handleClick(id: string, name: string, position: Position | null) {
+    if (position) recenter(position.x * -1, position.y * -1);
+
     selectedID = id; // Update selected person ID
     getPersonInfo(id, name); // Fetch person info
 
@@ -94,11 +96,11 @@
     });
   }
 
-  export function recenter() {
+  export function recenter(x: number = 0, y: number = 0) {
     const svg = d3.select('#svg-root');
     const zoomGroup = d3.select('#zoom-group');
 
-    const initialTransform = d3.zoomIdentity.translate(0, 0).scale(1);
+    const initialTransform = d3.zoomIdentity.translate(x, y).scale(1);
 
     svg
       .transition()
@@ -179,7 +181,7 @@
               >
                 <button
                   onclick={(e) => {
-                    handleClick(id, person.name);
+                    handleClick(id, person.name, position);
                     e.stopPropagation();
                   }}
                   ondblclick={() => onExpandNode(id, person.name)}

@@ -83,7 +83,7 @@
 
     const withinTree = tree?.people.find((tup) => tup[1].name === newName);
     if (withinTree && currentWidth === maxWidth && currentHeight === maxHeight) {
-      familyTree?.handleClick(withinTree[0], withinTree[1].name);
+      familyTree?.handleClick(withinTree[0], withinTree[1].name, null);
     } else {
       status = { state: 'loading' };
       fetchTree(newName, useFakeData, maxWidth, maxHeight).then((result) => {
@@ -202,7 +202,8 @@
       newMarriages.push({
         parents: marriage.parents,
         children: Array.from(children),
-        focuses: Array.from(focuses)
+        focuses: Array.from(focuses),
+        type: marriage.type
       });
     }
 
@@ -227,7 +228,8 @@
       marriages.push({
         parents: marriage.parents,
         children: marriage.children,
-        focuses: newFocuses
+        focuses: newFocuses,
+        type: marriage.type
       });
     }
 

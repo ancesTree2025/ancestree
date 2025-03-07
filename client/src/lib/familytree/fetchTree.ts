@@ -22,7 +22,8 @@ export const treeSchema = z.object({
   edges: z.array(
     z.object({
       node1: personIdSchema,
-      node2: personIdSchema
+      node2: personIdSchema,
+      tag: z.union([z.literal(''), z.literal('UN')])
     })
   )
 });
@@ -41,7 +42,8 @@ export function apiResponseToTree(res: ApiResponse): Tree {
 
   // Create list of marriages, and mapping from parents to children
 
-  const simpleMarriages: [PersonID, PersonID][] = [];
+  const simpleMarriages: { person1: PersonID; person2: PersonID; type: 'married' | 'unmarried' }[] =
+    [];
   const children = new Map<PersonID, PersonID[]>();
 
   for (const edge of res.edges) {
@@ -51,7 +53,11 @@ export function apiResponseToTree(res: ApiResponse): Tree {
     // If two nodes have same depth then they are married
 
     if (depth1 === depth2) {
-      simpleMarriages.push([edge.node1, edge.node2]);
+      simpleMarriages.push({
+        person1: edge.node1,
+        person2: edge.node2,
+        type: edge.tag === 'UN' ? 'unmarried' : 'married'
+      });
       continue;
     }
 
@@ -84,11 +90,12 @@ export function apiResponseToTree(res: ApiResponse): Tree {
 
   for (const parents of simpleMarriages) {
     marriages.push({
-      parents: parents,
-      children: (children.get(parents[0]) ?? []).filter((child) =>
-        (children.get(parents[1]) ?? []).includes(child)
+      parents: [parents.person1, parents.person2],
+      children: (children.get(parents.person1) ?? []).filter((child) =>
+        (children.get(parents.person2) ?? []).includes(child)
       ),
-      focuses: [res.root.id]
+      focuses: [res.root.id],
+      type: parents.type
     });
   }
 
@@ -125,6 +132,9 @@ export async function fetchTree(
   );
   return parsed.mapCatching(
     (json) => apiResponseToTree(treeSchema.parse(json)),
-    () => 'Server data in wrong format'
+    (err) => {
+      console.error(err);
+      return 'Server data in wrong format';
+    }
   );
 }
