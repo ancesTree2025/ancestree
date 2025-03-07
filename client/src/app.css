@@ -50,3 +50,25 @@ a {
     transform: rotate(1turn);
   }
 }
+
+input[type='range'] {
+  @apply h-5 w-full cursor-pointer appearance-none overflow-hidden rounded-xl outline-none;
+}
+
+/* Track: webkit browsers */
+input[type='range']::-webkit-slider-runnable-track,
+input[type='range']::-moz-range-track {
+  @apply h-4 rounded-xl bg-gray;
+}
+
+/* Thumb: webkit */
+input[type='range']::-webkit-slider-thumb {
+  @apply h-4 w-4 appearance-none rounded-full border-2 border-orange bg-white;
+  box-shadow: -407px 0 0 400px oklch(0.705 0.213 47.604);
+}
+
+/* Thumb: Firefox */
+input[type='range']::-moz-range-thumb {
+  @apply h-4 w-4 rounded-full border-2 border-orange bg-white;
+  box-shadow: -407px 0 0 400px oklch(0.705 0.213 47.604);
+}

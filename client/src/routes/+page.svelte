@@ -68,12 +68,10 @@
     { key: 'wikiLink', label: 'Show Wikipedia Link', checked: true }
   ];
 
-  const filterOptions = $state<Record<FilterOption, boolean>>({
-    sibling: true,
-    spousefamily: true,
-    ancestor: true,
-    descendant: true
-  });
+  let filterSibling = $state(true);
+  let filterSpouseFamily = $state(false);
+  let filterAncestor = $state(true);
+  let filterDescendant = $state(true);
 
   function toggleSettings() {
     showSettings = !showSettings;
@@ -110,7 +108,14 @@
   }
 
   $effect(() => {
-    tree = rawTree && filterByOption(rawTree, filterOptions);
+    tree =
+      rawTree &&
+      filterByOption(rawTree, {
+        sibling: filterSibling,
+        spousefamily: filterSpouseFamily,
+        ancestor: filterAncestor,
+        descendant: filterDescendant
+      });
   });
 
   /**
@@ -242,13 +247,13 @@
   <nav class="flex items-center gap-12 px-8 py-4 shadow-lg">
     <a href="/" class="flex items-center gap-2">
       <img src="/logo.png" alt="Ancestree" class="size-8" />
-      <h1 class="text-xl font-semibold text-dark-gray">Ancestree</h1>
+      <h1 class="text-dark-gray text-xl font-semibold">Ancestree</h1>
     </a>
     <div class="flex flex-1 items-center justify-center gap-4">
       <div class="flex gap-2">
         <Tooltip title="Undo Tree" position="bm">
           <button
-            class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
+            class="hover:bg-cream rounded-lg p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
             onclick={() => handleUndo()}
             disabled={!treeHistory.canUndo()}
           >
@@ -257,7 +262,7 @@
         </Tooltip>
         <Tooltip title="Redo Tree" position="bm">
           <button
-            class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
+            class="hover:bg-cream rounded-lg p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
             onclick={() => handleRedo()}
             disabled={!treeHistory.canRedo()}
           >
@@ -290,43 +295,41 @@
         {expandNode}
         {collapseNode}
       />
-      <div class="absolute bottom-8 right-8 flex flex-col items-start gap-4">
-        <div class="z-50 flex rounded-xl bg-white text-xl shadow-lg">
-          <div class="w-96 rounded bg-white p-6 shadow-lg">
-            <label class="mb-2 block"
-              >Maximum Tree Width
-              <div class="flex gap-5">
-                <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  bind:value={maxWidth}
-                  class="flex-1"
-                  onclick={() => onSubmit(currentName)}
-                />
-                <div>
-                  {maxWidth}
-                </div>
+      <div class="absolute bottom-8 right-8 z-50 flex flex-col items-start gap-4">
+        <div class="w-80 rounded-xl bg-white p-6 text-base shadow-lg">
+          <label class="mb-2 flex flex-col gap-2 font-medium"
+            >Maximum Tree Width
+            <div class="flex gap-5">
+              <input
+                type="range"
+                min="1"
+                max="5"
+                bind:value={maxWidth}
+                class="flex-1"
+                onclick={() => onSubmit(currentName)}
+              />
+              <div>
+                {maxWidth}
               </div>
-            </label>
+            </div>
+          </label>
 
-            <label class="mb-2 block"
-              >Maximum Tree Height
-              <div class="flex gap-5">
-                <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  bind:value={maxHeight}
-                  class="flex-1"
-                  onclick={() => onSubmit(currentName)}
-                />
-                <div>
-                  {maxHeight}
-                </div>
+          <label class="mb-2 flex flex-col gap-2 font-medium"
+            >Maximum Tree Height
+            <div class="flex gap-5">
+              <input
+                type="range"
+                min="1"
+                max="5"
+                bind:value={maxHeight}
+                class="flex-1"
+                onclick={() => onSubmit(currentName)}
+              />
+              <div>
+                {maxHeight}
               </div>
-            </label>
-          </div>
+            </div>
+          </label>
         </div>
       </div>
     </div>
@@ -351,7 +354,7 @@
             </div>
           {/each}
         </div>
-        <button class="bg-blue-500 mt-4 rounded p-2 text-black" onclick={toggleSettings}
+        <button class="mt-4 rounded bg-blue-500 p-2 text-black" onclick={toggleSettings}
           >Close</button
         >
       </div>
@@ -370,7 +373,12 @@
         />
       </FilterPopup>
       <FilterPopup show={popupStatus === 'filter'}>
-        <FilterContent setOption={(option, to) => (filterOptions[option] = to)} />
+        <FilterContent
+          bind:sibling={filterSibling}
+          bind:spousefamily={filterSpouseFamily}
+          bind:ancestor={filterAncestor}
+          bind:descendant={filterDescendant}
+        />
       </FilterPopup>
       <div class="z-50 flex rounded-xl bg-white text-xl shadow-lg">
         <Tooltip title="Relationship Finder" position="tr">
