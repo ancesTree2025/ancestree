@@ -97,10 +97,14 @@
         const [fetched, error] = result.toTuple();
         if (fetched) {
           rawTree = fetched;
-          treeHistory.put({ tree: rawTree, relation: undefined, sidePanel: {
-            name: sidePanelName ?? '',
-            qid: sidePanelQid ?? ''
-          }});
+          treeHistory.put({
+            tree: rawTree,
+            relation: undefined,
+            sidePanel: {
+              name: sidePanelName ?? '',
+              qid: sidePanelQid ?? ''
+            }
+          });
 
           status = { state: 'idle' };
 
@@ -146,10 +150,11 @@
       };
       treeHistory.put({
         tree,
-        relation, sidePanel: {
-            name: sidePanelName ?? '',
-            qid: sidePanelQid ?? ''
-          }
+        relation,
+        sidePanel: {
+          name: sidePanelName ?? '',
+          qid: sidePanelQid ?? ''
+        }
       });
       relationFinderStatus = { state: 'idle' };
     });
@@ -169,12 +174,10 @@
       sidePanelQid = qid;
       sidePanelData = fetched;
       sidePanelName = name;
-      treeHistory.updateSidePanel(
-        {
-          qid: sidePanelQid,
-          name: sidePanelName,
-        }
-      )
+      treeHistory.updateSidePanel({
+        qid: sidePanelQid,
+        name: sidePanelName
+      });
     }
   }
 
@@ -250,10 +253,14 @@
       pivot: id,
       pivotPosition: position
     };
-    treeHistory.put({ tree: rawTree, relation: undefined, sidePanel: {
-            name: sidePanelName ?? '',
-            qid: sidePanelQid ?? ''
-          } });
+    treeHistory.put({
+      tree: rawTree,
+      relation: undefined,
+      sidePanel: {
+        name: sidePanelName ?? '',
+        qid: sidePanelQid ?? ''
+      }
+    });
   }
 
   function collapseNode(id: string) {
@@ -279,10 +286,14 @@
       pivot: rawTree!.pivot,
       pivotPosition: rawTree!.pivotPosition
     };
-    treeHistory.put({ tree: rawTree, relation: undefined, sidePanel: {
-            name: sidePanelName ?? '',
-            qid: sidePanelQid ?? ''
-          } });
+    treeHistory.put({
+      tree: rawTree,
+      relation: undefined,
+      sidePanel: {
+        name: sidePanelName ?? '',
+        qid: sidePanelQid ?? ''
+      }
+    });
   }
 </script>
 

@@ -9,7 +9,7 @@ export type TreeHistoryElem = {
   sidePanel: {
     qid: PersonID;
     name: string;
-  }
+  };
 };
 
 class TreeHistory {
@@ -28,10 +28,7 @@ class TreeHistory {
     this.index = this.history.length - 1;
   }
 
-  updateSidePanel(sidePanel: {
-    qid: PersonID;
-    name: string;
-  }) {
+  updateSidePanel(sidePanel: { qid: PersonID; name: string }) {
     this.history[this.index] = {
       ...this.history[this.index],
       sidePanel
