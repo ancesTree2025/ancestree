@@ -14,3 +14,9 @@ services:
       target: runtime
     ports:
       - '3000:3000'
+
+  redis-cache:
+    container_name: redis-container
+    image: redis:7.4.2
+    ports:
+      - '6379:6379'
