@@ -90,9 +90,9 @@ export function apiResponseToTree(res: ApiResponse): Tree {
 
   for (const parents of simpleMarriages) {
     marriages.push({
-      parents: parents,
-      children: (children.get(parents[0]) ?? []).filter((child) =>
-        (children.get(parents[1]) ?? []).includes(child)
+      parents: [parents.person1, parents.person2],
+      children: (children.get(parents.person1) ?? []).filter((child) =>
+        (children.get(parents.person2) ?? []).includes(child)
       ),
       focuses: [res.root.id],
       type: parents.type
