@@ -1,4 +1,4 @@
-import type { PersonID, PersonInfo, Tree } from '$lib/types';
+import type { PersonID, Tree } from '$lib/types';
 
 export type TreeHistoryElem = {
   tree: Tree;
