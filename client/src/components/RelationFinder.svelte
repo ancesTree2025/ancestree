@@ -1,17 +1,19 @@
 <script lang="ts">
-  import type { People } from '$lib/types';
+  import type { LoadingStatus, People } from '$lib/types';
   import NameInput from './NameInput.svelte';
   import PersonSearchIcon from '~icons/tabler/user-search';
 
   const {
     searchWithinTree,
     people,
+    status,
     relationDescriptor,
     clearFilter
   }: {
     clearFilter: () => void;
     people: People;
     relationDescriptor?: string;
+    status: LoadingStatus;
     searchWithinTree: (result: string) => void;
   } = $props();
 
@@ -31,7 +33,7 @@
     bind:this={nameInput}
     onSubmit={searchWithinTree}
     displayAbove
-    status={{ state: 'idle' }}
+    {status}
     namesInTree={people.map((p) => p[1].name)}
     clearSearch={clearFilter}
     type="RelationFinder"

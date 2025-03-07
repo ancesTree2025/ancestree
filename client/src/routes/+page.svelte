@@ -35,6 +35,7 @@
 
   let name = $state<string>('');
   let status = $state<LoadingStatus>({ state: 'idle' });
+  let relationFinderStatus = $state<LoadingStatus>({ state: 'idle' })
   let currentName = '';
   let currentWidth = 4;
   let currentHeight = 4;
@@ -127,8 +128,12 @@
 
   function searchWithinTree(query: string) {
     if (!sidePanelQid) return;
+    relationFinderStatus = { state: 'loading' }
     fetchRelationship(sidePanelQid, query).then((result) => {
       if (!tree) return;
+      if (result.isError()) {
+        relationFinderStatus = { state: 'error', error: result.errorOrNull() }
+      }
       const response = result.getOrNull();
       if (response === null) return;
 
@@ -140,7 +145,8 @@
         tree,
         relation
       });
-    });
+      relationFinderStatus = { state: 'idle' }
+    })
   }
 
   let sidePanelQid = $state<PersonID | undefined>();
@@ -382,6 +388,7 @@
       <FilterPopup show={popupStatus === 'relationfinder'}>
         <RelationFinder
           bind:this={relationFinder}
+          status={relationFinderStatus}
           people={tree.people}
           {searchWithinTree}
           relationDescriptor={relation?.relationDescriptor}
