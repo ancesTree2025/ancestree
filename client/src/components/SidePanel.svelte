@@ -65,7 +65,7 @@
         <div class="mt-4 space-y-4">
           {#if data.bcoords && data.dcoords !== 'Unknown'}
             <div>
-              <p><strong>Birthplace:</strong></p>
+              <p class="mb-2"><strong>Birthplace</strong></p>
               <a
                 href={`https://www.google.com/maps?q=${data.bcoords}`}
                 target="_blank"
@@ -87,7 +87,7 @@
 
           {#if data.dcoords && data.dcoords !== 'Unknown'}
             <div>
-              <p><strong>Death Place:</strong></p>
+              <p class="mb-2"><strong>Deathplace</strong></p>
               <a
                 href={`https://www.google.com/maps?q=${data.dcoords}`}
                 target="_blank"
@@ -109,7 +109,7 @@
 
           {#if data.rcoords && data.rcoords !== 'Unknown'}
             <div>
-              <p><strong>Residence</strong></p>
+              <p class="mb-2"><strong>Residence</strong></p>
               <a
                 href={`https://www.google.com/maps?q=${data.rcoords}`}
                 target="_blank"

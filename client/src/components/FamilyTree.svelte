@@ -109,6 +109,7 @@
     zoomGroup.attr('transform', initialTransform as any);
   }
 
+  // svelte-ignore non_reactive_update
   function closeSidePanel() {
     highlightSet.clear();
     selectedID = '';
@@ -135,7 +136,16 @@
   }
 </script>
 
-<svg id="svg-root" class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
+<svg
+  id="svg-root"
+  class="h-full w-full"
+  bind:clientWidth={width}
+  bind:clientHeight={height}
+  onclick={closeSidePanel}
+  role="tree"
+  tabindex="0"
+  onkeydown={() => {}}
+>
   <g id="zoom-group">
     <g transform="translate({xOffset}, {yOffset}) scale({zoomFactor})">
       {#each marriagePositions as marriagePosition}
@@ -174,7 +184,10 @@
                 height={RECT_HEIGHT}
               >
                 <button
-                  onclick={() => handleClick(id, person.name, position)}
+                  onclick={(e) => {
+                    handleClick(id, person.name, position);
+                    e.stopPropagation();
+                  }}
                   ondblclick={() => onExpandNode(id, person.name)}
                   class="relative flex h-full w-full cursor-pointer items-center justify-center text-center text-sm {tree.secondary.includes(
                     id

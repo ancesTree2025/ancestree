@@ -16,7 +16,6 @@
     InfoChecklist,
     Person,
     PopupStatus,
-    FilterOption,
     Position
   } from '$lib/types';
 
@@ -68,12 +67,10 @@
     { key: 'wikiLink', label: 'Show Wikipedia Link', checked: true }
   ];
 
-  const filterOptions = $state<Record<FilterOption, boolean>>({
-    sibling: true,
-    spousefamily: true,
-    ancestor: true,
-    descendant: true
-  });
+  let filterSibling = $state(true);
+  let filterSpouseFamily = $state(false);
+  let filterAncestor = $state(true);
+  let filterDescendant = $state(true);
 
   function toggleSettings() {
     showSettings = !showSettings;
@@ -110,7 +107,14 @@
   }
 
   $effect(() => {
-    tree = rawTree && filterByOption(rawTree, filterOptions);
+    tree =
+      rawTree &&
+      filterByOption(rawTree, {
+        sibling: filterSibling,
+        spousefamily: filterSpouseFamily,
+        ancestor: filterAncestor,
+        descendant: filterDescendant
+      });
   });
 
   /**
@@ -293,42 +297,40 @@
         {collapseNode}
       />
       <div class="absolute bottom-8 right-8 flex flex-col items-start gap-4">
-        <div class="z-50 flex rounded-xl bg-white text-xl shadow-lg">
-          <div class="w-96 rounded bg-white p-6 shadow-lg">
-            <label class="mb-2 block"
-              >Maximum Tree Width
-              <div class="flex gap-5">
-                <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  bind:value={maxWidth}
-                  class="flex-1"
-                  onclick={() => onSubmit(currentName)}
-                />
-                <div>
-                  {maxWidth}
-                </div>
+        <div class="w-80 rounded-xl bg-white p-6 text-base shadow-lg">
+          <label class="mb-2 flex flex-col gap-2 font-medium"
+            >Maximum Tree Width
+            <div class="flex gap-5">
+              <input
+                type="range"
+                min="1"
+                max="5"
+                bind:value={maxWidth}
+                class="flex-1"
+                onclick={() => onSubmit(currentName)}
+              />
+              <div>
+                {maxWidth}
               </div>
-            </label>
+            </div>
+          </label>
 
-            <label class="mb-2 block"
-              >Maximum Tree Height
-              <div class="flex gap-5">
-                <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  bind:value={maxHeight}
-                  class="flex-1"
-                  onclick={() => onSubmit(currentName)}
-                />
-                <div>
-                  {maxHeight}
-                </div>
+          <label class="mb-2 flex flex-col gap-2 font-medium"
+            >Maximum Tree Height
+            <div class="flex gap-5">
+              <input
+                type="range"
+                min="1"
+                max="5"
+                bind:value={maxHeight}
+                class="flex-1"
+                onclick={() => onSubmit(currentName)}
+              />
+              <div>
+                {maxHeight}
               </div>
-            </label>
-          </div>
+            </div>
+          </label>
         </div>
       </div>
     </div>
@@ -341,8 +343,8 @@
   </div>
   {#if showSettings}
     <div class="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50">
-      <div class="w-96 rounded bg-white p-6 shadow-lg">
-        <h2 class="mb-4 text-lg font-bold">Settings</h2>
+      <div class="w-96 rounded-xl bg-white p-6 shadow-lg">
+        <h2 class="mb-4 text-lg font-semibold">Settings</h2>
         <div class="mb-4">
           {#each checkboxOptions as option}
             <div class="mb-1 flex items-center gap-2">
@@ -353,8 +355,9 @@
             </div>
           {/each}
         </div>
-        <button class="bg-blue-500 mt-4 rounded p-2 text-black" onclick={toggleSettings}
-          >Close</button
+        <button
+          class="mt-4 rounded-lg bg-orange px-4 py-2 font-semibold text-white"
+          onclick={toggleSettings}>Close</button
         >
       </div>
     </div>
@@ -372,7 +375,12 @@
         />
       </FilterPopup>
       <FilterPopup show={popupStatus === 'filter'}>
-        <FilterContent setOption={(option, to) => (filterOptions[option] = to)} />
+        <FilterContent
+          bind:sibling={filterSibling}
+          bind:spousefamily={filterSpouseFamily}
+          bind:ancestor={filterAncestor}
+          bind:descendant={filterDescendant}
+        />
       </FilterPopup>
       <div class="z-50 flex rounded-xl bg-white text-xl shadow-lg">
         <Tooltip title="Relationship Finder" position="tr">

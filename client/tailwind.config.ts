@@ -19,7 +19,7 @@ export default {
       blue: '#b5e2ff',
       'dark-blue': 'oklch(0.5 0.134 242.749)',
       highlight: '#e8bf8b',
-      orange: 'oklch(0.705 0.213 47.604)',
+      orange: 'oklch(0.646 0.222 41.116)',
       cream: '#f5ebda',
       'dark-gray': '#423d3d',
       highlight_border: '#2D2D2D',
