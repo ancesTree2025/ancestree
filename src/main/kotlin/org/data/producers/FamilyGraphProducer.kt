@@ -108,7 +108,6 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     while (queue.isNotEmpty()) {
 
       /** Early stopping for exceeding horizontal width */
-      println(traversals)
       if (traversals++ == width) {
         break
       }
@@ -203,9 +202,6 @@ class FamilyGraphProducer : GraphProducer<Label, Person> {
     val qidsToReplace = mutableListOf<QID>()
     qidsToReplace.addAll(nodes.keys)
     qidsToReplace.addAll(genders)
-
-    println(qidsToReplace)
-    println(qidsToReplace.size)
 
     val labels = wikiService.getAllLabels(qidsToReplace).toMutableMap()
     labels["Unknown"] = "Unknown"
