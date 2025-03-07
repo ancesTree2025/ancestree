@@ -54,6 +54,7 @@
   let showSettings = $state(false);
   let maxWidth = $state(4);
   let maxHeight = $state(4);
+  let currentCenter: Position = $state<Position>({ x: 0, y: 0 });
   const checkboxOptions: InfoChecklist = [
     { key: 'image', label: 'Show Image', checked: true },
     { key: 'birth', label: 'Show Birth Date', checked: true },
@@ -95,7 +96,7 @@
 
           // Opening the side panel with the focus on search complete
           const [qid, personName] = getFocusQidAndName();
-          if (qid && personName) getPersonInfo(qid, personName.name);
+          if (qid && personName) getPersonInfo(qid, personName.name, { x: 0, y: 0 });
         } else if (error) {
           status = { state: 'error', error };
         }
@@ -141,9 +142,10 @@
   let sidePanelName = $state<string | undefined>(undefined);
   let sidePanelData = $state<PersonInfo | undefined>(undefined);
 
-  async function getPersonInfo(qid: string, name: string) {
+  async function getPersonInfo(qid: string, name: string, position: Position) {
     sidePanelData = undefined;
     sidePanelName = undefined;
+    currentCenter = position;
     const [fetched] = (await fetchInfo(qid, useFakeData, checkboxOptions)).toTuple();
 
     if (fetched) {
@@ -162,7 +164,7 @@
 
     const [qid, personName] = getFocusQidAndName();
     name = personName.name;
-    getPersonInfo(qid, personName.name);
+    getPersonInfo(qid, personName.name, { x: 0, y: 0 });
   }
   function handleRedo() {
     relation = undefined;
@@ -170,7 +172,7 @@
 
     const [qid, personName] = getFocusQidAndName();
     name = personName.name;
-    getPersonInfo(qid, personName.name);
+    getPersonInfo(qid, personName.name, { x: 0, y: 0 });
   }
 
   async function expandNode(id: string, name: string, position: Position) {
@@ -400,7 +402,10 @@
           </button>
         </Tooltip>
         <Tooltip title="Recenter Tree" position="tm">
-          <button class="p-3" onclick={() => familyTree?.recenter()}>
+          <button
+            class="p-3"
+            onclick={() => familyTree?.recenter(currentCenter.x, currentCenter.y)}
+          >
             <AlignCenterIcon />
           </button>
         </Tooltip>
