@@ -1,7 +1,15 @@
 import type { Tree } from '$lib/types';
 
+export type TreeHistoryElem = {
+  tree: Tree;
+  relation?: {
+    tree: Tree;
+    relationDescriptor: string;
+  }
+};
+
 class TreeHistory {
-  private history: Tree[] = $state([]);
+  private history: TreeHistoryElem[] = $state([]);
   private index: number = $state(-1);
 
   /**
@@ -10,9 +18,9 @@ class TreeHistory {
    *
    * @param tree to insert as the newest tree.
    */
-  put(tree: Tree) {
+  put(elem: TreeHistoryElem) {
     this.history = this.history.slice(0, this.index + 1);
-    this.history.push(tree);
+    this.history.push(elem);
     this.index = this.history.length - 1;
   }
 
@@ -22,7 +30,7 @@ class TreeHistory {
    *
    * @return the tree immediately before the current rendered tree.
    */
-  undo(): Tree {
+  undo(): TreeHistoryElem {
     if (!this.canUndo()) throw new Error('cannot undo when there is nothing');
 
     return this.history[--this.index];
@@ -38,7 +46,7 @@ class TreeHistory {
    *
    * @return the tree immediately before the current rendered tree.
    */
-  redo(): Tree {
+  redo(): TreeHistoryElem {
     if (!this.canRedo()) throw new Error('cannot redo when there is nothing');
 
     return this.history[++this.index];

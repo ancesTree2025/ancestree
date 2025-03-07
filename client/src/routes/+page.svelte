@@ -43,6 +43,7 @@
   let tree = $state<Tree | undefined>();
   let relation = $state<
     | {
+        tree: Tree;
         relationDescriptor: string;
       }
     | undefined
@@ -95,7 +96,7 @@
         const [fetched, error] = result.toTuple();
         if (fetched) {
           rawTree = fetched;
-          treeHistory.put(rawTree!);
+          treeHistory.put({ tree: rawTree, relation: undefined });
 
           status = { state: 'idle' };
 
@@ -127,14 +128,18 @@
   function searchWithinTree(query: string) {
     if (!sidePanelQid) return;
     fetchRelationship(sidePanelQid, query).then((result) => {
+      if (!tree) return;
       const response = result.getOrNull();
       if (response === null) return;
 
       relation = {
         relationDescriptor: response.relation,
+        tree: apiResponseToTree(response?.links)
       };
-      tree = apiResponseToTree(response?.links)
-      treeHistory.put(tree);
+      treeHistory.put({
+        tree,
+        relation
+      });
     });
   }
 
@@ -162,7 +167,9 @@
   function handleUndo() {
     relation = undefined;
     relationFinder?.clear();
-    tree = treeHistory.undo();
+    const historyElem = treeHistory.undo();
+    tree = historyElem.tree;
+    relation = historyElem.relation;
 
     const [qid, personName] = getFocusQidAndName();
     name = personName.name;
@@ -171,7 +178,9 @@
   function handleRedo() {
     relation = undefined;
     relationFinder?.clear();
-    tree = treeHistory.redo();
+    const historyElem = treeHistory.redo();
+    tree = historyElem.tree;
+    relation = historyElem.relation;
 
     const [qid, personName] = getFocusQidAndName();
     name = personName.name;
@@ -219,7 +228,7 @@
       pivot: id,
       pivotPosition: position
     };
-    treeHistory.put(rawTree);
+    treeHistory.put({ tree: rawTree, relation: undefined });
   }
 
   function collapseNode(id: string) {
@@ -245,7 +254,7 @@
       pivot: rawTree!.pivot,
       pivotPosition: rawTree!.pivotPosition
     };
-    treeHistory.put(rawTree);
+    treeHistory.put({ tree: rawTree, relation: undefined });
   }
 </script>
 
@@ -297,7 +306,7 @@
       <FamilyTree
         bind:this={familyTree}
         {getPersonInfo}
-        {tree}
+        tree={relation?.tree ?? tree}
         {expandNode}
         {collapseNode}
       />
@@ -376,9 +385,7 @@
           people={tree.people}
           {searchWithinTree}
           relationDescriptor={relation?.relationDescriptor}
-          clearFilter={() => {
-            relation = undefined;
-          }}
+          clearFilter={() => {}}
         />
       </FilterPopup>
       <FilterPopup show={popupStatus === 'filter'}>
