@@ -299,11 +299,13 @@
 </script>
 
 <div class="flex h-full flex-col overflow-x-hidden">
-  <nav class="flex items-center gap-12 px-8 py-4 shadow-lg">
-    <a href="/" class="flex items-center gap-2">
-      <img src="/logo.png" alt="Ancestree" class="size-8" />
-      <h1 class="text-xl font-semibold text-dark-gray">Ancestree</h1>
-    </a>
+  <nav class="flex items-center px-8 py-4 shadow-lg">
+    <div class="flex flex-1 justify-start">
+      <a href="/" class="flex items-center gap-2">
+        <img src="/logo.png" alt="Ancestree" class="size-8" />
+        <h1 class="text-xl font-semibold text-dark-gray">Ancestree</h1>
+      </a>
+    </div>
     <div class="flex flex-1 items-center justify-center gap-4">
       <div class="flex gap-2">
         <Tooltip title="Undo Tree" position="bm">
@@ -333,7 +335,33 @@
         bind:value={name}
       />
     </div>
-    <div class="flex justify-end text-xl">
+    <div class="flex flex-1 justify-end text-xl">
+      {#if tree}
+        <Tooltip title="Relationship Finder" position="bm">
+          <button
+            class="p-2 {popupStatus === 'relationfinder' ? 'text-orange' : ''}"
+            onclick={() => switchPopup('relationfinder')}
+          >
+            <PersonSearchIcon />
+          </button>
+        </Tooltip>
+        <Tooltip title="Filter Tree" position="bm">
+          <button
+            class="p-2 {popupStatus === 'filter' ? 'text-orange' : ''}"
+            onclick={() => switchPopup('filter')}
+          >
+            <FilterIcon />
+          </button>
+        </Tooltip>
+        <Tooltip title="Recenter Tree" position="bm">
+          <button
+            class="p-2"
+            onclick={() => familyTree?.recenter(currentCenter.x, currentCenter.y)}
+          >
+            <AlignCenterIcon />
+          </button>
+        </Tooltip>
+      {/if}
       <Tooltip title="Settings" position="bl">
         <button class="p-2" onclick={toggleSettings}>
           <IconSettings />
@@ -419,32 +447,6 @@
           bind:descendant={filterDescendant}
         />
       </FilterPopup>
-      <div class="z-50 flex rounded-xl bg-white text-xl shadow-lg">
-        <Tooltip title="Relationship Finder" position="tr">
-          <button
-            class="p-3 {popupStatus === 'relationfinder' ? 'text-orange' : ''}"
-            onclick={() => switchPopup('relationfinder')}
-          >
-            <PersonSearchIcon />
-          </button>
-        </Tooltip>
-        <Tooltip title="Filter Tree" position="tm">
-          <button
-            class="p-3 {popupStatus === 'filter' ? 'text-orange' : ''}"
-            onclick={() => switchPopup('filter')}
-          >
-            <FilterIcon />
-          </button>
-        </Tooltip>
-        <Tooltip title="Recenter Tree" position="tm">
-          <button
-            class="p-3"
-            onclick={() => familyTree?.recenter(currentCenter.x, currentCenter.y)}
-          >
-            <AlignCenterIcon />
-          </button>
-        </Tooltip>
-      </div>
     </div>
   {/if}
 </div>
