@@ -76,6 +76,7 @@
   let filterSpouseFamily = $state(false);
   let filterAncestor = $state(true);
   let filterDescendant = $state(true);
+  let filterUnmarried = $state(true);
 
   function toggleSettings() {
     showSettings = !showSettings;
@@ -127,7 +128,8 @@
         sibling: filterSibling,
         spousefamily: filterSpouseFamily,
         ancestor: filterAncestor,
-        descendant: filterDescendant
+        descendant: filterDescendant,
+        unmarried: filterUnmarried
       });
   });
 
@@ -214,7 +216,7 @@
   }
 
   async function expandNode(id: string, name: string, position: Position) {
-    const result = await fetchTree(name, false);
+    const result = await fetchTree(name, false, maxWidth, maxHeight);
     const childTree = result.getOrThrow();
 
     const oldPeople = rawTree!.people;
@@ -445,6 +447,7 @@
           bind:spousefamily={filterSpouseFamily}
           bind:ancestor={filterAncestor}
           bind:descendant={filterDescendant}
+          bind:unmarried={filterUnmarried}
         />
       </FilterPopup>
     </div>
