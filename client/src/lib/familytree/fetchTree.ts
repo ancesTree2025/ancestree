@@ -112,8 +112,8 @@ export function apiResponseToTree(res: ApiResponse): Tree {
 export async function fetchTree(
   name: string,
   useFakeData: boolean,
-  width: number = 4,
-  height: number = 4
+  width: number,
+  height: number
 ): Promise<Result<Tree, string>> {
   if (useFakeData) {
     return Result.ok(exampleTree as Tree);

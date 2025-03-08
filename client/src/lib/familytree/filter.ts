@@ -7,13 +7,20 @@ export function filterByOption(tree: Tree, options: Record<FilterOption, boolean
     personAssignment.add(focus);
     const ascVisited = new Set<PersonID>();
     const descVisited = new Set<PersonID>();
-    assignAncestors(tree, personAssignment, focus, ascVisited, descVisited, options);
     assignDescendants(tree, personAssignment, focus, ascVisited, descVisited, options);
+    assignAncestors(tree, personAssignment, focus, ascVisited, descVisited, options);
+  }
+
+  let marriages = tree.marriages;
+
+  if (!options.unmarried) {
+    marriages = marriages.filter((m) => m.type !== 'unmarried');
   }
 
   return {
     ...tree,
-    people: tree.people.filter((person) => personAssignment.has(person[0]))
+    people: tree.people.filter((person) => personAssignment.has(person[0])),
+    marriages: marriages
   };
 }
 
@@ -31,6 +38,9 @@ function assignAncestors(
   personAssignment.add(person);
   const marriages = tree.marriages.filter((m) => m.children.includes(person));
   for (const marriage of marriages) {
+    if (marriage.type === 'unmarried' && !options.unmarried) {
+      continue;
+    }
     for (const parent of marriage.parents) {
       assignAncestors(tree, personAssignment, parent, ascVisited, descVisited, options);
     }
@@ -56,6 +66,9 @@ function assignDescendants(
   personAssignment.add(person);
   const marriages = tree.marriages.filter((m) => m.parents.includes(person));
   for (const marriage of marriages) {
+    if (marriage.type === 'unmarried' && !options.unmarried) {
+      continue;
+    }
     for (const parent of marriage.parents) {
       personAssignment.add(parent);
       if (options.spousefamily) {
