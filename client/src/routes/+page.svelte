@@ -56,7 +56,7 @@
   let relationFinder = $state<RelationFinder>();
 
   let showSettings = $state(false);
-  let maxWidth = $state(4);
+  const maxWidth = 4;
   let maxHeight = $state(4);
   let currentCenter: Position = $state<Position>({ x: 0, y: 0 });
   const checkboxOptions: InfoChecklist = [
@@ -352,23 +352,6 @@
       />
       <div class="absolute bottom-8 right-8 flex flex-col items-start gap-4">
         <div class="w-80 rounded-xl bg-white p-6 text-base shadow-lg">
-          <label class="mb-2 flex flex-col gap-2 font-medium"
-            >Maximum Tree Width
-            <div class="flex gap-5">
-              <input
-                type="range"
-                min="1"
-                max="5"
-                bind:value={maxWidth}
-                class="flex-1"
-                onclick={() => onSubmit(currentName)}
-              />
-              <div>
-                {maxWidth}
-              </div>
-            </div>
-          </label>
-
           <label class="mb-2 flex flex-col gap-2 font-medium"
             >Maximum Tree Height
             <div class="flex gap-5">
