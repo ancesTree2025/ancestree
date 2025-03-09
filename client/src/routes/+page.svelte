@@ -82,6 +82,18 @@
     showSettings = !showSettings;
   }
 
+  async function closeSettings() {
+    toggleSettings();
+
+    if (sidePanelQid) {
+      const [fetched] = (await fetchInfo(sidePanelQid, false, checkboxOptions)).toTuple();
+
+      if (fetched) {
+        sidePanelData = fetched;
+      }
+    }
+  }
+
   async function onSubmit(newName: string) {
     if (!newName.length) return;
     relationFinder?.clear();
@@ -424,7 +436,7 @@
         </div>
         <button
           class="mt-4 rounded-lg bg-orange px-4 py-2 font-semibold text-white"
-          onclick={toggleSettings}>Close</button
+          onclick={closeSettings}>Close</button
         >
       </div>
     </div>
