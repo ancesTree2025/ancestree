@@ -222,7 +222,7 @@
     const result = await fetchTree(name, false, 2, 3);
     const childTree = result.getOrThrow();
 
-    const treeToExpand = relation?.tree ?? tree!;
+    const treeToExpand = relation?.tree ?? rawTree!;
 
     const oldPeople = treeToExpand.people;
     const oldMarriages = treeToExpand.marriages;
@@ -283,7 +283,7 @@
 
   function collapseNode(id: string) {
     const marriages = [];
-    const treeToCollapse = relation?.tree ?? tree!;
+    const treeToCollapse = relation?.tree ?? rawTree!;
     for (const marriage of treeToCollapse.marriages) {
       const newFocuses = marriage.focuses.filter((f) => f !== id);
       if (newFocuses.length === 0) {
