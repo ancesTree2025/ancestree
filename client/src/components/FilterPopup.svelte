@@ -7,7 +7,7 @@
 
 {#if show}
   <div
-    class="relative bottom-0 rounded-xl bg-white p-4 shadow-lg"
+    class="relative bottom-0 rounded-xl bg-white p-4 text-base shadow-lg"
     transition:fly={{ y: 100, duration: 150 }}
   >
     {@render children()}
