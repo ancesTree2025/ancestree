@@ -57,7 +57,8 @@
 
   let showSettings = $state(false);
   const maxWidth = 4;
-  let maxHeight = $state(4);
+  let maxHeight = $state(2);
+
   let currentCenter: Position = $state<Position>({ x: 0, y: 0 });
   const checkboxOptions: InfoChecklist = [
     { key: 'image', label: 'Show Image', checked: true },
@@ -104,7 +105,7 @@
       familyTree?.handleClick(withinTree[0], withinTree[1].name, null);
     } else {
       status = { state: 'loading' };
-      fetchTree(newName, useFakeData, maxWidth, maxHeight).then((result) => {
+      fetchTree(newName, useFakeData, maxWidth, maxHeight + 2).then((result) => {
         const [fetched, error] = result.toTuple();
         if (fetched) {
           rawTree = fetched;
@@ -351,22 +352,51 @@
     </div>
     <div class="flex flex-1 justify-end text-xl">
       {#if tree}
-        <Tooltip title="Relationship Finder" position="bm">
-          <button
-            class="p-2 {popupStatus === 'relationfinder' ? 'text-orange' : ''}"
-            onclick={() => switchPopup('relationfinder')}
-          >
-            <PersonSearchIcon />
-          </button>
-        </Tooltip>
-        <Tooltip title="Filter Tree" position="bm">
-          <button
-            class="p-2 {popupStatus === 'filter' ? 'text-orange' : ''}"
-            onclick={() => switchPopup('filter')}
-          >
-            <FilterIcon />
-          </button>
-        </Tooltip>
+        <div class="relative">
+          <Tooltip title="Relation Finder" position="br">
+            <button
+              class="p-2 {popupStatus === 'relationfinder' ? 'text-orange' : ''}"
+              onclick={() => switchPopup('relationfinder')}
+            >
+              <PersonSearchIcon />
+            </button>
+          </Tooltip>
+
+          <div class="absolute right-full top-full z-40">
+            <FilterPopup show={popupStatus === 'relationfinder'}>
+              <RelationFinder
+                bind:this={relationFinder}
+                status={relationFinderStatus}
+                people={tree.people}
+                {searchWithinTree}
+                relationDescriptor={relation?.relationDescriptor}
+                clearFilter={() => {}}
+              />
+            </FilterPopup>
+          </div>
+        </div>
+        <div class="relative">
+          <Tooltip title="Filter Tree" position="br">
+            <button
+              class="p-2 {popupStatus === 'filter' ? 'text-orange' : ''}"
+              onclick={() => switchPopup('filter')}
+            >
+              <FilterIcon />
+            </button>
+          </Tooltip>
+
+          <div class="absolute right-full top-full z-40 min-w-64">
+            <FilterPopup show={popupStatus === 'filter'}>
+              <FilterContent
+                bind:sibling={filterSibling}
+                bind:spousefamily={filterSpouseFamily}
+                bind:ancestor={filterAncestor}
+                bind:descendant={filterDescendant}
+                bind:unmarried={filterUnmarried}
+              />
+            </FilterPopup>
+          </div>
+        </div>
         <Tooltip title="Recenter Tree" position="bm">
           <button
             class="p-2"
@@ -392,8 +422,8 @@
         {expandNode}
         {collapseNode}
       />
-      <div class="absolute bottom-8 right-8 flex flex-col items-start gap-4">
-        <div class="w-80 rounded-xl bg-white p-6 text-base shadow-lg">
+      <div class="absolute bottom-8 left-8 flex flex-col items-start gap-4">
+        <div class="min-w-80 rounded-xl bg-white px-6 py-4 text-base shadow-lg">
           <label class="mb-2 flex flex-col gap-2 font-medium"
             >Maximum Tree Height
             <div class="flex gap-5">
@@ -439,29 +469,6 @@
           onclick={closeSettings}>Close</button
         >
       </div>
-    </div>
-  {/if}
-  {#if tree}
-    <div class="absolute bottom-8 left-8 flex flex-col items-start gap-4">
-      <FilterPopup show={popupStatus === 'relationfinder'}>
-        <RelationFinder
-          bind:this={relationFinder}
-          status={relationFinderStatus}
-          people={tree.people}
-          {searchWithinTree}
-          relationDescriptor={relation?.relationDescriptor}
-          clearFilter={() => {}}
-        />
-      </FilterPopup>
-      <FilterPopup show={popupStatus === 'filter'}>
-        <FilterContent
-          bind:sibling={filterSibling}
-          bind:spousefamily={filterSpouseFamily}
-          bind:ancestor={filterAncestor}
-          bind:descendant={filterDescendant}
-          bind:unmarried={filterUnmarried}
-        />
-      </FilterPopup>
     </div>
   {/if}
 </div>
