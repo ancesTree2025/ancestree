@@ -49,8 +49,9 @@
     Math.max(parentsX, ...marriagePosition.children.map((child) => child.x))
   );
 
-  const dasharray =
-    marriagePosition.type === 'married' ? 'stroke-rounded' : '[stroke-dasharray:10,10]';
+  const dasharray = $derived(
+    marriagePosition.type === 'married' ? 'stroke-rounded' : '[stroke-dasharray:10,10]'
+  );
 </script>
 
 {#if spouse1 && spouse2}

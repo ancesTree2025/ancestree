@@ -108,6 +108,11 @@
     searchQuery = inputValue;
   }
 
+  export function clear() {
+    value = '';
+    name = '';
+  }
+
   // common tailwind classes for status icons
   const ICON_CLASS = 'absolute right-3 flex h-full w-5 items-center';
   const HOVER_CLASS = 'scale-100 hover:scale-125 transition-transform duration-150';
@@ -145,11 +150,11 @@
     </div>
   {/if}
   {#if suggestions.length && searchQuery}
-    <div class="absolute {displayAbove ? 'bottom-full' : 'top-full'} left-0 right-0 mx-5">
-      <div class="rounded-lg bg-white shadow-lg">
+    <div class="absolute {displayAbove ? 'bottom-full' : 'top-full'} left-0 right-0 z-10 mx-5">
+      <div class="z-10 rounded-lg bg-white shadow-lg">
         {#each suggestions as result}
           <button
-            class="block w-full cursor-pointer p-2 text-left hover:bg-gray"
+            class="z-10 block w-full cursor-pointer p-2 text-left hover:bg-gray"
             onclick={() => selectName(result.name)}
           >
             <div class="flex items-center gap-3">

@@ -64,8 +64,6 @@ fun Application.configureRouting() {
             "params is required. Nothing was passed",
           )
 
-      println("Parameters: $paramList")
-
       val queryParams = InfoQueryBuilder()
 
       for (param in paramList) {

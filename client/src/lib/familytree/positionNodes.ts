@@ -207,13 +207,13 @@ function assignDepths(
         const parents = marriage.parents;
         for (const parent of parents) {
           const parentGroupId = groups.members[parent];
-          // don't bother updating groups whose depths have been found
-          if (!unfound.has(parentGroupId)) continue;
+          if (parentGroupId === undefined) continue;
+          const maxDepth = Math.min(maxDepths.get(parentGroupId) ?? Infinity, depth - 1);
 
-          maxDepths.set(
-            parentGroupId,
-            Math.min(maxDepths.get(parentGroupId) ?? Infinity, depth - 1)
-          );
+          maxDepths.set(parentGroupId, maxDepth);
+
+          if (!unfound.has(parentGroupId) && (depths.get(parentGroupId) ?? Infinity) > maxDepth)
+            unfound.add(parentGroupId);
         }
       }
       // update the min depth of all the children to be higher than this group's depth
@@ -221,13 +221,13 @@ function assignDepths(
         const children = marriage.children;
         for (const child of children) {
           const childGroupId = groups.members[child];
-          // don't bother updating groups whose depths have been found
-          if (!unfound.has(childGroupId)) continue;
+          if (childGroupId === undefined) continue;
+          const minDepth = Math.max(minDepths.get(childGroupId) ?? -Infinity, depth + 1);
 
-          minDepths.set(
-            childGroupId,
-            Math.max(minDepths.get(childGroupId) ?? -Infinity, depth + 1)
-          );
+          minDepths.set(childGroupId, minDepth);
+
+          if (!unfound.has(childGroupId) && (depths.get(childGroupId) ?? -Infinity) < minDepth)
+            unfound.add(childGroupId);
         }
       }
     }
@@ -317,6 +317,14 @@ function sortDepths(
               peoplePositionCount.set(person, (peoplePositionCount.get(person) ?? 0) + 1);
             }
           }
+          // in the case that the gap between parent and child > 1
+          const abovePosition = lastAssignment.indexOf(person);
+          if (abovePosition !== -1) {
+            positionTotal.set(groupId, (positionTotal.get(groupId) ?? 0) + abovePosition);
+            positionCount.set(groupId, (positionCount.get(groupId) ?? 0) + 1);
+            peoplePositionTotal.set(person, (peoplePositionTotal.get(person) ?? 0) + abovePosition);
+            peoplePositionCount.set(person, (peoplePositionCount.get(person) ?? 0) + 1);
+          }
         }
       }
       for (const [groupId, count] of positionCount.entries()) {
@@ -330,7 +338,9 @@ function sortDepths(
         .map(([a]) => a);
 
       for (let i = 0; i < sortedPositions.length - 1; i++) {
-        constraints.push([sortedPositions[i], sortedPositions[i + 1]]);
+        for (let j = i + 1; j < sortedPositions.length; j++) {
+          constraints.push([sortedPositions[i], sortedPositions[j]]);
+        }
       }
 
       for (const [person, count] of peoplePositionCount.entries()) {
@@ -344,7 +354,9 @@ function sortDepths(
         .map(([a]) => a);
 
       for (let i = 0; i < sortedPeoplePositions.length - 1; i++) {
-        peopleConstraints.push([sortedPeoplePositions[i], sortedPeoplePositions[i + 1]]);
+        for (let j = i + 1; j < sortedPeoplePositions.length; j++) {
+          peopleConstraints.push([sortedPeoplePositions[i], sortedPeoplePositions[j]]);
+        }
       }
     }
 
@@ -385,7 +397,10 @@ function sortDepths(
     outputDepths.set(depth, minimumPermutation);
   }
 
-  for (const depth of outputDepths.values()) {
+  const sortedDepths = Array.from(outputDepths.keys()).sort((a, b) => a - b);
+
+  for (const depthNo of sortedDepths) {
+    const depth = outputDepths.get(depthNo)!;
     for (const [i, person] of depth.entries()) {
       positions.set(person, i);
     }
@@ -394,7 +409,7 @@ function sortDepths(
   return { sortedLevels: outputDepths, positions };
 }
 
-const UNORDERED_WEIGHT = 40;
+const UNORDERED_WEIGHT = 10000;
 
 /**
  * Sorts an array of elements with respect to weights and constraints.
@@ -601,12 +616,12 @@ function arrangeNodes(
       assignment.set(node, pos);
     }
 
-    shuntOverlapping(nodes, assignment);
+    shuntOverlapping(nodes, assignment, new Set());
     assignments.set(depth, assignment);
     depth--;
   }
 
-  const handled = new Set<PersonID>();
+  let handled = new Set<PersonID>();
   const handledIds = new Set<GroupID>();
   const parentGroupIds = new Set(base.map((id) => groups.members[id]));
 
@@ -615,6 +630,8 @@ function arrangeNodes(
   for (;;) {
     const nodes = depths.get(depth);
     if (nodes === undefined) break;
+
+    const lastAssignment = assignments.get(depth - 1)!;
 
     const childrenGroupLeft: Map<GroupID, number> = new Map();
     const childrenGroupRight: Map<GroupID, number> = new Map();
@@ -629,7 +646,7 @@ function arrangeNodes(
       let parentsLeft = Infinity;
       let parentsRight = -Infinity;
       for (const parent of parentGroup) {
-        const pos = assignments.get(depth - 1)?.get(parent);
+        const pos = lastAssignment.get(parent);
         if (pos === undefined) continue;
         parentsLeft = Math.min(parentsLeft, pos);
         parentsRight = Math.max(parentsRight, pos);
@@ -653,9 +670,10 @@ function arrangeNodes(
           childrenMember.set(id, [...(childrenMember.get(id) ?? []), groupId]);
           childrenGroups.set(groupId, [id]);
 
-          const pos = assignments.get(depth - 1)!.get(id)!;
+          const pos = lastAssignment.get(id)!;
           childrenGroupLeft.set(groupId, pos);
           childrenGroupRight.set(groupId, pos);
+
           return false;
         }
         return true;
@@ -675,18 +693,18 @@ function arrangeNodes(
       handledIds.add(parentGroupId);
     }
 
-    // TODO: prevent overlap of groups
-
     const groupCounts = new Map<GroupID, number>();
     const arrangement = new Map<PersonID, number>();
 
-    handled.clear();
+    const newHandled = new Set<PersonID>();
     parentGroupIds.clear();
 
     let lastPos = 0;
 
     // allocate positions to each node by group position
     for (const node of nodes) {
+      newHandled.add(node);
+
       const nodeChildrenGroups = childrenMember.get(node);
       if (nodeChildrenGroups === undefined) {
         arrangement.set(node, lastPos);
@@ -698,17 +716,26 @@ function arrangeNodes(
       )[0];
       const count = groupCounts.get(groupId) ?? 0;
 
+      parentGroupIds.add(groups.members[node]);
+
+      if (handled.has(node)) {
+        const pos = lastAssignment.get(node)!;
+        groupCounts.set(groupId, count + 1);
+        arrangement.set(node, pos);
+        lastPos = pos;
+        continue;
+      }
+
       const left = childrenGroupLeft.get(groupId)!;
       const pos = left + count * 2;
       groupCounts.set(groupId, count + 1);
       arrangement.set(node, pos);
       lastPos = pos;
-
-      handled.add(node);
-      parentGroupIds.add(groups.members[node]);
     }
 
-    shuntOverlapping(nodes, arrangement);
+    shuntOverlapping(nodes, arrangement, handled);
+
+    handled = newHandled;
     assignments.set(depth, arrangement);
     depth++;
   }
@@ -716,7 +743,11 @@ function arrangeNodes(
   return assignments;
 }
 
-function shuntOverlapping(level: PersonID[], assignments: Map<PersonID, number>) {
+function shuntOverlapping(
+  level: PersonID[],
+  assignments: Map<PersonID, number>,
+  immoveable: Set<PersonID>
+) {
   let iters = 10000;
   let happy = false;
   while (!happy) {
@@ -733,8 +764,14 @@ function shuntOverlapping(level: PersonID[], assignments: Map<PersonID, number>)
       const pos2 = assignments.get(person2)!;
       if (pos2 - pos1 < 2) {
         happy = false;
-        assignments.set(person1, pos1 - 0.5);
-        assignments.set(person2, pos2 + 0.5);
+        if (immoveable.has(person1)) {
+          assignments.set(person2, pos2 + 1);
+        } else if (immoveable.has(person2)) {
+          assignments.set(person1, pos1 - 1);
+        } else {
+          assignments.set(person1, pos1 - 0.5);
+          assignments.set(person2, pos2 + 0.5);
+        }
       }
     }
   }
@@ -757,7 +794,10 @@ function calculatePositions(
   let shiftY = 0;
   const positions: Positions = {};
 
-  for (const [depth, arrangement] of levels) {
+  const sortedLevels = Array.from(levels.keys()).sort((a, b) => a - b);
+
+  for (const depth of sortedLevels) {
+    const arrangement = levels.get(depth)!;
     for (const [person, x] of arrangement) {
       const actualX = x * NODE_WIDTH;
       minX = Math.min(minX, actualX);

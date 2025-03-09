@@ -5,12 +5,14 @@
     sibling = $bindable(),
     spousefamily = $bindable(),
     ancestor = $bindable(),
-    descendant = $bindable()
+    descendant = $bindable(),
+    unmarried = $bindable()
   }: {
     sibling?: boolean;
     spousefamily?: boolean;
     ancestor?: boolean;
     descendant?: boolean;
+    unmarried?: boolean;
   } = $props();
 </script>
 
@@ -38,6 +40,11 @@
     <label>
       <input class="mr-2" type="checkbox" bind:checked={descendant} />
       Show descendants
+    </label>
+
+    <label>
+      <input class="mr-2" type="checkbox" bind:checked={unmarried} />
+      Show unmarried
     </label>
   </div>
 </div>
