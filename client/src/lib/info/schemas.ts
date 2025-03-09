@@ -8,6 +8,8 @@ export const personInfoSchema = z.object({
   description: z.string().optional(),
   office: z.string().optional(),
   wikiLink: z.string().optional(),
+  burial: z.string().optional(),
+  ccoords: z.string().optional(),
   bcoords: z.string().optional(),
   dcoords: z.string().optional(),
   rcoords: z.string().optional()
