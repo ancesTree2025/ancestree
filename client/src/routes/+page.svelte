@@ -156,6 +156,7 @@
         relationDescriptor: response.relation,
         tree: {
           ...apiResponseToTree(response?.links),
+          secondary: []
         }
       };
       treeHistory.put({
@@ -262,7 +263,10 @@
     };
 
     if (relation?.tree) {
-      relation.tree = newTree;
+      relation = {
+        ...relation,
+        tree: newTree
+      };
     } else {
       rawTree = newTree;
     }
@@ -303,7 +307,10 @@
     };
 
     if (relation?.tree) {
-      relation.tree = newTree;
+      relation = {
+        ...relation,
+        tree: newTree
+      };
     } else {
       rawTree = newTree;
     }
