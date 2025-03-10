@@ -198,7 +198,7 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
 
     if (queryParams.burial) {
       val buryPlace = getPlaceName(infoMap["Burial"]!!.getOrNull(0))
-      info.burial = formatDatePlaceInfo(buryPlace, infoMap["Burial"])
+      info.burial = buryPlace
     }
 
     return info
