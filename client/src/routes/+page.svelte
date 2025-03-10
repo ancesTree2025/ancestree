@@ -37,7 +37,7 @@
   let relationFinderStatus = $state<LoadingStatus>({ state: 'idle' });
   let currentName = '';
   let currentWidth = 4;
-  let currentHeight = 4;
+  let currentHeight = $state(2);
 
   let rawTree = $state<Tree | undefined>();
   let tree = $state<Tree | undefined>();

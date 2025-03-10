@@ -32,7 +32,7 @@
   <NameInput
     bind:this={nameInput}
     onSubmit={searchWithinTree}
-    displayAbove
+    displayAbove={false}
     {status}
     namesInTree={people.map((p) => p[1].name)}
     clearSearch={clearFilter}
