@@ -37,7 +37,7 @@
   let relationFinderStatus = $state<LoadingStatus>({ state: 'idle' });
   let currentName = '';
   let currentWidth = 4;
-  let currentHeight = 4;
+  let currentHeight = $state(2);
 
   let rawTree = $state<Tree | undefined>();
   let tree = $state<Tree | undefined>();
@@ -57,7 +57,8 @@
 
   let showSettings = $state(false);
   const maxWidth = 4;
-  let maxHeight = $state(4);
+  let maxHeight = $state(2);
+
   let currentCenter: Position = $state<Position>({ x: 0, y: 0 });
   const checkboxOptions: InfoChecklist = [
     { key: 'image', label: 'Show Image', checked: true },
@@ -65,6 +66,8 @@
     { key: 'bcoords', label: 'Show Birth Location', checked: true },
     { key: 'death', label: 'Show Death Date', checked: true },
     { key: 'dcoords', label: 'Show Death Location', checked: true },
+    { key: 'burial', label: 'Show Burial Location', checked: true },
+    { key: 'ccoords', label: 'Show Map of Burial Location', checked: true },
     { key: 'residence', label: 'Show Residence', checked: true },
     { key: 'rcoords', label: 'Show Map Location of Residence', checked: true },
     { key: 'description', label: 'Show Description', checked: true },
@@ -80,6 +83,18 @@
 
   function toggleSettings() {
     showSettings = !showSettings;
+  }
+
+  async function closeSettings() {
+    toggleSettings();
+
+    if (sidePanelQid) {
+      const [fetched] = (await fetchInfo(sidePanelQid, false, checkboxOptions)).toTuple();
+
+      if (fetched) {
+        sidePanelData = fetched;
+      }
+    }
   }
 
   async function onSubmit(newName: string) {
@@ -381,22 +396,51 @@
     </div>
     <div class="flex flex-1 justify-end text-xl">
       {#if tree}
-        <Tooltip title="Relationship Finder" position="bm">
-          <button
-            class="p-2 {popupStatus === 'relationfinder' ? 'text-orange' : ''}"
-            onclick={() => switchPopup('relationfinder')}
-          >
-            <PersonSearchIcon />
-          </button>
-        </Tooltip>
-        <Tooltip title="Filter Tree" position="bm">
-          <button
-            class="p-2 {popupStatus === 'filter' ? 'text-orange' : ''}"
-            onclick={() => switchPopup('filter')}
-          >
-            <FilterIcon />
-          </button>
-        </Tooltip>
+        <div class="relative">
+          <Tooltip title="Relation Finder" position="br">
+            <button
+              class="p-2 {popupStatus === 'relationfinder' ? 'text-orange' : ''}"
+              onclick={() => switchPopup('relationfinder')}
+            >
+              <PersonSearchIcon />
+            </button>
+          </Tooltip>
+
+          <div class="absolute right-full top-full z-40">
+            <FilterPopup show={popupStatus === 'relationfinder'}>
+              <RelationFinder
+                bind:this={relationFinder}
+                status={relationFinderStatus}
+                people={tree.people}
+                {searchWithinTree}
+                relationDescriptor={relation?.relationDescriptor}
+                clearFilter={() => {}}
+              />
+            </FilterPopup>
+          </div>
+        </div>
+        <div class="relative">
+          <Tooltip title="Filter Tree" position="br">
+            <button
+              class="p-2 {popupStatus === 'filter' ? 'text-orange' : ''}"
+              onclick={() => switchPopup('filter')}
+            >
+              <FilterIcon />
+            </button>
+          </Tooltip>
+
+          <div class="absolute right-full top-full z-40 min-w-64">
+            <FilterPopup show={popupStatus === 'filter'}>
+              <FilterContent
+                bind:sibling={filterSibling}
+                bind:spousefamily={filterSpouseFamily}
+                bind:ancestor={filterAncestor}
+                bind:descendant={filterDescendant}
+                bind:unmarried={filterUnmarried}
+              />
+            </FilterPopup>
+          </div>
+        </div>
         <Tooltip title="Recenter Tree" position="bm">
           <button
             class="p-2"
@@ -416,8 +460,8 @@
   <div class="flex min-h-0 flex-1">
     <div class="relative flex-1">
       <FamilyTree bind:this={familyTree} {getPersonInfo} {tree} {expandNode} {collapseNode} />
-      <div class="absolute bottom-8 right-8 flex flex-col items-start gap-4">
-        <div class="w-80 rounded-xl bg-white p-6 text-base shadow-lg">
+      <div class="absolute bottom-8 left-8 flex flex-col items-start gap-4">
+        <div class="min-w-80 rounded-xl bg-white px-6 py-4 text-base shadow-lg">
           <label class="mb-2 flex flex-col gap-2 font-medium"
             >Maximum Tree Height
             <div class="flex gap-5">
@@ -460,32 +504,9 @@
         </div>
         <button
           class="mt-4 rounded-lg bg-orange px-4 py-2 font-semibold text-white"
-          onclick={toggleSettings}>Close</button
+          onclick={closeSettings}>Close</button
         >
       </div>
-    </div>
-  {/if}
-  {#if tree}
-    <div class="absolute bottom-8 left-8 flex flex-col items-start gap-4">
-      <FilterPopup show={popupStatus === 'relationfinder'}>
-        <RelationFinder
-          bind:this={relationFinder}
-          status={relationFinderStatus}
-          people={tree.people}
-          {searchWithinTree}
-          relationDescriptor={relation?.relationDescriptor}
-          clearFilter={() => {}}
-        />
-      </FilterPopup>
-      <FilterPopup show={popupStatus === 'filter'}>
-        <FilterContent
-          bind:sibling={filterSibling}
-          bind:spousefamily={filterSpouseFamily}
-          bind:ancestor={filterAncestor}
-          bind:descendant={filterDescendant}
-          bind:unmarried={filterUnmarried}
-        />
-      </FilterPopup>
     </div>
   {/if}
 </div>

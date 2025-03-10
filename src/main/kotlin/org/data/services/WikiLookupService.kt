@@ -189,6 +189,19 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
       info.wikiLink = link[qid]
     }
 
+    if (queryParams.ccoords) {
+      println()
+      val burLoc = getPlaceCoords(infoMap["Burial"]!!.getOrNull(0))
+      if (burLoc != "Unknown") {
+        info.ccoords = burLoc
+      }
+    }
+
+    if (queryParams.burial) {
+      val buryPlace = getPlaceName(infoMap["Burial"]!!.getOrNull(0))
+      info.burial = buryPlace
+    }
+
     return info
   }
 
@@ -279,14 +292,18 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
   private suspend fun getPlaceCoords(locQID: QID?): String {
     if (locQID == null) return "Unknown"
 
-    if (WikiCacheManager.getProps(locQID) == null) {
-      val locReq = ComplexRequester.getInfo(listOf(locQID))
-      val locInfo = WikiRequestParser.parseWikidataClaims(locReq, propertyQIDMapPersonal)
-      WikiCacheManager.putProps(locQID, locInfo[locQID]!!)
-      val coords = locInfo[locQID]!!["Coords"]
-      return coords!![0]
-    } else {
-      return WikiCacheManager.getProps(locQID)!!["Coords"]!![0]
+    try {
+      if (WikiCacheManager.getProps(locQID) == null) {
+        val locReq = ComplexRequester.getInfo(listOf(locQID))
+        val locInfo = WikiRequestParser.parseWikidataClaims(locReq, propertyQIDMapPersonal)
+        WikiCacheManager.putProps(locQID, locInfo[locQID]!!)
+        val coords = locInfo[locQID]!!["Coords"]
+        return coords!![0]
+      } else {
+        return WikiCacheManager.getProps(locQID)!!["Coords"]!![0]
+      }
+    } catch (e: Exception) {
+      return "Unknown"
     }
   }
 

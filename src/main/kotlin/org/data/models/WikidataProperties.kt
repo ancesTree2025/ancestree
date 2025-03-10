@@ -24,5 +24,9 @@ object WikidataProperties {
       "P625" to "Coords",
       "P551" to "Residence",
       "P39" to "Office Held",
+      "P119" to "Burial",
     )
+
+  // Destination Properties
+  val propertyQIDMapDest = mapOf("P31" to "Instance Of")
 }

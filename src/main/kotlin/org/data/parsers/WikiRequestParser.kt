@@ -25,6 +25,19 @@ object WikiRequestParser {
     return wikidataID
   }
 
+  suspend fun parseWikidataIDLookupMultiple(response: HttpResponse): List<QID>? {
+    val json = Json { ignoreUnknownKeys = true }
+    val result = json.decodeFromString<PagesResponse>(response.bodyAsText())
+
+    val qidSingleton = result.query?.pages?.values ?: return null
+
+    val wIDs = mutableListOf<QID>()
+
+    qidSingleton.toList().forEach { wIDs.add(it.title) }
+
+    return wIDs
+  }
+
   private fun parseDataValue(jsonElement: JsonElement): List<String> {
     return when (jsonElement) {
       is JsonObject -> {
