@@ -13,6 +13,8 @@ class InfoQueryBuilder(
   var residence: Boolean = false,
   var rcoords: Boolean = false,
   var office: Boolean = false,
+  var burial: Boolean = false,
+  var ccoords: Boolean = false,
 ) {
 
   // For testing purposes
@@ -29,6 +31,8 @@ class InfoQueryBuilder(
     this.residence = true
     this.rcoords = true
     this.office = true
+    this.burial = true
+    this.ccoords = true
     return this
   }
 
@@ -80,5 +84,13 @@ class InfoQueryBuilder(
   fun withWikiLink(): InfoQueryBuilder {
     this.wikiLink = true
     return this
+  }
+
+  fun withBurial() {
+    this.burial = true
+  }
+
+  fun withCCoords() {
+    this.ccoords = true
   }
 }

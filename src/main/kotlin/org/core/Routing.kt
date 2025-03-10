@@ -78,6 +78,8 @@ fun Application.configureRouting() {
           "bcoords" -> queryParams.withBCoords()
           "dcoords" -> queryParams.withDCoords()
           "office" -> queryParams.withOffice()
+          "burial" -> queryParams.withBurial()
+          "ccords" -> queryParams.withCCoords()
           "all" -> queryParams.withAll()
         }
       }

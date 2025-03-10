@@ -24,6 +24,7 @@ object WikidataProperties {
       "P625" to "Coords",
       "P551" to "Residence",
       "P39" to "Office Held",
+      "P119" to "Burial",
     )
 
   // Destination Properties

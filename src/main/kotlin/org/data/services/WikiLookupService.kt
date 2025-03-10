@@ -189,6 +189,18 @@ class WikiLookupService : LookupService<String, Pair<Person, Relations>> {
       info.wikiLink = link[qid]
     }
 
+    if (queryParams.ccoords) {
+      val burLoc = getPlaceCoords(infoMap["Burial"]!!.getOrNull(0))
+      if (burLoc != "Unknown") {
+        info.ccoords = burLoc
+      }
+    }
+
+    if (queryParams.burial) {
+      val buryPlace = getPlaceName(infoMap["Burial"]!!.getOrNull(0))
+      info.burial = formatDatePlaceInfo(buryPlace, infoMap["Burial"])
+    }
+
     return info
   }
 
