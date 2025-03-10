@@ -110,12 +110,12 @@
 
           {#if data.ccoords && data.ccoords !== 'Unknown'}
             <div>
-              <p class="mb-2"><strong>Deathplace</strong></p>
+              <p class="mb-2"><strong>Burial Location</strong></p>
               <a
                 href={`https://www.google.com/maps?q=${data.ccoords}`}
                 target="_blank"
                 class="block"
-                aria-label="Link to Death place coordinates"
+                aria-label="Link to Burial place coordinates"
               >
                 <iframe
                   src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(data.ccoords.split(',')[1]) - 0.01},${Number(data.ccoords.split(',')[0]) - 0.01},${Number(data.ccoords.split(',')[1]) + 0.01},${Number(data.ccoords.split(',')[0]) + 0.01}&layer=mapnik&marker=${data.ccoords.split(',')[0]},${data.ccoords.split(',')[1]}`}
