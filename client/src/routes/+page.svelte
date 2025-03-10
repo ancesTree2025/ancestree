@@ -167,7 +167,10 @@
 
       relation = {
         relationDescriptor: response.relation,
-        tree: apiResponseToTree(response?.links)
+        tree: {
+          ...apiResponseToTree(response?.links),
+          secondary: []
+        }
       };
       treeHistory.put({
         tree,
@@ -229,11 +232,13 @@
   }
 
   async function expandNode(id: string, name: string, position: Position) {
-    const result = await fetchTree(name, false, maxWidth, maxHeight);
+    const result = await fetchTree(name, false, 2, 3);
     const childTree = result.getOrThrow();
 
-    const oldPeople = rawTree!.people;
-    const oldMarriages = rawTree!.marriages;
+    const treeToExpand = relation?.tree ?? rawTree!;
+
+    const oldPeople = treeToExpand.people;
+    const oldMarriages = treeToExpand.marriages;
 
     const newPeople = childTree.people.filter((p) => !oldPeople.some((op) => op[0] === p[0]));
 
@@ -261,17 +266,27 @@
       });
     }
 
-    rawTree = {
-      focus: rawTree!.focus,
+    const newTree = {
+      focus: treeToExpand.focus,
       people: [...oldPeople, ...newPeople],
       marriages: newMarriages,
-      secondary: [...rawTree!.secondary, id],
+      secondary: [...treeToExpand.secondary, id],
       pivot: id,
       pivotPosition: position
     };
+
+    if (relation?.tree) {
+      relation = {
+        ...relation,
+        tree: newTree
+      };
+    } else {
+      rawTree = newTree;
+    }
+
     treeHistory.put({
-      tree: rawTree,
-      relation: undefined,
+      tree: rawTree!,
+      relation,
       sidePanel: {
         name: sidePanelName ?? '',
         qid: sidePanelQid ?? ''
@@ -281,7 +296,8 @@
 
   function collapseNode(id: string) {
     const marriages = [];
-    for (const marriage of rawTree!.marriages) {
+    const treeToCollapse = relation?.tree ?? rawTree!;
+    for (const marriage of treeToCollapse.marriages) {
       const newFocuses = marriage.focuses.filter((f) => f !== id);
       if (newFocuses.length === 0) {
         continue;
@@ -294,7 +310,7 @@
       });
     }
 
-    rawTree = {
+    const newTree = {
       focus: rawTree!.focus,
       people: rawTree!.people,
       marriages,
@@ -302,9 +318,19 @@
       pivot: rawTree!.pivot,
       pivotPosition: rawTree!.pivotPosition
     };
+
+    if (relation?.tree) {
+      relation = {
+        ...relation,
+        tree: newTree
+      };
+    } else {
+      rawTree = newTree;
+    }
+
     treeHistory.put({
-      tree: rawTree,
-      relation: undefined,
+      tree: rawTree!,
+      relation,
       sidePanel: {
         name: sidePanelName ?? '',
         qid: sidePanelQid ?? ''
