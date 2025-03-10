@@ -218,8 +218,10 @@
     getPersonInfo(sidePanelQid, sidePanelName, { x: 0, y: 0 });
   }
 
+  const EXPAND_NODE_HEIGHT = 3;
+
   async function expandNode(id: string, name: string, position: Position) {
-    const result = await fetchTree(name, false, 2, 3);
+    const result = await fetchTree(name, false, maxWidth, Math.min(maxHeight, EXPAND_NODE_HEIGHT));
     const childTree = result.getOrThrow();
 
     const treeToExpand = relation?.tree ?? rawTree!;
