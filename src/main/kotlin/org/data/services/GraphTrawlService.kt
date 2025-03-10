@@ -2,6 +2,7 @@ package org.data.services
 
 import org.data.caches.WikiCacheManager
 import org.data.models.*
+import org.data.models.WikidataProperties.propertyQIDMapDest
 import org.data.parsers.WikiRequestParser
 import org.data.requests.ComplexRequester
 import org.domain.models.*
@@ -45,7 +46,7 @@ class GraphTrawlService {
       listOf("Sister", "Spouse") to "Brother-in-law",
     )
 
-  fun deltaForRelation(rel: String): Int {
+  private fun deltaForRelation(rel: String): Int {
     return when {
       rel.startsWith("Father") || rel.startsWith("Mother") -> -1
       rel.startsWith("Son") || rel.startsWith("Daughter") || rel.startsWith("Child") -> 1
@@ -102,7 +103,6 @@ class GraphTrawlService {
       } else if (
         token.equals("Son", ignoreCase = true) || token.equals("Daughter", ignoreCase = true)
       ) {
-        val type = token.replaceFirstChar { it.uppercaseChar() }
         var count = 1
         while (
           i + count < inputTokens.size &&
@@ -111,6 +111,8 @@ class GraphTrawlService {
         ) {
           count++
         }
+        val lastChild = inputTokens[i + count - 1]
+        val type = lastChild.replaceFirstChar { it.uppercaseChar() }
         when (count) {
           1 -> result.add(type)
           2 -> result.add("Grand$type")
@@ -153,9 +155,7 @@ class GraphTrawlService {
       subqs.forEach {
         val propReq = ComplexRequester.getInfo(it)
         val qidToPropertyMap = WikiRequestParser.parseWikidataClaims(propReq)
-        missing.forEach { qid ->
-          WikiCacheManager.putProps(qid, qidToPropertyMap[qid] ?: emptyMap())
-        }
+        it.forEach { qid -> WikiCacheManager.putProps(qid, qidToPropertyMap[qid] ?: emptyMap()) }
       }
     }
   }
@@ -165,8 +165,26 @@ class GraphTrawlService {
     val dest: QID? =
       WikiCacheManager.getQID(destLab)
         ?: run {
-          val qidReq = ComplexRequester.searchWikidataForQID(destLab)
-          WikiRequestParser.parseWikidataIDLookup(qidReq)
+          val qidReq = ComplexRequester.searchWikidataForQID(destLab, limit = 3)
+          val qids = WikiRequestParser.parseWikidataIDLookupMultiple(qidReq)
+
+          if (qids.isNullOrEmpty()) {
+            null
+          } else {
+            val infoReq = ComplexRequester.getInfo(qids)
+            val reqResp =
+              WikiRequestParser.parseWikidataClaims(infoReq, properties = propertyQIDMapDest)
+
+            var final: String? = null
+
+            reqResp.forEach { (k, v) ->
+              if (v["Instance Of"]!![0] == "Q5") {
+                final = k
+              }
+            }
+
+            final
+          }
         }
 
     if (dest == null)
@@ -178,13 +196,18 @@ class GraphTrawlService {
 
     while (currentLevelQueue.isNotEmpty()) {
 
-      val currentNodes = currentLevelQueue.map { it.qids.last() }.toSet()
+      val currentNodes =
+        currentLevelQueue.filter { it.qids.size < maxDepth }.map { it.qids.last() }.toSet()
+
+      if (currentNodes.isEmpty()) {
+        return RelationLinks("Unrelated", Graph(Node(Person(), "", 0), emptySet(), emptySet()))
+      }
+
       ensurePropsFor(currentNodes)
 
       val missingGenderNeighbors = mutableSetOf<QID>()
-      for (path in currentLevelQueue) {
-        val currentQID = path.qids.last()
-        val propMap = WikiCacheManager.getProps(currentQID) ?: emptyMap()
+      for (node in currentNodes) {
+        val propMap = WikiCacheManager.getProps(node)!!
         propMap.forEach { (prop, qidList) ->
           if (prop in listOf("Spouse(s)", "Child(ren)", "Partner(s)")) {
             qidList.forEach { neighbor ->
@@ -203,10 +226,10 @@ class GraphTrawlService {
       val nextLevelQueue = mutableListOf<Path>()
 
       for (path in currentLevelQueue) {
-        if (path.qids.size > maxDepth) continue
 
         val currentQID = path.qids.last()
-        val propMap = WikiCacheManager.getProps(currentQID) ?: emptyMap()
+        val propMap =
+          WikiCacheManager.getProps(currentQID) ?: error("Should never happen. QID is $currentQID.")
 
         propMap.forEach { (prop, qidList) ->
           if (prop == "Gender") return@forEach
