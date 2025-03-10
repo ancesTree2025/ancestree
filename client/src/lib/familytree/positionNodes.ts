@@ -160,7 +160,7 @@ function assignDepths(
   const unfound: Set<GroupID> = new Set(groups.groups.keys());
 
   // give the focused node's group a min and max depth of zero
-  const focusGroupId = groups.members[tree.secondary[0]];
+  const focusGroupId = groups.members[[...tree.secondary, ...tree.roots][0] ?? tree.focus];
   maxDepths.set(focusGroupId, 0);
   minDepths.set(focusGroupId, 0);
 

@@ -137,15 +137,16 @@
   }
 
   $effect(() => {
-    tree =
-      rawTree &&
-      filterByOption(rawTree, {
+    const selectedTree = relation?.tree ?? rawTree;
+    if (selectedTree) {
+      tree = filterByOption(selectedTree, {
         sibling: filterSibling,
         spousefamily: filterSpouseFamily,
         ancestor: filterAncestor,
         descendant: filterDescendant,
         unmarried: filterUnmarried
       });
+    }
   });
 
   /**
@@ -167,9 +168,23 @@
       const response = result.getOrNull();
       if (response === null) return;
 
+      const newTree = {
+        ...apiResponseToTree(response?.links),
+        secondary: []
+      };
+
+      newTree.marriages = newTree.marriages.map((m) => {
+        return {
+          ...m,
+          focuses: ['RELATION']
+        };
+      });
+
+      newTree.roots = newTree.people.map((p) => p[0]);
+
       relation = {
         relationDescriptor: response.relation,
-        tree: apiResponseToTree(response?.links)
+        tree: newTree
       };
       treeHistory.put({
         tree,
@@ -230,12 +245,16 @@
     getPersonInfo(sidePanelQid, sidePanelName, { x: 0, y: 0 });
   }
 
+  const EXPAND_NODE_HEIGHT = 3;
+
   async function expandNode(id: string, name: string, position: Position) {
-    const result = await fetchTree(name, false, maxWidth, maxHeight);
+    const result = await fetchTree(name, false, maxWidth, Math.min(maxHeight, EXPAND_NODE_HEIGHT));
     const childTree = result.getOrThrow();
 
-    const oldPeople = rawTree!.people;
-    const oldMarriages = rawTree!.marriages;
+    const treeToExpand = relation?.tree ?? rawTree!;
+
+    const oldPeople = treeToExpand.people;
+    const oldMarriages = treeToExpand.marriages;
 
     const newPeople = childTree.people.filter((p) => !oldPeople.some((op) => op[0] === p[0]));
 
@@ -263,17 +282,28 @@
       });
     }
 
-    rawTree = {
-      focus: rawTree!.focus,
+    const newTree = {
+      focus: treeToExpand.focus,
       people: [...oldPeople, ...newPeople],
       marriages: newMarriages,
-      secondary: [...rawTree!.secondary, id],
+      secondary: [...treeToExpand.secondary, id],
+      roots: treeToExpand.roots,
       pivot: id,
       pivotPosition: position
     };
+
+    if (relation?.tree) {
+      relation = {
+        ...relation,
+        tree: newTree
+      };
+    } else {
+      rawTree = newTree;
+    }
+
     treeHistory.put({
-      tree: rawTree,
-      relation: undefined,
+      tree: rawTree!,
+      relation,
       sidePanel: {
         name: sidePanelName ?? '',
         qid: sidePanelQid ?? ''
@@ -283,7 +313,8 @@
 
   function collapseNode(id: string) {
     const marriages = [];
-    for (const marriage of rawTree!.marriages) {
+    const treeToCollapse = relation?.tree ?? rawTree!;
+    for (const marriage of treeToCollapse.marriages) {
       const newFocuses = marriage.focuses.filter((f) => f !== id);
       if (newFocuses.length === 0) {
         continue;
@@ -296,17 +327,28 @@
       });
     }
 
-    rawTree = {
-      focus: rawTree!.focus,
-      people: rawTree!.people,
+    const newTree = {
+      focus: treeToCollapse!.focus,
+      people: treeToCollapse!.people,
       marriages,
-      secondary: rawTree!.secondary.filter((s) => s !== id),
-      pivot: rawTree!.pivot,
-      pivotPosition: rawTree!.pivotPosition
+      secondary: treeToCollapse!.secondary.filter((s) => s !== id),
+      roots: treeToCollapse!.roots,
+      pivot: treeToCollapse!.pivot,
+      pivotPosition: treeToCollapse!.pivotPosition
     };
+
+    if (relation?.tree) {
+      relation = {
+        ...relation,
+        tree: newTree
+      };
+    } else {
+      rawTree = newTree;
+    }
+
     treeHistory.put({
-      tree: rawTree,
-      relation: undefined,
+      tree: rawTree!,
+      relation,
       sidePanel: {
         name: sidePanelName ?? '',
         qid: sidePanelQid ?? ''
@@ -417,13 +459,7 @@
   </nav>
   <div class="flex min-h-0 flex-1">
     <div class="relative flex-1">
-      <FamilyTree
-        bind:this={familyTree}
-        {getPersonInfo}
-        tree={relation?.tree ?? tree}
-        {expandNode}
-        {collapseNode}
-      />
+      <FamilyTree bind:this={familyTree} {getPersonInfo} {tree} {expandNode} {collapseNode} />
       <div class="absolute bottom-8 left-8 flex flex-col items-start gap-4">
         <div class="min-w-80 rounded-xl bg-white px-6 py-4 text-base shadow-lg">
           <label class="mb-2 flex flex-col gap-2 font-medium"
