@@ -122,15 +122,16 @@
   }
 
   $effect(() => {
-    tree =
-      rawTree &&
-      filterByOption(rawTree, {
+    const selectedTree = relation?.tree ?? rawTree;
+    if (selectedTree) {
+      tree = filterByOption(selectedTree, {
         sibling: filterSibling,
         spousefamily: filterSpouseFamily,
         ancestor: filterAncestor,
         descendant: filterDescendant,
         unmarried: filterUnmarried
       });
+    }
   });
 
   /**
@@ -152,12 +153,23 @@
       const response = result.getOrNull();
       if (response === null) return;
 
+      const newTree = {
+        ...apiResponseToTree(response?.links),
+        secondary: []
+      };
+
+      newTree.marriages = newTree.marriages.map((m) => {
+        return {
+          ...m,
+          focuses: ['RELATION']
+        };
+      });
+
+      newTree.roots = newTree.people.map((p) => p[0]);
+
       relation = {
         relationDescriptor: response.relation,
-        tree: {
-          ...apiResponseToTree(response?.links),
-          secondary: []
-        }
+        tree: newTree
       };
       treeHistory.put({
         tree,
@@ -260,6 +272,7 @@
       people: [...oldPeople, ...newPeople],
       marriages: newMarriages,
       secondary: [...treeToExpand.secondary, id],
+      roots: treeToExpand.roots,
       pivot: id,
       pivotPosition: position
     };
@@ -300,12 +313,13 @@
     }
 
     const newTree = {
-      focus: rawTree!.focus,
-      people: rawTree!.people,
+      focus: treeToCollapse!.focus,
+      people: treeToCollapse!.people,
       marriages,
-      secondary: rawTree!.secondary.filter((s) => s !== id),
-      pivot: rawTree!.pivot,
-      pivotPosition: rawTree!.pivotPosition
+      secondary: treeToCollapse!.secondary.filter((s) => s !== id),
+      roots: treeToCollapse!.roots,
+      pivot: treeToCollapse!.pivot,
+      pivotPosition: treeToCollapse!.pivotPosition
     };
 
     if (relation?.tree) {
@@ -333,14 +347,14 @@
     <div class="flex flex-1 justify-start">
       <a href="/" class="flex items-center gap-2">
         <img src="/logo.png" alt="Ancestree" class="size-8" />
-        <h1 class="text-xl font-semibold text-dark-gray">Ancestree</h1>
+        <h1 class="text-dark-gray text-xl font-semibold">Ancestree</h1>
       </a>
     </div>
     <div class="flex flex-1 items-center justify-center gap-4">
       <div class="flex gap-2">
         <Tooltip title="Undo Tree" position="bm">
           <button
-            class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
+            class="hover:bg-cream rounded-lg p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
             onclick={() => handleUndo()}
             disabled={!treeHistory.canUndo()}
           >
@@ -349,7 +363,7 @@
         </Tooltip>
         <Tooltip title="Redo Tree" position="bm">
           <button
-            class="rounded-lg p-1 transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
+            class="hover:bg-cream rounded-lg p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
             onclick={() => handleRedo()}
             disabled={!treeHistory.canRedo()}
           >
@@ -401,13 +415,7 @@
   </nav>
   <div class="flex min-h-0 flex-1">
     <div class="relative flex-1">
-      <FamilyTree
-        bind:this={familyTree}
-        {getPersonInfo}
-        tree={relation?.tree ?? tree}
-        {expandNode}
-        {collapseNode}
-      />
+      <FamilyTree bind:this={familyTree} {getPersonInfo} {tree} {expandNode} {collapseNode} />
       <div class="absolute bottom-8 right-8 flex flex-col items-start gap-4">
         <div class="w-80 rounded-xl bg-white p-6 text-base shadow-lg">
           <label class="mb-2 flex flex-col gap-2 font-medium"
@@ -451,7 +459,7 @@
           {/each}
         </div>
         <button
-          class="mt-4 rounded-lg bg-orange px-4 py-2 font-semibold text-white"
+          class="bg-orange mt-4 rounded-lg px-4 py-2 font-semibold text-white"
           onclick={toggleSettings}>Close</button
         >
       </div>

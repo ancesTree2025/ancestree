@@ -102,6 +102,7 @@ export function apiResponseToTree(res: ApiResponse): Tree {
   return {
     focus: res.root.id,
     secondary: [res.root.id],
+    roots: [res.root.id],
     pivot: res.root.id,
     pivotPosition: { x: 0, y: 0 },
     people,

@@ -3,7 +3,7 @@ import type { FilterOption, PersonID, Tree } from '$lib/types';
 export function filterByOption(tree: Tree, options: Record<FilterOption, boolean>): Tree {
   const personAssignment = new Set<PersonID>();
 
-  for (const focus of tree.secondary) {
+  for (const focus of [...tree.secondary, ...tree.roots]) {
     personAssignment.add(focus);
     const ascVisited = new Set<PersonID>();
     const descVisited = new Set<PersonID>();

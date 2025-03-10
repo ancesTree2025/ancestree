@@ -21,6 +21,7 @@ export type Marriages = Marriage[];
 export type Tree = {
   focus: PersonID;
   secondary: PersonID[];
+  roots: PersonID[];
   pivot: PersonID;
   pivotPosition: Position;
   people: People;
