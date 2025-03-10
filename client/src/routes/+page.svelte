@@ -107,7 +107,7 @@
       familyTree?.handleClick(withinTree[0], withinTree[1].name, null);
     } else {
       status = { state: 'loading' };
-      fetchTree(newName, useFakeData, maxWidth, maxHeight + 2).then((result) => {
+      fetchTree(newName, useFakeData, maxWidth, maxHeight).then((result) => {
         const [fetched, error] = result.toTuple();
         if (fetched) {
           rawTree = fetched;

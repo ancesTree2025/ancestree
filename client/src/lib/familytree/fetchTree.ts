@@ -120,7 +120,7 @@ export async function fetchTree(
   }
 
   const response = await Result.fromAsyncCatching(
-    fetch(`${env.PUBLIC_API_BASE_URL}/${name}?width=${width}&height=${height}`)
+    fetch(`${env.PUBLIC_API_BASE_URL}/${name}?width=${width}&height=${height + 2}`)
   ).mapError(() => 'Could not connect to server');
 
   if (response.getOrNull()?.status === 404) {
@@ -131,7 +131,11 @@ export async function fetchTree(
     () => 'Could not parse server response'
   );
   return parsed.mapCatching(
-    (json) => apiResponseToTree(treeSchema.parse(json)),
+    (json) => {
+      const tree = apiResponseToTree(treeSchema.parse(json));
+      console.log(tree);
+      return tree;
+    },
     (err) => {
       console.error(err);
       return 'Server data in wrong format';
